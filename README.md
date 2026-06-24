@@ -13,7 +13,7 @@
 ## 🚀 دانلود و نصب (Installation)
 برای دانلود آخرین نسخه برنامه، به لینک زیر مراجعه کنید:
 
-📥 [دانلود آخرین نسخه MLMVPN (فایل exe و zip)](https://github.com/mlmvpn/mlmvpn/releases/tag/untagged-c561af0545a8856c3226)
+📥 [دانلود آخرین نسخه‌های MLMVPN ویندوز](https://github.com/mlmvpn/mlmvpn_windows/releases)
 
 ## 💡 راهنمای استفاده سریع (Quick Start)
 1. برنامه را باز کرده و در پنل سمت چپ، ارائه‌دهندگان (مثل کلودفلر) و پورت‌ها را انتخاب کنید.
@@ -22,5 +22,8 @@
 4. کانفیگ‌های خود را در تب **نودهای V2Ray** قرار دهید و با یک کلیک به اینترنت آزاد متصل شوید!
 
 ## 📞 ارتباط با ما
-*   کانال تلگرام: [mlmvpn](https://t.me/mlmvpn)
-*   آموزش‌های یوتیوب: [marketmlm](https://youtube.com/@marketmlm)
+*   کانال تلگرام: [mlmvpn@](https://t.me/mlmvpn)
+*   آموزش‌های یوتیوب: [marketmlm@](https://youtube.com/@marketmlm)
+
+---
+**گزارش مشکل (Issues):** در صورت مشاهده هرگونه باگ یا مشکل در اجرای برنامه، لطفاً آن را از طریق بخش [Issues](https://github.com/mlmvpn/mlmvpn_windows/issues) در همین مخزن به ما اطلاع دهید تا در نسخه‌های بعدی برطرف شود.
