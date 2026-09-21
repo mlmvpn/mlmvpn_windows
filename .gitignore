@@ -93,3 +93,4 @@ desktop.ini
 *.tmp
 *.swp
 *~
+.release-notes-*.md
