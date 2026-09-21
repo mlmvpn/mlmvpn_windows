@@ -1,0 +1,262 @@
+/* =====================================================================
+   MLMVPN design tokens — the single source of the app's look.
+   ---------------------------------------------------------------------
+   macOS-inspired, RTL-first. Two appearances only: dark and light.
+   <html data-appearance="dark|light"> is set before first paint by
+   ui/appearance-boot.js; nothing else in the app may hard-code a colour.
+
+   Labels, fills and separators are TRANSLUCENT (as on macOS), so the same
+   token reads correctly on an opaque surface and on glass.
+
+   The system colours are Apple's own values — the same ones the Android
+   app uses in HomeDestinations.kt — so an icon has one colour everywhere.
+   ===================================================================== */
+
+/* ── Type: IRANSansX ships with the app (FaNum digits). ── */
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-Light.ttf") format("truetype"); font-weight: 300; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-Regular.ttf") format("truetype"); font-weight: 400; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-Medium.ttf") format("truetype"); font-weight: 500; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-DemiBold.ttf") format("truetype"); font-weight: 600; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-Bold.ttf") format("truetype"); font-weight: 700; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-ExtraBold.ttf") format("truetype"); font-weight: 800; font-display: block; }
+@font-face { font-family: "IRANSansX"; src: url("../font/IRANSansXFaNum-Black.ttf") format("truetype"); font-weight: 900; font-display: block; }
+
+/* ── Latin digits for technical values. IRANSansX FaNum draws even ASCII digits in Persian
+   shapes, which makes an IP, port or e-mail hard to compare and easy to mistype. This face
+   covers ONLY U+0030–0039 and is placed first in --mv-font-tech: the digits come from Segoe
+   UI, every letter (Persian or Latin) still comes from IRANSansX. ── */
+@font-face { font-family: "MV Latin Digits"; src: local("Segoe UI Light"), local("SegoeUI-Light"); font-weight: 100 350; unicode-range: U+0030-0039; }
+@font-face { font-family: "MV Latin Digits"; src: local("Segoe UI"), local("SegoeUI"); font-weight: 351 550; unicode-range: U+0030-0039; }
+@font-face { font-family: "MV Latin Digits"; src: local("Segoe UI Semibold"), local("SegoeUI-Semibold"); font-weight: 551 650; unicode-range: U+0030-0039; }
+@font-face { font-family: "MV Latin Digits"; src: local("Segoe UI Bold"), local("SegoeUI-Bold"); font-weight: 651 800; unicode-range: U+0030-0039; }
+@font-face { font-family: "MV Latin Digits"; src: local("Segoe UI Black"), local("SegoeUI-Black"); font-weight: 801 1000; unicode-range: U+0030-0039; }
+
+/* ── Persian inside monospace runs (logs, terminals, config text). Cascadia/Consolas carry no
+   good Persian, so the browser fell back glyph by glyph to a spaced-out Arabic face. This face
+   covers ONLY the Arabic-script ranges and leads --mv-font-mono: Latin letters and digits stay
+   monospace, a Persian word inside a log line is set in IRANSansX. ── */
+@font-face { font-family: "MV Mono Persian"; src: url("../font/IRANSansXFaNum-Regular.ttf") format("truetype"); font-weight: 100 450; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: "MV Mono Persian"; src: url("../font/IRANSansXFaNum-Medium.ttf") format("truetype"); font-weight: 451 550; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: "MV Mono Persian"; src: url("../font/IRANSansXFaNum-DemiBold.ttf") format("truetype"); font-weight: 551 650; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+@font-face { font-family: "MV Mono Persian"; src: url("../font/IRANSansXFaNum-Bold.ttf") format("truetype"); font-weight: 651 1000; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+
+/* ── Appearance-independent tokens ── */
+:root {
+  --mv-font: "IRANSansX", "Segoe UI Variable Text", "Segoe UI", Tahoma, sans-serif;
+  /* Latin-digit face for anything a human compares or copies: IPs, ports, hosts. */
+  --mv-font-latin: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mv-font-mono: "MV Mono Persian", "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+  /* The app face with Latin digits — for fields and left-to-right runs (see above). */
+  --mv-font-tech: "MV Latin Digits", "IRANSansX", "Segoe UI Variable Text", "Segoe UI", Tahoma, sans-serif;
+
+  /* Type scale (Persian needs taller lines than macOS's 1.3). */
+  --mv-fs-large: 26px;  --mv-fs-title1: 22px; --mv-fs-title2: 17px; --mv-fs-title3: 15px;
+  --mv-fs-body: 13px;   --mv-fs-callout: 12px; --mv-fs-caption: 10.5px; --mv-fs-tech: 12px;
+  --mv-lh-tight: 1.4;   --mv-lh-body: 1.8;
+
+  /* Spacing — 4px grid. */
+  --mv-s-1: 2px;  --mv-s-2: 4px;  --mv-s-3: 6px;  --mv-s-4: 8px;  --mv-s-5: 12px; --mv-s-6: 16px;
+  --mv-s-7: 20px; --mv-s-8: 24px; --mv-s-9: 32px; --mv-s-10: 40px; --mv-s-11: 48px; --mv-s-12: 64px;
+
+  /* Radius. App icons use 22.5% of their side (see .mv-ic). */
+  --mv-r-xs: 4px; --mv-r-sm: 6px; --mv-r-md: 8px; --mv-r-lg: 10px; --mv-r-xl: 12px; --mv-r-2xl: 18px; --mv-r-pill: 999px;
+
+  /* Motion. Only transform/opacity animate; nothing loops on requestAnimationFrame. */
+  --mv-d-1: 110ms; --mv-d-2: 170ms; --mv-d-3: 240ms; --mv-d-4: 380ms;
+  --mv-ease-out: cubic-bezier(.2, .8, .2, 1);
+  --mv-ease-spring: cubic-bezier(.32, .72, 0, 1);
+  --mv-ease-in: cubic-bezier(.4, 0, 1, 1);
+
+  /* Materials (glass). Only chrome gets glass — never long text or tables. */
+  --mv-blur-thin: blur(24px) saturate(180%);
+  --mv-blur-regular: blur(34px) saturate(180%);
+  --mv-blur-thick: blur(40px) saturate(200%);
+
+  /* One device pixel: 1px at 100% scaling, .5px on 2x screens. */
+  --mv-hl: 1px;
+
+  /* Window chrome. The traffic-light colours are macOS's own and do not change with
+     the appearance; the caption-close red is Windows' own, for the app window's controls. */
+  --mv-menubar-h: 30px;
+  --mv-tl-close: #FF5F57; --mv-tl-min: #FEBC2E; --mv-tl-zoom: #28C840;
+  --mv-caption-close: #E81123;
+
+  /* Fills that carry WHITE TEXT (buttons, step dots, badges). The system colours are made
+     for icons and dots: white on systemGreen is 2:1. These are Apple's own
+     increased-contrast variants — every one ≥ 4.5 with white — and read the same on a dark
+     or a light ground, so they do not change with the appearance. */
+  --mv-green-fill: #1F8236;  --mv-orange-fill: #C93400; --mv-red-fill: #D70015; --mv-yellow-fill: #B25000;
+  --mv-teal-fill: #0071A4;   --mv-purple-fill: #8944AB; --mv-pink-fill: #D30F45; --mv-indigo-fill: #3634A3;
+  --mv-gray-fill: #6C6C70;
+
+  /* One stacking scale for the whole app. */
+  --mv-z-desktop: 0; --mv-z-widget: 10; --mv-z-window: 100; --mv-z-dock: 900; --mv-z-menubar: 950;
+  --mv-z-menu: 1000; --mv-z-alert: 1100; --mv-z-toast: 1200; --mv-z-tooltip: 1300; --mv-z-boot: 2000;
+}
+@media (min-resolution: 2dppx) { :root { --mv-hl: .5px; } }
+
+/* ── Dark (the default until an appearance is chosen) ── */
+:root,
+html[data-appearance="dark"] {
+  color-scheme: dark;
+  --mv-desk: #141518;
+  --mv-window: #2A2B2F;
+  --mv-surface: #1E1F22;
+  --mv-surface-2: #26272B;
+  --mv-surface-3: #2F3035;
+  --mv-surface-4: #3A3B41;
+
+  --mv-label: rgba(255, 255, 255, .88);
+  --mv-label-2: rgba(255, 255, 255, .60);
+  --mv-label-3: rgba(255, 255, 255, .38);
+  --mv-label-4: rgba(255, 255, 255, .22);
+  --mv-fill: rgba(255, 255, 255, .06);
+  --mv-fill-2: rgba(255, 255, 255, .10);
+  --mv-fill-3: rgba(255, 255, 255, .15);
+  --mv-sep: rgba(255, 255, 255, .09);
+  --mv-sep-2: rgba(255, 255, 255, .16);
+  --mv-sep-3: rgba(255, 255, 255, .24);
+
+  --mv-accent: #0A84FF;
+  --mv-accent-2: #3395FF;
+  --mv-accent-soft: rgba(10, 132, 255, .20);
+  --mv-accent-ring: rgba(10, 132, 255, .50);
+  --mv-accent-rgb: 10, 132, 255;
+  --mv-on-accent: #FFFFFF;
+
+  --mv-blue: #0A84FF;   --mv-green: #30D158;  --mv-orange: #FF9F0A; --mv-red: #FF453A;  --mv-yellow: #FFD60A;
+  --mv-teal: #64D2FF;   --mv-indigo: #5E5CE6; --mv-purple: #BF5AF2; --mv-pink: #FF375F; --mv-gray: #98989D;
+  /* Colours that are safe as TEXT on this appearance's surfaces. */
+  --mv-green-ink: #32D65F; --mv-orange-ink: #FFB340; --mv-red-ink: #FF6961; --mv-yellow-ink: #FFD60A;
+  --mv-teal-ink: #64D2FF;  --mv-purple-ink: #D48CF7; --mv-blue-ink: #409CFF; --mv-indigo-ink: #8F8CFF;
+  --mv-pink-ink: #FF6482;
+
+  --mv-mat-thin: rgba(46, 46, 52, .74);
+  --mv-mat-regular: rgba(38, 38, 43, .80);
+  --mv-mat-thick: rgba(30, 30, 36, .46);
+
+  --mv-hair: inset 0 0 0 .5px rgba(255, 255, 255, .12);
+  --mv-e1: 0 1px 2px rgba(0, 0, 0, .5), inset 0 0 0 .5px rgba(255, 255, 255, .08);
+  --mv-e2: 0 8px 22px rgba(0, 0, 0, .5), 0 0 0 .5px rgba(0, 0, 0, .7), inset 0 0 0 .5px rgba(255, 255, 255, .10);
+  --mv-e3: 0 12px 30px rgba(0, 0, 0, .5), 0 0 0 .5px rgba(0, 0, 0, .75), inset 0 0 0 .5px rgba(255, 255, 255, .10);
+  --mv-e4: 0 24px 70px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(0, 0, 0, .8), inset 0 0 0 .5px rgba(255, 255, 255, .12);
+  --mv-e5: 0 32px 96px rgba(0, 0, 0, .7), 0 0 0 .5px rgba(0, 0, 0, .85), inset 0 0 0 .5px rgba(255, 255, 255, .12);
+  --mv-scrim: rgba(0, 0, 0, .40);
+
+  --mv-knob: #F4F4F6;
+  --mv-control: rgba(255, 255, 255, .14);
+  --mv-control-hover: rgba(255, 255, 255, .19);
+  --mv-control-press: rgba(255, 255, 255, .24);
+  --mv-control-hair: inset 0 .5px 0 rgba(255, 255, 255, .12), 0 0 0 .5px rgba(0, 0, 0, .6), 0 1px 1.5px rgba(0, 0, 0, .3);
+  --mv-field: rgba(0, 0, 0, .22);
+  --mv-track: rgba(255, 255, 255, .16);
+  --mv-code: #26272C;
+  --mv-tl-idle: #4A4A4F;
+
+  /* Page kit (ui/page-kit.css): the ground a settings-style pane sits on, the grouped-form
+     boxes on it, and the inset sidebar. Measured on Apple's own macOS 26 screenshots (Mac
+     User Guide › System Settings; HIG › Color): in both appearances a group is a slightly
+     DARKER well than the ground, with no border, and hairlines inside it are fainter still.
+     The sidebar is the lighter glass that floats over both. */
+  --mv-pane: #2A2B2F;
+  --mv-group: rgba(0, 0, 0, .16);
+  --mv-group-edge: rgba(0, 0, 0, .10);
+  --mv-group-sep: rgba(255, 255, 255, .075);
+  --mv-side: rgba(255, 255, 255, .055);
+  --mv-side-edge: rgba(255, 255, 255, .10);
+  --mv-side-shadow: 0 0 0 .5px rgba(0, 0, 0, .55), 0 6px 20px rgba(0, 0, 0, .30);
+  --mv-glass-btn: rgba(255, 255, 255, .09);
+  --mv-glass-btn-edge: inset 0 .5px 0 rgba(255, 255, 255, .14), 0 0 0 .5px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .25);
+  --mv-popup-knob: rgba(255, 255, 255, .13);
+  --mv-popup-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='12' viewBox='0 0 8 12'%3E%3Cpath d='M1.2 4.6 4 1.8l2.8 2.8M1.2 7.4 4 10.2l2.8-2.8' fill='none' stroke='%23E6E6EA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ── Light ── */
+html[data-appearance="light"] {
+  color-scheme: light;
+  --mv-desk: #EEEFF2;
+  --mv-window: #F7F7F9;
+  --mv-surface: #FFFFFF;
+  --mv-surface-2: #F3F3F6;
+  --mv-surface-3: #EAEAEE;
+  --mv-surface-4: #E1E1E6;
+
+  --mv-label: rgba(0, 0, 0, .86);
+  --mv-label-2: rgba(0, 0, 0, .56);
+  --mv-label-3: rgba(0, 0, 0, .44);   /* hints: ≥ 3:1 even on surface-3 */
+  --mv-label-4: rgba(0, 0, 0, .20);
+  --mv-fill: rgba(0, 0, 0, .045);
+  --mv-fill-2: rgba(0, 0, 0, .075);
+  --mv-fill-3: rgba(0, 0, 0, .11);
+  --mv-sep: rgba(0, 0, 0, .09);
+  --mv-sep-2: rgba(0, 0, 0, .15);
+  --mv-sep-3: rgba(0, 0, 0, .24);
+
+  --mv-accent: #007AFF;
+  --mv-accent-2: #0062D1;
+  --mv-accent-soft: rgba(0, 122, 255, .12);
+  --mv-accent-ring: rgba(0, 122, 255, .34);
+  --mv-accent-rgb: 0, 122, 255;
+  --mv-on-accent: #FFFFFF;
+
+  --mv-blue: #007AFF;   --mv-green: #34C759;  --mv-orange: #FF9500; --mv-red: #FF3B30;  --mv-yellow: #FFCC00;
+  --mv-teal: #5AC8FA;   --mv-indigo: #5856D6; --mv-purple: #AF52DE; --mv-pink: #FF2D55; --mv-gray: #8E8E93;
+  /* ≥ 4.5 on every light surface, surface-3 (#EAEAEE) included — .claude/contrast.js. */
+  --mv-green-ink: #1B7A34; --mv-orange-ink: #A94E08; --mv-red-ink: #D40015; --mv-yellow-ink: #826400;
+  --mv-teal-ink: #006FA1;  --mv-purple-ink: #8E3AB8; --mv-blue-ink: #0062D1; --mv-indigo-ink: #3634A3;
+  --mv-pink-ink: #CF0F44;
+
+  --mv-mat-thin: rgba(250, 250, 252, .74);
+  --mv-mat-regular: rgba(243, 243, 247, .80);
+  --mv-mat-thick: rgba(255, 255, 255, .42);
+
+  --mv-hair: inset 0 0 0 .5px rgba(0, 0, 0, .12);
+  --mv-e1: 0 1px 1.5px rgba(0, 0, 0, .10), 0 0 0 .5px rgba(0, 0, 0, .08);
+  --mv-e2: 0 6px 18px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .14);
+  --mv-e3: 0 10px 26px rgba(0, 0, 0, .14), 0 0 0 .5px rgba(0, 0, 0, .16);
+  --mv-e4: 0 22px 60px rgba(0, 0, 0, .24), 0 0 0 .5px rgba(0, 0, 0, .20);
+  --mv-e5: 0 30px 90px rgba(0, 0, 0, .34), 0 0 0 .5px rgba(0, 0, 0, .22);
+  --mv-scrim: rgba(20, 20, 28, .16);
+
+  --mv-knob: #FFFFFF;
+  --mv-control: #FFFFFF;
+  --mv-control-hover: #F4F4F6;
+  --mv-control-press: #E9E9ED;
+  --mv-control-hair: 0 0 0 .5px rgba(0, 0, 0, .18), 0 1px 1.5px rgba(0, 0, 0, .12);
+  --mv-field: #FFFFFF;
+  --mv-track: rgba(0, 0, 0, .10);
+  --mv-code: #F1F2F5;
+  --mv-tl-idle: #D5D5D9;
+
+  --mv-pane: #FFFFFF;
+  --mv-group: rgba(0, 0, 0, .032);
+  --mv-group-edge: transparent;
+  --mv-group-sep: rgba(0, 0, 0, .055);
+  --mv-side: rgba(247, 247, 249, .84);
+  --mv-side-edge: rgba(255, 255, 255, .95);
+  --mv-side-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 4px 18px rgba(0, 0, 0, .08);
+  --mv-glass-btn: rgba(255, 255, 255, .92);
+  --mv-glass-btn-edge: 0 0 0 .5px rgba(0, 0, 0, .07), 0 2px 10px rgba(0, 0, 0, .09);
+  --mv-popup-knob: rgba(0, 0, 0, .09);
+  --mv-popup-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='12' viewBox='0 0 8 12'%3E%3Cpath d='M1.2 4.6 4 1.8l2.8 2.8M1.2 7.4 4 10.2l2.8-2.8' fill='none' stroke='%233C3C43' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ── «کاهش شفافیت»: every material becomes an opaque surface, blur is off. ── */
+html[data-transparency="reduced"] {
+  --mv-mat-thin: var(--mv-surface-2);
+  --mv-mat-regular: var(--mv-surface-2);
+  --mv-mat-thick: var(--mv-window);
+  --mv-side: var(--mv-surface-2);
+  --mv-blur-thin: none;
+  --mv-blur-regular: none;
+  --mv-blur-thick: none;
+}
+
+/* ── «کاهش حرکت»: movement collapses to a fade. Status indicators slow down, never stop. ── */
+html[data-motion="reduced"] {
+  --mv-d-3: 1ms;
+  --mv-d-4: 1ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) { --mv-d-3: 1ms; --mv-d-4: 1ms; }
+}

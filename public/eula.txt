@@ -1,0 +1,16 @@
+END USER LICENSE AGREEMENT (EULA)
+
+1. Acceptance of Terms
+By installing and using the MLMVPN software (hereinafter referred to as the "Software"), you agree to all the terms and conditions set forth in this Agreement. If you do not accept them, please stop the installation process.
+
+2. Security and Privacy
+The MLMVPN software does not store any of your personal information or traffic data (Logs). Traffic routing (SNI Routing) is performed in a fully End-to-End Encrypted manner.
+
+3. Permitted Use
+You agree to use this Software solely to bypass unfair internet restrictions and to access free information. Any use for cyber attacks (DDoS), spam, or other illegal activities will result in account suspension.
+
+4. Assumption of Risk
+The Software is provided "As Is". The developers accept no responsibility for nationwide internet outages (National Intranet).
+
+
+Version 1.2.0

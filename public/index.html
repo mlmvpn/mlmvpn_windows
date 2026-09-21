@@ -1,0 +1,2089 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MLMVPN Scanner</title>
+  <!-- Appearance (dark/light, transparency, motion) is decided here, before the first
+       paint. The server has already injected the saved state above this line. -->
+  <script src="ui/appearance-boot.js"></script>
+  <link rel="stylesheet" href="assets/phosphor/regular/style.css" />
+  <link rel="stylesheet" href="assets/phosphor/bold/style.css" />
+  <link rel="stylesheet" href="assets/phosphor/fill/style.css" />
+  <link rel="stylesheet" href="assets/phosphor/duotone/style.css" />
+  <script src="tailwind.js"></script>
+  <script>
+    tailwind.config = (function () {
+      // Design tokens (ui/tokens.css) as Tailwind colours. A function rather than a bare
+      // var(): Tailwind cannot put an opacity modifier (bg-gs-primary/10) on a var() and
+      // silently generates nothing, so the alpha is applied with color-mix instead.
+      function tok(name) {
+        return function (o) {
+          var a = o && o.opacityValue;
+          if (a === undefined || a === '1' || a === 1) return 'var(' + name + ')';
+          return 'color-mix(in srgb, var(' + name + ') calc(' + a + ' * 100%), transparent)';
+        };
+      }
+      return {
+        theme: {
+          fontFamily: {
+            sans: ['IRANSansX', '"Segoe UI Variable Text"', '"Segoe UI"', 'Tahoma', 'sans-serif'],
+            mono: ['"MV Mono Persian"', '"Cascadia Mono"', '"Cascadia Code"', 'Consolas', 'monospace']
+          },
+          extend: {
+            colors: {
+              gs: {
+                bg: tok('--mv-window'),
+                panel: tok('--mv-surface'),
+                surface: tok('--mv-surface-2'),
+                surface2: tok('--mv-surface-3'),
+                surface3: tok('--mv-surface-4'),
+                card: tok('--mv-surface-2'),
+                border: tok('--mv-sep-2'),
+                text: tok('--mv-label'),
+                muted: tok('--mv-label-2'),
+                gray: tok('--mv-label-3'),
+                primary: tok('--mv-accent'),
+                success: tok('--mv-green-ink'),
+                danger: tok('--mv-red-ink'),
+                warning: tok('--mv-orange-ink'),
+                info: tok('--mv-teal-ink')
+              },
+              m3: {
+                bg: tok('--mv-window'),
+                background: tok('--mv-window'),
+                surface: tok('--mv-surface'),
+                surface2: tok('--mv-surface-2'),
+                surface3: tok('--mv-fill-3'),
+                surfaceVariant: tok('--mv-surface-3'),
+                surfaceHover: tok('--mv-fill-2'),
+                surfaceActive: tok('--mv-accent'),
+                primary: tok('--mv-accent'),
+                onPrimary: tok('--mv-on-accent'),
+                onSurface: tok('--mv-label'),
+                onSurfaceVariant: tok('--mv-label-2'),
+                secondary: tok('--mv-label-2'),
+                outline: tok('--mv-sep-2'),
+                error: tok('--mv-red-ink'),
+                success: tok('--mv-green-ink'),
+                warning: tok('--mv-orange-ink')
+              },
+              syn: {
+                blue: tok('--mv-accent'),
+                cyan: tok('--mv-teal-ink'),
+                green: tok('--mv-green-ink'),
+                purple: tok('--mv-purple-ink'),
+                yellow: tok('--mv-orange-ink'),
+                red: tok('--mv-red-ink'),
+                string: tok('--mv-orange-ink')
+              },
+              // The design system's own names — what new and migrated markup uses:
+              // text-mv-label-2, bg-mv-fill, border-mv-sep-2, bg-mv-green/15, text-mv-red-ink.
+              mv: (function () {
+                var c = {
+                  label: { DEFAULT: tok('--mv-label'), 2: tok('--mv-label-2'), 3: tok('--mv-label-3'), 4: tok('--mv-label-4') },
+                  fill: { DEFAULT: tok('--mv-fill'), 2: tok('--mv-fill-2'), 3: tok('--mv-fill-3') },
+                  sep: { DEFAULT: tok('--mv-sep'), 2: tok('--mv-sep-2'), 3: tok('--mv-sep-3') },
+                  surface: { DEFAULT: tok('--mv-surface'), 2: tok('--mv-surface-2'), 3: tok('--mv-surface-3'), 4: tok('--mv-surface-4') },
+                  window: tok('--mv-window'),
+                  desk: tok('--mv-desk'),
+                  field: tok('--mv-field'),
+                  code: tok('--mv-code'),
+                  scrim: tok('--mv-scrim'),
+                  control: tok('--mv-control'),
+                  accent: tok('--mv-accent'),
+                  'on-accent': tok('--mv-on-accent')
+                };
+                ['blue', 'green', 'orange', 'red', 'yellow', 'teal', 'indigo', 'purple', 'pink'].forEach(function (n) {
+                  c[n] = { DEFAULT: tok('--mv-' + n), ink: tok('--mv-' + n + '-ink'), fill: tok('--mv-' + (n === 'blue' ? 'accent' : n + '-fill')) };
+                });
+                c.gray = { DEFAULT: tok('--mv-gray'), fill: tok('--mv-gray-fill') };
+                return c;
+              })()
+            }
+          }
+        }
+      };
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=1781010218569" />
+
+  <style>
+    /* Tailwind's preflight sets a global `border-color: var(--mv-sep-3)` (gray-200) on
+       every element. Any element that carries a border utility whose COLOUR utility was
+       not generated into compiled-tailwind.css therefore renders a near-white hairline
+       on this dark UI — which is where the stray white lines in the panels come from.
+       (Confirmed case: `border-m3-outline/30` in the V2RAY panel. `.border-m3-outline`
+       is in the compiled file; the /30 opacity variant is not, so nothing sets a colour.)
+
+       Re-pointing the default at the app's own border token fixes the existing lines and,
+       more usefully, means a future utility that fails to compile degrades to the right
+       colour instead of a bright scar.
+
+       `html *` rather than `*`: tailwind.js injects preflight at RUNTIME, so its
+       stylesheet lands after this block and an equal-specificity rule would lose on
+       source order. One element selector (0,0,1) outranks preflight's `*` (0,0,0) while
+       still losing to any real colour utility (0,1,0) — so this stays a fallback and
+       never overrides a border colour someone actually asked for. */
+    html *,
+    html *::before,
+    html *::after {
+      border-color: var(--ide-border, #222222);
+    }
+
+    /* `.custom-scrollbar` was used in markup across the panels but never defined, so
+       every scroll area fell back to Chromium's default bar — which paints a wide
+       track with a dark border on hover. Define it once, globally, as a thin
+       borderless overlay thumb; `border: none` on the track kills the hover outline. */
+    .custom-scrollbar::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track,
+    *::-webkit-scrollbar-track {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb,
+    *::-webkit-scrollbar-thumb {
+      background: var(--mv-fill-3);
+      border: none;
+      border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--mv-label-4);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-corner,
+    *::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  </style>
+
+  <!-- Design system. Order matters: tokens, then the bridge that puts the existing
+       markup onto them, then the new components. All three load after style.css and the
+       block above so they win on equal specificity. -->
+  <link rel="stylesheet" href="ui/tokens.css" />
+  <link rel="stylesheet" href="ui/bridge.css" />
+  <link rel="stylesheet" href="ui/components.css" />
+  <link rel="stylesheet" href="ui/page-kit.css" />
+  <link rel="stylesheet" href="ui/shell.css" />
+
+  <script>
+    window.addEventListener('error', function (e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:var(--mv-label);z-index:999999;padding:20px;font-family:var(--mv-font-mono);font-size:16px;word-wrap:break-word;';
+      errorDiv.innerHTML = "<b>Uncaught Error:</b> " + e.message + "<br><b>File:</b> " + e.filename + ":" + e.lineno + ":" + e.colno + "<br><br>" + (e.error && e.error.stack ? e.error.stack.replace(/\n/g, '<br>') : '');
+      document.body.appendChild(errorDiv);
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:purple;color:var(--mv-label);z-index:999999;padding:20px;font-family:var(--mv-font-mono);font-size:16px;word-wrap:break-word;';
+      errorDiv.innerHTML = "<b>Unhandled Promise Rejection:</b> " + e.reason;
+      document.body.appendChild(errorDiv);
+    });
+  </script>
+</head>
+
+
+<body class="layout">
+  <!-- Startup system check. Deliberately the FIRST script in the body: every other script
+       in this app loads at the bottom, so mounting here is what lets the overlay paint
+       before the rest of the page is built instead of appearing on top of it afterwards. -->
+  <script src="components/systemcheck.js"></script>
+
+  <!-- macOS traffic-light window controls (top-left) -->
+  <script src="components/mac-window-controls.js"></script>
+
+  <!-- CUSTOM FRAMELESS TITLE BAR -->
+  <header class="header-bar" style="
+        -webkit-app-region: drag;
+        display: flex;
+        align-items: center;
+        /* flex-start, not space-between: once the row overflows, space-between
+           lets the packing drift and the anchored left group gets pushed off
+           screen too. With flex-start plus `margin-left:auto` spacers, the
+           slack lives in the margins, collapses to zero first, and the left
+           group never moves. */
+        justify-content: flex-start;
+        /* 28px controls inside a 35px bar left only ~3px above them, while the
+           workspace below opens with its own 4px padding — so the row read as
+           pinned to the top. 40px gives the controls even air on both sides,
+           and matches the height of the Android Studio main toolbar. */
+        height: 40px;
+        padding: 0 12px;
+        background: transparent;
+        border-bottom: none;
+        /* Responsive rule for this bar: nothing resizes and nothing reorders.
+           The row is laid out LTR so the fixed group anchors to the left; the
+           slack between groups collapses first, and once it is gone the groups
+           simply run past the right edge and are clipped there — sliding out
+           one at a time instead of overlapping or vanishing. `order` keeps the
+           visual arrangement while leaving the DOM untouched. */
+        direction: ltr;
+        overflow: hidden;
+        gap: 10px;
+      ">
+    <!-- RIGHT SIDE (Under Windows Native Controls) -->
+    <!-- margin-right is 140px so the text does not hide under the Close/Max/Min buttons -->
+    <div style="
+          display: flex;
+          align-items: center;
+          direction: rtl;
+          order: 3;
+          flex: 0 0 auto;
+          margin-left: auto;
+          margin-right: 0;
+        ">
+      <!-- Brand wordmark. Content and animation live in components/brand-title.js -->
+      <span id="brand-title"></span>
+
+    </div>
+
+    <!-- CENTER (Traffic Stats) -->
+    <div style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          direction: rtl;
+          order: 2;
+          flex: 0 0 auto;
+          margin-left: auto;
+          gap: 16px;
+          -webkit-app-region: drag;
+        ">
+      <!-- ذخیرهٔ خودکار، شروع/توقف اسکن و «اسکن مجدد» از این نوار برداشته شدند: حالا داخل
+           خودِ صفحهٔ اسکن‌اند (components/scan.js) — دکمهٔ گرد سربرگ و یک ردیف در «تنظیمات اسکن». -->
+
+      <!-- Header Traffic Placeholder -->
+      <div id="header-traffic-module-container"></div>
+    </div>
+
+    <!-- LEFT SIDE (App Icon, Help, About, Status) -->
+    <div style="
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          direction: rtl;
+          order: 1;
+          flex: 0 0 auto;
+          gap: 6px;
+        ">
+      <button class="btn-sm" style="
+            font-family:
+              &quot;Vazirmatn&quot;, &quot;IRANSans&quot;, Tahoma, sans-serif;
+            font-size: 12.5px;
+            /* Fixed height, not padding: the two buttons hold different-sized
+               icons (18px glyph vs 21px tile), so padding alone would give
+               their hover plates different heights. */
+            height: 28px;
+            padding: 0 10px;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            line-height: 1;
+            -webkit-app-region: no-drag;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--ide-text-muted);
+          " onmouseover="
+            this.style.background = 'var(--mv-fill)';
+            this.style.color = 'var(--ide-text-main)';
+          " onmouseout="
+            this.style.background = 'transparent';
+            this.style.color = 'var(--ide-text-muted)';
+          " onclick="openGuideTab()">
+        <!-- RTL: the label comes first so it renders on the right, icon on the
+             left. The Persian face sits optically high inside its line box, so
+             it needs a 1px nudge to centre against the icon. -->
+        <span style="display: inline-block; transform: translateY(1px)">راهنما</span>
+        <!-- Outline manual/book glyph on the left edge of the button. -->
+        <svg style="width: 18px; height: 18px; flex-shrink: 0" viewBox="0 0 512 512" fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="m502.754 232.852-38.203-41.54A35.1 35.1 0 0 0 438.777 180H302.516V35c0-19.3-15.707-35-35.012-35h-20.008c-19.308 0-35.012 15.7-35.012 35v25H72.828c-9.332 0-18.433 3.816-24.973 10.469l-37.808 38.457c-13.078 13.308-13.434 34.488-.8 48.222l38.202 41.54A35.1 35.1 0 0 0 73.223 210h139.261v267c0 19.3 15.707 35 35.012 35h20.008c19.305 0 35.012-15.7 35.012-35V330h136.656c9.332 0 18.433-3.816 24.973-10.469l37.808-38.457c13.078-13.308 13.43-34.488.8-48.222M211.484 180H73.223a5.02 5.02 0 0 1-3.684-1.617l-38.203-41.54a5 5 0 0 1 .117-6.89l37.805-38.457A5.05 5.05 0 0 1 72.828 90h138.656zm56.02 302h-20.008c-2.758 0-5-2.242-5-5V35c0-2.758 2.242-5 5-5h20.008c2.758 0 5 2.242 5 5v442c0 2.758-2.242 5-5 5m213.043-221.953-37.809 38.457a5.04 5.04 0 0 1-3.566 1.496H302.516v-90h136.261c1.395 0 2.739.59 3.684 1.617l38.203 41.54a5 5 0 0 1-.117 6.89m0 0"
+            fill="currentColor"></path>
+        </svg>
+      </button>
+      <button class="btn-sm" style="
+            font-family:
+              &quot;Vazirmatn&quot;, &quot;IRANSans&quot;, Tahoma, sans-serif;
+            font-size: 12.5px;
+            /* Fixed height, not padding: the two buttons hold different-sized
+               icons (18px glyph vs 21px tile), so padding alone would give
+               their hover plates different heights. */
+            height: 28px;
+            padding: 0 10px;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            line-height: 1;
+            -webkit-app-region: no-drag;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--ide-text-muted);
+          " onmouseover="
+            this.style.background = 'var(--mv-fill)';
+            this.style.color = 'var(--ide-text-main)';
+          " onmouseout="
+            this.style.background = 'transparent';
+            this.style.color = 'var(--ide-text-muted)';
+          " onclick="showModal('about-modal')">
+        <span style="display: inline-block; transform: translateY(1px)">درباره ما</span>
+        <!-- Filled blue tile on the left, mirroring the green "IS" project chip
+             in Android Studio: 5px corners, Google blue, monogram knocked out. -->
+        <span style="
+              width: 21px;
+              height: 21px;
+              border-radius: 5px;
+              background: var(--mv-accent);
+              flex-shrink: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #fff;
+              font-family: 'Segoe UI', Roboto, sans-serif;
+              font-size: 11px;
+              font-weight: 700;
+              letter-spacing: -0.3px;
+              line-height: 1;
+            ">MV</span>
+      </button>
+
+      <svg id="btn-hamburger" onclick="toggleMainMenu()" style="
+            width: 20px;
+            height: 20px;
+            color: var(--ide-text-muted);
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            margin-left: 4px;
+            transition: color 0.2s;
+          " onmouseover="this.style.color = 'var(--ide-text-main)'"
+        onmouseout="this.style.color = 'var(--ide-text-muted)'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round">
+        <!-- Four rules, spaced 5 units apart like the Android Studio main-menu
+             icon. The old 4-unit spacing with a 2.5 stroke packed them so
+             tightly the glyph read as a solid block at 20px. -->
+        <line x1="4" y1="4.5" x2="20" y2="4.5"></line>
+        <line x1="4" y1="9.5" x2="20" y2="9.5"></line>
+        <line x1="4" y1="14.5" x2="20" y2="14.5"></line>
+        <line x1="4" y1="19.5" x2="20" y2="19.5"></line>
+      </svg>
+      <img src="icon.png" style="width: 24px; height: 24px; flex-shrink: 0; margin-right: 2px" alt="Logo" />
+    </div>
+  </header>
+
+
+  <!-- Main Dropdown Menu -->
+  <div id="main-menu-overlay" class="hidden fixed inset-0 z-[100]" onclick="toggleMainMenu()"></div>
+  <div id="main-menu"
+    class="hidden fixed top-12 right-4 w-64 bg-gs-panel border border-gs-border rounded-xl shadow-2xl z-[101] overflow-hidden"
+    dir="rtl">
+    <div class="p-2 flex flex-col gap-1">
+      <button onclick="window.openFixedIpTab(); toggleMainMenu()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gs-text hover:bg-gs-bg hover:text-gs-primary rounded-lg transition-colors text-right">
+        <i class="ph-bold ph-globe-hemisphere-west text-lg"></i>
+        <div class="flex flex-col">
+          <span class="font-bold">انتخاب آیپی ثابت</span>
+          <span class="text-[10px] text-gs-muted">تست و انتخاب آیپی برای قفل لوکیشن</span>
+        </div>
+      </button>
+      <button onclick="window.openDnsCleanTab(); toggleMainMenu()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gs-text hover:bg-gs-bg hover:text-gs-primary rounded-lg transition-colors text-right">
+        <i class="ph-bold ph-broom text-lg"></i>
+        <div class="flex flex-col">
+          <span class="font-bold">پاک‌سازی عمیق DNS</span>
+          <span class="text-[10px] text-gs-muted">انتخاب DNS و پاک کردن ته‌مانده‌ها</span>
+        </div>
+      </button>
+      <button onclick="window.openNetDiagTab(); toggleMainMenu()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gs-text hover:bg-gs-bg hover:text-gs-primary rounded-lg transition-colors text-right">
+        <i class="ph-bold ph-stethoscope text-lg"></i>
+        <div class="flex flex-col">
+          <span class="font-bold">دیاگ اینترنت</span>
+          <span class="text-[10px] text-gs-muted">وقتی وصل است ولی صفحه‌ای باز نمی‌شود</span>
+        </div>
+      </button>
+      <button onclick="window.openChangelogTab(); toggleMainMenu()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gs-text hover:bg-gs-bg hover:text-gs-primary rounded-lg transition-colors text-right">
+        <i class="ph-bold ph-scroll text-lg"></i>
+        <div class="flex flex-col">
+          <span class="font-bold">لیست تغییرات</span>
+          <span class="text-[10px] text-gs-muted">تازه‌ها و اصلاحات هر نسخه</span>
+        </div>
+      </button>
+      <div class="h-px bg-gs-border my-1"></div>
+      <button onclick="toggleMainMenu()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gs-muted hover:bg-gs-bg hover:text-gs-danger rounded-lg transition-colors text-right">
+        <i class="ph-bold ph-x text-lg"></i>
+        بستن منو
+      </button>
+    </div>
+  </div>
+
+  <!-- Notification Menu -->
+  <div id="notification-menu-overlay" class="hidden fixed inset-0 z-[100]" onclick="toggleNotificationMenu()"></div>
+  <div id="notification-menu"
+    class="hidden fixed bottom-8 right-2 w-64 bg-gs-panel border border-gs-border rounded-xl shadow-2xl z-[101] overflow-hidden"
+    dir="rtl">
+    <div class="p-3 border-b border-gs-border bg-gs-bg flex justify-between items-center">
+      <span class="font-bold text-sm text-gs-text">تنظیمات نوتیفیکیشن</span>
+      <button onclick="requestNotificationPermission()" id="btn-notif-perm"
+        class="text-[10px] bg-gs-primary/10 text-gs-primary px-2 py-1 rounded hover:bg-gs-primary/20 transition-colors">دسترسی
+        ویندوز</button>
+    </div>
+    <div class="p-2 flex flex-col gap-1 max-h-[60vh] overflow-y-auto custom-scrollbar" id="notif-settings-list">
+      <!-- Toggles will be injected by JS -->
+    </div>
+  </div>
+
+  <!-- History Module Placeholder -->
+  <div id="history-module-container"></div>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="main-area">
+    <!-- ACTIVITY BAR -->
+    <div class="activity-bar">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <!-- New Tab -->
+        <button title="تب جدید" onclick="promptNewTab()">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M18 2c2.206 0 4 1.794 4 4v12c0 2.206-1.794 4-4 4H6c-2.206 0-4-1.794-4-4V6c0-2.206 1.794-4 4-4zm0-2H6a6 6 0 0 0-6 6v12a6 6 0 0 0 6 6h12a6 6 0 0 0 6-6V6a6 6 0 0 0-6-6"
+              fill="currentColor"></path>
+            <path d="M12 18a1 1 0 0 1-1-1V7a1 1 0 0 1 2 0v10a1 1 0 0 1-1 1" fill="currentColor"></path>
+            <path d="M6 12a1 1 0 0 1 1-1h10a1 1 0 0 1 0 2H7a1 1 0 0 1-1-1" fill="currentColor"></path>
+          </svg>
+        </button>
+        <!-- Duplicate Tab -->
+        <button title="کپی تب فعلی" onclick="duplicateTab()">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 800 800" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor">
+              <path
+                d="M500 758.3H400c-48.9 0-84.2 0-113.1-3.9-34-4.6-57.3-14.7-75.3-32.7-18.1-18.1-28.2-41.3-32.7-75.3-3.9-28.9-3.9-64.2-3.9-113.1V366.7c0-48.9 0-84.2 3.9-113.1 4.6-34 14.7-57.3 32.7-75.3 18.1-18.1 41.3-28.2 75.3-32.7 28.9-3.9 64.2-3.9 113.1-3.9h100c48.9 0 84.2 0 113.1 3.9 34 4.6 57.3 14.7 75.3 32.7 18.1 18.1 28.2 41.3 32.7 75.3 3.9 28.9 3.9 64.2 3.9 113.1v166.7c0 48.9 0 84.2-3.9 113.1-4.6 34-14.7 57.3-32.7 75.3s-41.3 28.2-75.3 32.7c-28.9 3.8-64.2 3.8-113.1 3.8M400 191.7c-87.3 0-131.1 0-153 22-22 22-22 65.8-22 153v166.7c0 87.3 0 131.1 22 153s65.8 22 153 22h100c87.3 0 131.1 0 153-22 22-22 22-65.8 22-153V366.7c0-87.3 0-131.1-22-153-22-22-65.8-22-153-22z"
+                fill="currentColor" class=""></path>
+              <path
+                d="M200 658.3c-68.9 0-125-56.1-125-125v-200c0-64.8 0-111.7 5.1-149.6 5.8-43.5 18.6-73 41.3-95.7s52.2-35.4 95.7-41.3c38-5.1 84.8-5.1 149.6-5.1H500c68.9 0 125 56.1 125 125h-50c0-41.4-33.6-75-75-75H366.7c-118.7 0-178.2 0-209.9 31.7-31.8 31.8-31.8 91.4-31.8 210v200c0 41.4 33.6 75 75 75z"
+                fill="currentColor" class=""></path>
+            </g>
+          </svg>
+        </button>
+        <!-- Scan Settings Sidebar -->
+        <button title="تنظیمات اسکن" onclick="toggleSidebar()">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M490.667 405.333h-56.811C424.619 374.592 396.373 352 362.667 352s-61.931 22.592-71.189 53.333H21.333C9.557 405.333 0 414.891 0 426.667S9.557 448 21.333 448h270.144c9.237 30.741 37.483 53.333 71.189 53.333s61.931-22.592 71.189-53.333h56.811c11.797 0 21.333-9.557 21.333-21.333s-9.535-21.334-21.332-21.334m-128 53.334c-17.643 0-32-14.357-32-32s14.357-32 32-32 32 14.357 32 32-14.358 32-32 32M490.667 64h-56.811c-9.259-30.741-37.483-53.333-71.189-53.333S300.736 33.259 291.477 64H21.333C9.557 64 0 73.557 0 85.333s9.557 21.333 21.333 21.333h270.144C300.736 137.408 328.96 160 362.667 160s61.931-22.592 71.189-53.333h56.811c11.797 0 21.333-9.557 21.333-21.333S502.464 64 490.667 64m-128 53.333c-17.643 0-32-14.357-32-32s14.357-32 32-32 32 14.357 32 32-14.358 32-32 32M490.667 234.667H220.523c-9.259-30.741-37.483-53.333-71.189-53.333s-61.931 22.592-71.189 53.333H21.333C9.557 234.667 0 244.224 0 256s9.557 21.333 21.333 21.333h56.811c9.259 30.741 37.483 53.333 71.189 53.333s61.931-22.592 71.189-53.333h270.144c11.797 0 21.333-9.557 21.333-21.333.001-11.776-9.535-21.333-21.332-21.333M149.333 288c-17.643 0-32-14.357-32-32s14.357-32 32-32 32 14.357 32 32-14.357 32-32 32"
+              fill="currentColor" class=""></path>
+          </svg>
+        </button>
+        <!-- History -->
+        <button id="btn-history" title="تاریخچه اسکن‌ها" onclick="toggleHistoryMenu()">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 682.667 682.667" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="histClip" clipPathUnits="userSpaceOnUse">
+                <path d="M0 512h512V0H0Z" fill="currentColor"></path>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#histClip)" transform="matrix(1.33333 0 0 -1.33333 0 682.667)">
+              <path
+                d="M0 0v-78.667h78.667M-21.049-236v-78.667C-21.049-401.56 49.392-472 136.285-472h157.333c86.893 0 157.333 70.44 157.333 157.333v157.334C450.951-70.44 380.511 0 293.618 0v0H136.285C78.049 0 27.204-31.639 0-78.666m293.618-236.001L214.951-236v118"
+                style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1;"
+                transform="translate(41.049 492)" fill="none" stroke="currentColor" stroke-width="40px"
+                stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none"
+                stroke-opacity=""></path>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <div style="
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 8px;
+          ">
+        <!-- Speed Test -->
+        <button title="تست سرعت" onclick="
+              toggleSettings();
+              setTimeout(function () {
+                switchSettingsTab('speed');
+              }, 100);
+            ">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M442.05 496.01c0-31.4-7.79-60.99-21.53-86.94l-38.45 22.19c-3.32 1.93-7.6.79-9.52-2.55-1.96-3.32-.79-7.6 2.52-9.52l38.46-22.2a187.15 187.15 0 0 0-58.54-58.54l-22.19 38.44c-1.9 3.34-6.18 4.48-9.5 2.58-3.34-1.93-4.51-6.18-2.58-9.52l22.21-38.47c-24.01-12.72-51.13-20.33-79.92-21.39v44.36c0 3.88-3.15 7-7 7s-7-3.12-7-7v-44.36c-28.8 1.07-55.92 8.67-79.93 21.39l22.19 38.45c1.93 3.35.79 7.6-2.52 9.55-3.34 1.93-7.62.79-9.55-2.55L157 338.47a187 187 0 0 0-58.53 58.54l38.44 22.19c3.34 1.9 4.48 6.18 2.58 9.52-1.93 3.32-6.18 4.48-9.52 2.55l-38.47-22.2c-13.74 25.95-21.54 55.54-21.54 86.95H16c0-132.55 107.46-240.01 240.01-240.01s239.98 107.46 239.98 240.01h-53.94zM289.06 448.1l17.15-29.65c1.93-3.34.79-7.62-2.55-9.55s-7.6-.79-9.55 2.55l-17.12 29.68a59.6 59.6 0 0 0-23.61-4.85c-33 0-59.73 26.73-59.73 59.73H313.1c0-19.62-9.44-36.99-24.04-47.91M56.97 217.9h81.89V97.88h40.93L97.9 15.99 16 97.88h40.96V217.9zM496 136.01h-40.93V15.99h-81.89v120.02h-40.96l81.89 81.89z"
+              fill="currentColor" class=""></path>
+          </svg>
+        </button>
+        <!-- General Settings -->
+        <button title="تنظیمات" onclick="toggleSettings()">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="m478.08 200.17-28.46-5a202 202 0 0 0-13.69-33.12l16.58-23.63c11.454-16.293 9.521-38.465-4.58-52.53L426.1 64.06c-14.065-14.101-36.237-16.034-52.53-4.58l-23.64 16.58a202 202 0 0 0-33.12-13.69l-5-28.46C308.368 14.306 291.344.006 271.44 0h-30.88c-19.92-.023-36.964 14.295-40.38 33.92l-5 28.45a202 202 0 0 0-33.12 13.69l-23.63-16.58c-16.293-11.454-38.465-9.521-52.53 4.58L64.06 85.9c-14.101 14.065-16.034 36.237-4.58 52.53l16.57 23.63a202 202 0 0 0-13.69 33.12l-28.45 5C14.289 203.6-.023 220.644 0 240.56v30.88c.002 19.911 14.308 36.942 33.92 40.38l28.45 5a202 202 0 0 0 13.69 33.12l-16.58 23.63c-11.454 16.293-9.521 38.465 4.58 52.53l21.84 21.84c14.065 14.101 36.237 16.034 52.53 4.58l23.63-16.57a201.7 201.7 0 0 0 33.12 13.69l5 28.46c3.424 19.617 20.467 33.924 40.38 33.9h30.88c19.916.023 36.96-14.289 40.38-33.91 1.243-7.072-3.483-13.812-10.555-15.055s-13.812 3.483-15.055 10.555A15 15 0 0 1 271.44 486h-30.88a15 15 0 0 1-14.78-12.41l-6.39-36.43a13 13 0 0 0-9.39-10.31 175.6 175.6 0 0 1-42.24-17.46 13 13 0 0 0-14 .62l-30.25 21.22a15 15 0 0 1-19.22-1.68l-21.84-21.84a15 15 0 0 1-1.68-19.22L102 358.25a13 13 0 0 0 .62-14A175.8 175.8 0 0 1 85.14 302a13 13 0 0 0-10.31-9.44l-36.42-6.39A15 15 0 0 1 26 271.44v-30.88a15 15 0 0 1 12.41-14.77l36.43-6.39a13 13 0 0 0 10.3-9.4 175.9 175.9 0 0 1 17.47-42.25 13 13 0 0 0-.62-14l-21.22-30.24a15 15 0 0 1 1.68-19.22l21.84-21.84a15 15 0 0 1 19.22-1.68L153.75 102a13 13 0 0 0 14 .62A175.7 175.7 0 0 1 210 85.15a13 13 0 0 0 9.44-10.31l6.39-36.43A15 15 0 0 1 240.56 26h30.88a15 15 0 0 1 14.78 12.41l6.39 36.43A13 13 0 0 0 302 85.15a175.9 175.9 0 0 1 42.24 17.47 13 13 0 0 0 14-.62l30.25-21.22a15 15 0 0 1 19.22 1.68l21.84 21.84a15 15 0 0 1 1.68 19.22L410 153.76a13 13 0 0 0-.62 14A176 176 0 0 1 426.85 210a13 13 0 0 0 10.31 9.43l36.43 6.39A15 15 0 0 1 486 240.56v30.88a15 15 0 0 1-12.41 14.78c-7.072 1.243-11.798 7.983-10.555 15.055s7.983 11.798 15.055 10.555c19.624-3.421 33.938-20.47 33.91-40.39v-30.88c.003-19.914-14.305-36.951-33.92-40.39"
+              fill="currentColor" class=""></path>
+            <path
+              d="m475.07 391.53-83.16-85.69a53.23 53.23 0 0 1-14.91-42c5.968-68.273-44.539-128.457-112.812-134.425a124 124 0 0 0-21.788.015 24.32 24.32 0 0 0-15.08 6.9c-9.885 9.722-10.037 25.61-.34 35.52l35.83 36.53c7.282 7.417 7.173 19.332-.244 26.614l-.006.006-27.74 27.21c-7.421 7.275-19.333 7.158-26.61-.26l-35.83-36.53c-9.722-9.885-25.61-10.037-35.52-.34a24.3 24.3 0 0 0-7.2 14.95c-7.372 68.135 41.887 129.346 110.022 136.718 7.239.783 14.533.928 21.798.432a53.18 53.18 0 0 1 41.63 15.66l83.11 85.63c5.001 5.153 13.232 5.276 18.385.275s5.276-13.232.275-18.385l-83.16-85.68a79.22 79.22 0 0 0-62-23.45c-54.047 3.704-100.863-37.107-104.567-91.154a98 98 0 0 1 .117-14.946l34.36 35a44.53 44.53 0 0 0 31.57 13.43h.44A44.5 44.5 0 0 0 253 280.77l27.74-27.21c17.67-17.334 17.943-45.709.61-63.38l-34.36-35c54.058-3.531 100.744 37.429 104.276 91.487.325 4.981.27 9.98-.165 14.953a79.15 79.15 0 0 0 22.2 62.38l83.11 85.64c5.001 5.153 13.232 5.276 18.385.275 5.152-5.001 5.275-13.232.274-18.385"
+              fill="currentColor" class=""></path>
+          </svg>
+        </button>
+        <!-- Version stamp doubles as the changelog entry point. The tooltip
+             layer turns `title` into the app's own popup, and <br> is rendered
+             as a line break by it, so the hint sits on its own line. -->
+        <!-- The whole badge still opens the changelog; the two underlined words
+             inside the tooltip are separately clickable, which is why the
+             tooltip is flagged interactive. -->
+        <div id="app-version-badge" onclick="window.openChangelogTab && window.openChangelogTab()"
+          data-tooltip-interactive
+          title="ورژن فعلی برنامه MLMVPN شما ۱.۲.۳ می‌باشد، جهت مشاهده آخرین تغییرات <span onclick=&quot;window.openChangelogTab && window.openChangelogTab()&quot; style=&quot;cursor:pointer;color:var(--mv-blue-ink);border-bottom:1px dotted var(--mv-blue);padding-bottom:2px;&quot;>کلیک کنید</span> و جهت دریافت آخرین نسخه برنامه به کانال تلگرام <span onclick=&quot;window.open('https://t.me/mlmvpn','_blank')&quot; style=&quot;cursor:pointer;color:var(--mv-blue-ink);border-bottom:1px dotted var(--mv-blue);padding-bottom:2px;&quot;>MLMVPN</span> مراجعه بفرمایید."
+          style="
+              font-size: 9px;
+              color: var(--ide-text-main);
+              text-align: center;
+              margin-top: 4px;
+              font-weight: 600;
+              opacity: 0.85;
+              cursor: pointer;
+              transition: color 0.2s, opacity 0.2s;
+            " onmouseover="this.style.color = 'var(--mv-label)'; this.style.opacity = '1';"
+          onmouseout="this.style.color = 'var(--ide-text-main)'; this.style.opacity = '0.85';">
+          v1.2.3
+        </div>
+      </div>
+    </div>
+
+    <div style="
+          display: flex;
+          flex: 1;
+          min-height: 0;
+          position: relative;
+          gap: 4px;
+          padding: 4px;
+        ">
+      <!-- Scanner Sidebar Module Placeholder -->
+
+      <!-- EDITOR AREA -->
+      <div id="editor-area" class="editor-area relative flex-1 flex flex-col bg-transparent min-w-0"
+        style="gap: 4px; height: 100%">
+        <!-- بخش بالا: نوار تبها و مسیردهی (Breadcrumb) -->
+        <div id="top-nav-container"
+          class="flex flex-col w-full border border-gs-border rounded-xl overflow-hidden shadow-sm shrink-0 min-w-0"
+          dir="rtl">
+          <!-- Tab Bar -->
+          <div id="tabs-nav-wrap" class="flex items-center w-full h-10 bg-gs-panel border-b border-gs-border min-w-0">
+            <!-- Navigation Arrows (Right in RTL) -->
+            <div class="flex items-center gap-4 px-4 h-full border-l border-gs-border">
+              <button onclick="prevTab()" class="text-gs-muted hover:text-gs-text transition-colors">
+                <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="3">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+              <button onclick="nextTab()" class="text-gs-muted hover:text-gs-text transition-colors">
+                <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="3">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Tab List -->
+            <div id="tabs-bar" class="flex-1 flex items-center h-full custom-scrollbar"
+              style="overflow-x: auto; overflow-y: hidden; min-width: 0"></div>
+
+            <!-- New Tab (+) (Left in RTL) -->
+            <button onclick="promptNewTab()"
+              class="flex items-center justify-center px-4 h-full border-r border-gs-border hover:bg-gs-surface transition-colors"
+              style="color: var(--mv-label)">
+              <svg style="width: 16px; height: 16px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Breadcrumb Bar -->
+          <div id="breadcrumb-wrap"
+            class="flex items-center h-8 px-4 bg-gs-panel font-mono text-[11px] text-gs-muted tracking-wide" dir="ltr">
+            <span class="hover:text-gs-text cursor-pointer transition-colors">scanner</span>
+            <svg style="width: 10px; height: 10px; margin: 0 8px; opacity: 0.4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="3">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <span class="hover:text-gs-text cursor-pointer transition-colors">results</span>
+            <svg style="width: 10px; height: 10px; margin: 0 8px; opacity: 0.4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="3">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <span class="text-gs-text font-bold" id="breadcrumb-name">—</span>
+            <!-- NET/ISP/LOC به سربرگ صفحهٔ اسکن رفتند (components/scan.js) — همان idها، یک نسخه. -->
+          </div>
+        </div>
+
+        <!-- Editor Content -->
+        <div
+          class="editor-content flex-1 flex flex-col bg-gs-panel rounded-2xl border border-gs-border shadow-inner overflow-hidden relative min-w-0 min-h-0"
+          id="editor-content-wrap" style="display: none">
+          <!-- آمار، نوار پیشرفت و جدول نتایج به صفحهٔ اسکن منتقل شدند (components/scan.js). -->
+        </div>
+
+        <!-- صفحهٔ اسکن — کل صفحه در components/scan.js ساخته می‌شود (نوار کناری + بخش‌ها +
+             سربرگ + جدول)، روی همان page kit بقیهٔ برنامه. renderActiveTab این را نشان/پنهان
+             می‌کند؛ نوار تب و breadcrumb بالا فقط برای تب‌های دیگر مانده‌اند. -->
+        <div id="scan-root" class="flex-1 min-w-0 min-h-0" style="display:none"></div>
+
+
+
+        <!-- Settings — laid out as macOS 26 System Settings with the page kit (ui/page-kit.css):
+             an inset sidebar and grouped forms. Every control keeps its id; the app's logic
+             reads them as before. Settings apply the moment they change (no Save button). -->
+        <div id="settings-tab-wrap" class="mv-split" style="display: none" dir="rtl">
+          <aside class="mv-side" aria-label="بخش‌های تنظیمات">
+            <div class="mv-side-top"></div>
+            <label class="mv-side-search">
+              <i class="ph ph-magnifying-glass"></i>
+              <input type="search" placeholder="جست‌وجو" aria-label="جست‌وجو در تنظیمات" data-mv-side-search />
+            </label>
+            <!-- Android's Settings, in Android's order (components/android-settings.js): the
+                 Cloudflare account card and «منابع حساب», then شبکه · صفحه نمایش · مصرف · سیستم ·
+                 درباره. The last group is what only Windows has. -->
+            <nav class="mv-side-list">
+              <div class="mv-side-group">
+                <button type="button" id="btn-set-account" class="mv-side-account" onclick="window.AndroidSettings && AndroidSettings.openCloud()"
+                  data-kw="cloudflare account حساب کلادفلر کلودفلر ابری">
+                  <span class="as-avatar"><i class="ph-fill ph-cloud"></i></span>
+                  <span class="as-acc-text"><b>حساب کلادفلر</b><small>کلادفلر، ورکرها و بیشتر</small></span>
+                </button>
+                <button onclick="switchSettingsTab('cf')" id="btn-set-cf" class="settings-nav-btn mv-side-item"
+                  data-kw="cloudflare workers d1 kv resources account کلادفلر کلودفلر ورکر وورکر منابع حساب پایگاه داده">
+                  <span class="mv-side-tile" style="--tint:#F38020"><i class="ph-fill ph-hard-drives"></i></span><span>منابع حساب</span>
+                </button>
+              </div>
+              <div class="mv-side-group">
+                <button onclick="switchSettingsTab('network')" id="btn-set-network" class="settings-nav-btn mv-side-item"
+                  data-kw="network port local lan share proxy mode dns backend unblock fingerprint شبکه پورت محلی اشتراک حالت پروکسی دی ان اس بک‌اند رفع فیلتر کانفیگ">
+                  <span class="mv-side-tile" style="--tint:var(--mv-blue)"><i class="ph-fill ph-globe-hemisphere-east"></i></span><span>شبکه</span>
+                </button>
+                <button onclick="switchSettingsTab('tunnel')" id="btn-set-tunnel" class="settings-nav-btn mv-side-item"
+                  data-kw="vpn advanced always-on mtu quick tunnel split apps bypass allow per-app routing همیشه روشن تونل برنامه مسیریابی انتخابی عدم تونل اتصال سریع">
+                  <span class="mv-side-tile" style="--tint:var(--mv-green)"><i class="ph-fill ph-key"></i></span><span>تنظیمات پیشرفته VPN</span>
+                </button>
+              </div>
+              <div class="mv-side-group">
+                <button onclick="switchSettingsTab('appearance')" id="btn-set-appearance" class="settings-nav-btn mv-side-item active"
+                  data-kw="display appearance dark light auto wallpaper icon text label size dock transparency motion layout language traffic صفحه نمایش ظاهر تیره روشن خودکار تصویر زمینه اندازه آیکون متن داک شفافیت حرکت چیدمان زبان ترافیک لحظه‌ای">
+                  <span class="mv-side-tile" style="--tint:var(--mv-pink, #FF2D55)"><i class="ph-fill ph-palette"></i></span><span>صفحه نمایش</span>
+                </button>
+              </div>
+              <div class="mv-side-group">
+                <button onclick="switchSettingsTab('usage')" id="btn-set-usage" class="settings-nav-btn mv-side-item"
+                  data-kw="usage traffic monitoring total مصرف ترافیک مانیتورینگ کل حجم">
+                  <span class="mv-side-tile" style="--tint:var(--mv-yellow)"><i class="ph-fill ph-chart-bar"></i></span><span>مصرف</span>
+                </button>
+              </div>
+              <div class="mv-side-group">
+                <button onclick="switchSettingsTab('system')" id="btn-set-system" class="settings-nav-btn mv-side-item"
+                  data-kw="system lock screen off disconnect reset home layout log سیستم قفل خاموش قطع بازنشانی چیدمان لاگ">
+                  <span class="mv-side-tile" style="--tint:var(--mv-gray)"><i class="ph-fill ph-gear-six"></i></span><span>سیستم</span>
+                </button>
+              </div>
+              <div class="mv-side-group">
+                <button onclick="switchSettingsTab('about')" id="btn-set-about" class="settings-nav-btn mv-side-item"
+                  data-kw="about version update crash report changelog telegram github youtube درباره نسخه به‌روزرسانی گزارش خطا تغییرات تلگرام گیت‌هاب یوتیوب">
+                  <span class="mv-side-tile" style="--tint:var(--mv-blue)"><i class="ph-fill ph-info"></i></span><span>درباره</span>
+                </button>
+              </div>
+              <!-- Windows only. shell/notify.js adds «اعلان‌ها» here. -->
+              <div class="mv-side-group" id="mv-set-group-look">
+                <button onclick="switchSettingsTab('scan')" id="btn-set-scan" class="settings-nav-btn mv-side-item"
+                  data-kw="scan autosave internet اسکن ذخیره خودکار قطعی اینترنت">
+                  <span class="mv-side-tile" style="--tint:var(--mv-blue)"><i class="ph-fill ph-magnifying-glass"></i></span><span>اسکن</span>
+                </button>
+                <button onclick="switchSettingsTab('app')" id="btn-set-app" class="settings-nav-btn mv-side-item" hidden
+                  data-kw="app general traffic log monitor speed برنامه عمومی آمار حجم لاگ هسته مانیتورینگ سرعت لحظه‌ای">
+                  <span class="mv-side-tile" style="--tint:var(--mv-gray)"><i class="ph-fill ph-gear-six"></i></span><span>برنامه</span>
+                </button>
+                <button onclick="switchSettingsTab('v2ray')" id="btn-set-v2ray" class="settings-nav-btn mv-side-item"
+                  data-kw="v2ray xray advanced test url udp ping fingerprint fragment cloudflare پیشرفته تست هم‌زمان آدرس فینگرپرینت فرگمنت کلادفلر">
+                  <span class="mv-side-tile" style="--tint:var(--mv-indigo)"><i class="ph-fill ph-shield-check"></i></span><span>V2Ray پیشرفته</span>
+                </button>
+                <button onclick="switchSettingsTab('speed')" id="btn-set-speed" class="settings-nav-btn mv-side-item"
+                  data-kw="speed test ping download upload تست سرعت پینگ دانلود آپلود">
+                  <span class="mv-side-tile" style="--tint:var(--mv-green)"><i class="ph-fill ph-gauge"></i></span><span>تست سرعت</span>
+                </button>
+              </div>
+              <div class="mv-side-empty" data-mv-side-empty hidden>چیزی پیدا نشد.</div>
+            </nav>
+          </aside>
+
+          <section class="mv-pane">
+            <header class="mv-pane-bar">
+              <!-- Pane history, as in System Settings: ‹ › step through the panes you visited. -->
+              <div class="mv-pane-nav" role="group" aria-label="پیمایش بخش‌ها">
+                <button type="button" id="mv-set-back" onclick="settingsGo(-1)" aria-label="بخش قبلی" title="بخش قبلی" disabled><i class="ph-bold ph-caret-right"></i></button>
+                <button type="button" id="mv-set-fwd" onclick="settingsGo(1)" aria-label="بخش بعدی" title="بخش بعدی" disabled><i class="ph-bold ph-caret-left"></i></button>
+              </div>
+              <h1 class="mv-pane-title" id="mv-set-title">صفحه نمایش</h1>
+            </header>
+            <div class="mv-pane-scroll custom-scrollbar">
+
+              <!-- Settings panes drawn by components/android-settings.js, in Android's order. -->
+              <!-- منابع حساب (Android: CloudResourcesHub) -->
+              <div id="panel-set-cf" class="settings-panel-content mv-form" style="display: none"></div>
+              <!-- صفحه نمایش (Android: DisplayPage + the display group) -->
+              <div id="panel-set-appearance" class="settings-panel-content mv-form"></div>
+              <!-- مصرف -->
+              <div id="panel-set-usage" class="settings-panel-content mv-form" style="display: none"></div>
+              <!-- سیستم -->
+              <div id="panel-set-system" class="settings-panel-content mv-form" style="display: none"></div>
+              <!-- درباره -->
+              <div id="panel-set-about" class="settings-panel-content mv-form" style="display: none"></div>
+              <!-- The desktop's wallpaper picker is mounted here by shell/apps.js and shown on the
+                   «تصویر زمینه» page (android-settings.js moves it there and back). -->
+              <div id="mv-set-wallpaper-slot" hidden></div>
+
+              <!-- اسکن -->
+              <div id="panel-set-scan" class="settings-panel-content mv-form" style="display: none">
+                <div class="mv-form-hero">
+                  <span class="mv-side-tile" style="--tint:var(--mv-blue)"><i class="ph-fill ph-magnifying-glass"></i></span>
+                  <div><h2>اسکن</h2><p>ذخیره‌ی خودکار نتایج و رفتار اسکن وقتی اینترنت قطع می‌شود.</p></div>
+                </div>
+                <!-- Every control here is saved (settings.js › SETTINGS_SAVED) and read by the scan
+                     itself (history.js › auto-save, app.js › startScan). -->
+                <div class="mv-form-section">
+                  <div class="mv-form-header">ذخیره‌ی خودکار</div>
+                  <div class="mv-form-group">
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">ذخیره‌ی خودکار حین اسکن<small>نتایج اسکنِ در حال اجرا مرتب در تاریخچه ذخیره می‌شوند تا اگر برنامه وسط اسکن بسته شد، از دست نروند. همان «ذخیره‌ی خودکار» منوی «اسکن» است.</small></span>
+                      <input type="checkbox" id="setting-autosave-enabled" class="mv-switch-input" onchange="if (this.checked !== !!window.autoSaveEnabled) toggleAutoSave()" />
+                    </label>
+                    <div class="mv-form-row is-sub">
+                      <div class="mv-form-label">هر چند دقیقه یک بار</div>
+                      <div class="mv-form-control">
+                        <input type="number" id="autosave-interval-input" class="mv-field mv-field--compact" min="1" max="120" value="1" dir="ltr" aria-label="فاصله‌ی ذخیره‌ی خودکار به دقیقه" />
+                        <span>دقیقه</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="mv-form-footer">پایان هر اسکن همیشه در تاریخچه ذخیره می‌شود. هر اسکن فقط یک مورد در تاریخچه دارد و ذخیره‌های میانی همان را به‌روز می‌کنند.</p>
+                </div>
+                <div class="mv-form-section">
+                  <div class="mv-form-header">قطعی اینترنت</div>
+                  <div class="mv-form-group">
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">توقف هنگام قطعی اینترنت<small>اگر حین اسکن کارت شبکه قطع شود، اسکن می‌ایستد و با وصل شدن دوباره از همان نقطه ادامه می‌دهد.</small></span>
+                      <input type="checkbox" id="net-check-toggle" class="mv-switch-input" checked />
+                    </label>
+                  </div>
+                  <p class="mv-form-footer">اگر خاموش باشد، اسکن حین قطعی ادامه پیدا می‌کند و آی‌پی‌هایی که در آن لحظه تست می‌شوند مرده حساب می‌شوند — برای وقتی که اسکن بی‌دلیل مدام متوقف می‌شود.</p>
+                </div>
+              </div>
+
+              <!-- برنامه -->
+              <div id="panel-set-app" class="settings-panel-content mv-form" style="display: none">
+                <div class="mv-form-hero">
+                  <span class="mv-side-tile" style="--tint:var(--mv-gray)"><i class="ph-fill ph-gear-six"></i></span>
+                  <div><h2>برنامه</h2><p>آمار و لاگ‌هایی که برنامه در پس‌زمینه نگه می‌دارد.</p></div>
+                </div>
+                <div class="mv-form-section">
+                  <div class="mv-form-header">آمار و لاگ</div>
+                  <div class="mv-form-group">
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">غیرفعال کردن آمار حجم کل دانلود و آپلود<small>حجم امروز در نوار بالا و ابزارک «ترافیک امروز» نشان داده نمی‌شود.</small></span>
+                      <input type="checkbox" id="setting-disable-total-traffic" class="mv-switch-input" />
+                    </label>
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">غیرفعال شدن هسته لاگ<small>لاگ‌های هسته در کنسول نوشته نمی‌شوند.</small></span>
+                      <input type="checkbox" id="setting-disable-core-log" class="mv-switch-input" />
+                    </label>
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">غیرفعال شدن مانیتورینگ مصرف<small>برنامه هر ثانیه آمار مصرف را از موتور می‌پرسد و روی دیسک می‌نویسد. خاموشش که کنید، سرعت لحظه‌ای، حجم امروز و «مانیتور مصرف» دیگر به‌روز نمی‌شوند و برنامه روی سیستم‌های ضعیف سبک‌تر است. آمار قبلی سر جایش می‌ماند.</small></span>
+                      <input type="checkbox" id="setting-disable-monitoring" class="mv-switch-input" />
+                    </label>
+                    <label class="mv-form-row">
+                      <span class="mv-form-label">غیرفعال شدن سرعت لحظه‌ای آپلود و دانلود<small>سرعت لحظه‌ای در نوار بالا و ابزارک نشان داده نمی‌شود.</small></span>
+                      <input type="checkbox" id="setting-disable-live-speed" class="mv-switch-input" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- شبکه and تنظیمات پیشرفته VPN — drawn by components/android-settings.js. -->
+              <div id="panel-set-network" class="settings-panel-content mv-form" style="display: none"></div>
+              <div id="panel-set-tunnel" class="settings-panel-content mv-form" style="display: none"></div>
+
+              <!-- V2Ray پیشرفته -->
+
+              <div id="panel-set-v2ray" class="settings-panel-content mv-form" style="display: none">
+                <div class="mv-form-hero">
+                  <span class="mv-side-tile" style="--tint:var(--mv-indigo)"><i class="ph-fill ph-shield-check"></i></span>
+                  <div><h2>V2Ray پیشرفته</h2><p>تست نودها، آدرس‌هایی که با آن‌ها سرعت و تأخیر سنجیده می‌شود، و ضد فیلتر کلادفلر.</p></div>
+                </div>
+
+                <div class="mv-form-section">
+                  <div class="mv-form-header">تست نودها</div>
+                  <div class="mv-form-group">
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">تست هم‌زمان در تست گروهی<small>Concurrent tests during multi-test</small></div>
+                      <select id="setting-concurrent-tests" class="mv-popup" aria-label="تست هم‌زمان در تست گروهی">
+                        <option value="" selected>خودکار (۳۰)</option>
+                        <option value="1">۱</option>
+                        <option value="5">۵</option>
+                        <option value="10">۱۰</option>
+                        <option value="20">۲۰</option>
+                      </select>
+                    </div>
+                  </div>
+                  <p class="mv-form-footer">«تست هم‌زمان» یعنی چند نود با هم تست شوند؛ «خودکار» همان ۳۰تایی همیشگی است. روی اینترنت ضعیف، یا وقتی تست‌ها بی‌دلیل ناموفق می‌شوند، عدد کمتر نتیجه‌ی دقیق‌تری می‌دهد.</p>
+                </div>
+
+                <!-- The three addresses are saved the moment they change (the keys
+                     saveGlobalSettings() writes); settings.js loads them back on start. -->
+                <div class="mv-form-section">
+                  <div class="mv-form-header">آدرس‌های تست</div>
+                  <div class="mv-form-group">
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">تست سرعت<small>Speed test URL</small></div>
+                      <select id="setting-speed-url" class="mv-popup" dir="ltr" onchange="PersistentStorage.setItem(this.id, this.value)">
+                        <option value="https://cachefly.cachefly.net/50mb.test">https://cachefly.cachefly.net/50mb.test</option>
+                        <option value="https://speed.cloudflare.com/__down?bytes=10000000">https://speed.cloudflare.com/__down?bytes=10000000</option>
+                        <option value="https://speed.cloudflare.com/__down?bytes=50000000">https://speed.cloudflare.com/__down?bytes=50000000</option>
+                        <option value="https://speed.cloudflare.com/__down?bytes=99999999">https://speed.cloudflare.com/__down?bytes=99999999</option>
+                      </select>
+                    </div>
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">مهلت تست سرعت<small>برای اپ «تست سرعت» — Speed test timeout (s)</small></div>
+                      <div class="mv-form-control">
+                        <select id="setting-speed-timeout" class="mv-popup" dir="ltr">
+                          <option value="5">5</option>
+                          <option value="10" selected>10</option>
+                          <option value="15">15</option>
+                          <option value="30">30</option>
+                        </select>
+                        <span>ثانیه</span>
+                      </div>
+                    </div>
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">تست تأخیر<small>آدرسی که «تأخیر واقعی» کانفیگ‌ها تا آن سنجیده می‌شود</small></div>
+                      <select id="setting-ping-url" class="mv-popup" dir="ltr" onchange="PersistentStorage.setItem(this.id, this.value)">
+                        <option value="https://www.google.com/generate_204">https://www.google.com/generate_204</option>
+                        <option value="https://www.gstatic.com/generate_204">https://www.gstatic.com/generate_204</option>
+                        <option value="https://www.apple.com/library/test/success.html">https://www.apple.com/library/test/success.html</option>
+                        <option value="http://www.msftconnecttest.com/connecttest.txt">http://www.msftconnecttest.com/connecttest.txt</option>
+                      </select>
+                    </div>
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">تست UDP<small>UDP test URL</small></div>
+                      <select id="setting-udp-url" class="mv-popup" dir="ltr" onchange="PersistentStorage.setItem(this.id, this.value)">
+                        <option value="ntp:pool.ntp.org">ntp:pool.ntp.org</option>
+                        <option value="ntp:time.google.com">ntp:time.google.com</option>
+                        <option value="dns:1.1.1.1">dns:1.1.1.1</option>
+                        <option value="dns:8.8.8.8">dns:8.8.8.8</option>
+                        <option value="stun:stun.l.google.com:19302">stun:stun.l.google.com:19302</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- fragment+fingerprint: خودکار روی کانفیگ‌های کلودفلر -->
+                <div class="mv-form-section">
+                  <div class="mv-form-header">فینگرپرینت و فرگمنت (ضد فیلتر کلادفلر)</div>
+                  <div class="mv-form-group">
+                    <div class="mv-form-row">
+                      <div class="mv-form-label">اعمال خودکار روی کانفیگ‌های کلادفلر<small>جایگزین SNI-Spoofing: فیلتر شدن دامنه‌ی workers.dev / pages.dev و محدودیت آپلود روی نت همراه را دور می‌زند. کاری لازم نیست — کانفیگ را از «زیرساخت ابری» بگیرید و وصل شوید. فقط برای عیب‌یابی خاموشش کنید.</small></div>
+                      <input type="checkbox" id="setting-tlsfp-enabled" class="mv-switch-input" checked aria-label="اعمال خودکار روی کانفیگ‌های کلادفلر" />
+                    </div>
+                  </div>
+                  <p id="tlsfp-state" class="mv-form-footer"></p>
+                </div>
+              </div>
+
+              <!-- تست سرعت (components/speed-test.js) -->
+              <div id="speed-test-module-container"></div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Terminal -->
+        <div class="terminal-panel relative" id="terminal-panel" style="
+              display: none;
+              flex: none;
+              height: 300px;
+              min-height: 100px;
+              flex-direction: column;
+              background: var(--ide-panel);
+              border: 1px solid var(--ide-border);
+              border-radius: 12px;
+              overflow: hidden;
+            ">
+          <div id="terminal-resizer"
+            class="absolute top-0 left-0 right-0 h-1.5 cursor-row-resize z-50 bg-transparent hover:bg-gs-primary/50 transition-colors">
+          </div>
+          <div style="
+                display: flex;
+                align-items: center;
+                background: var(--ide-panel);
+                border-bottom: 1px solid var(--ide-border);
+                padding: 0 16px;
+                height: 35px;
+                justify-content: space-between;
+                flex-shrink: 0;
+              ">
+            <div id="bottom-panel-title" style="
+                  color: var(--ide-text-main);
+                  font-size: 11px;
+                  font-weight: 600;
+                ">
+              ترمینال اسکنر
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center">
+              <button class="terminal-action-btn" onclick="toggleMaximizeTerminal()" title="تمام‌صفحه / کوچک کردن"
+                style="
+                    background: none;
+                    border: none;
+                    color: var(--ide-text-muted);
+                    cursor: pointer;
+                  ">
+                <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                </svg>
+              </button>
+              <button onclick="window.closeTerminalPanel()" style="
+                    background: none;
+                    border: none;
+                    color: var(--ide-text-dim);
+                    cursor: pointer;
+                  ">
+                <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Core Logs View -->
+          <div class="terminal-content font-mono" id="view-core" style="
+                display: none;
+                flex-direction: row;
+                position: relative;
+                background: var(--mv-surface);
+                padding: 0;
+                overflow: hidden;
+                flex: 1;
+              ">
+            <!-- Vertical Toolbar -->
+            <div style="
+                  width: 40px;
+                  background: var(--ide-bg);
+                  border-left: 1px solid var(--ide-border);
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  padding: 8px 0;
+                  gap: 12px;
+                  flex-shrink: 0;
+                ">
+              <button onclick="toggleLogPause()" id="btn-log-pause" title="توقف / ادامه" style="
+                    background: none;
+                    border: none;
+                    color: var(--syn-yellow);
+                    cursor: pointer;
+                  ">
+                <svg id="icon-pause" style="width: 20px; height: 20px" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+                <svg id="icon-play" style="width: 20px; height: 20px; display: none" viewBox="0 0 24 24"
+                  fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+              <button onclick="copyLogs()" title="کپی کل لاگ" style="
+                    background: none;
+                    border: none;
+                    color: var(--syn-blue);
+                    cursor: pointer;
+                  ">
+                <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+              <button onclick="exportLogs()" title="خروجی txt" style="
+                    background: none;
+                    border: none;
+                    color: var(--syn-green);
+                    cursor: pointer;
+                  ">
+                <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                </svg>
+              </button>
+              <button onclick="clearCoreLogs()" title="پاک کردن لاگ‌ها" style="
+                    background: none;
+                    border: none;
+                    color: var(--syn-red);
+                    cursor: pointer;
+                  ">
+                <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+            </div>
+            <pre id="core-logs" style="
+                  flex: 1;
+                  height: 100%;
+                  color: var(--ide-text-dim);
+                  font-size: 10px;
+                  overflow-y: auto;
+                  white-space: pre-wrap;
+                  word-break: break-all;
+                  padding: 12px;
+                  margin: 0;
+                " dir="ltr"></pre>
+          </div>
+
+          <!-- Monitoring View -->
+          <!-- Monitor Module Placeholder -->
+          <div id="monitor-module-container" style="display: contents;"></div>
+
+          <!-- Scanner Terminal View -->
+          <div class="terminal-content" id="view-terminal" dir="ltr">
+            <div style="color: var(--syn-green)">
+              admin@mlmvpn:~/scanner$ npm start
+            </div>
+            <div style="color: var(--mv-label-2)">
+              > Initializing MLMVPN scanner engine...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEFT SIDEBAR -->
+      <div class="sidebar" id="left-sidebar" style="
+            height: 100%;
+            display: none;
+            border-radius: 12px;
+            border: 1px solid var(--ide-border);
+            direction: rtl;
+            width: 300px;
+            min-width: 200px;
+            max-width: 500px;
+            background: var(--ide-sidebar);
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: visible;
+            position: relative;
+          ">
+        <div id="ls-resizer" style="
+              position: absolute;
+              right: -4px;
+              top: 0;
+              bottom: 0;
+              width: 8px;
+              cursor: col-resize;
+              z-index: 10;
+            "></div>
+        <div class="sidebar-header" style="justify-content: space-between">
+          <span id="left-sidebar-title">تنظیمات ساخت کانفیگ خودکار</span>
+          <div style="display: flex; gap: 12px; align-items: center">
+            <button onclick="toggleMaximizeSidebar()" title="تمام‌صفحه / کوچک کردن" style="
+                  background: none;
+                  border: none;
+                  color: var(--ide-text-muted);
+                  cursor: pointer;
+                ">
+              <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              </svg>
+            </button>
+            <button onclick="toggleLeftSidebar()" style="
+                  background: none;
+                  border: none;
+                  color: var(--ide-text-dim);
+                  cursor: pointer;
+                ">
+              <svg style="width: 16px; height: 16px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sidebar-content" style="
+              padding: 12px;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+              flex: 1;
+              overflow-y: auto;
+              overflow-x: hidden;
+            ">
+          <div id="ls-quick"
+            style="display: none; flex-direction: column; gap: 12px; height: 100%; min-height: 0; position: relative;">
+          </div>
+          <div id="ls-cloud" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-openvpn" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-gst" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-vodi" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <!-- min-height:0 is what actually lets this scroll: without it a flex child
+               refuses to shrink below its content and the overflow is simply clipped. -->
+          <div id="ls-github-tunnel"
+            style="display: none; flex-direction: column; gap: 12px; height: 100%; min-height: 0; overflow-y: auto; overflow-x: hidden;">
+          </div>
+          <div id="ls-aether" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-game"
+            style="display: none; flex-direction: column; gap: 12px; height: 100%; min-height: 0; position: relative;">
+          </div>
+          <div id="ls-gateway" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-psiphon" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-tor" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-lantern" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-geph" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-store" style="display: none; flex-direction: column; height: 100%;"></div>
+          <div id="ls-sni" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-sanction" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-iran" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-fronting" style="display: none; flex-direction: column; gap: 12px; height: 100%;"></div>
+          <div id="ls-v2ray" class="v2ray-panel-container" style="display:none; flex-direction:column; height:100%;">
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- LEFT ACTIVITY BAR -->
+    <div class="activity-bar" style="border-left: none; border-right: none">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <button title="اتصال سریع (سرورهای آماده با انتخاب کشور)" onclick="toggleLeftSidebar('quick')">
+          <!-- Globe crossed by a bolt: a ready location, reached in one step. -->
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12a9 9 0 1 1-9-9"></path>
+            <path d="M3.6 9h9.2M3.6 15h7.4"></path>
+            <path d="M11.5 3.1c-3.3 3.6-3.3 14.2 0 17.8"></path>
+            <path d="M12.5 3.1c1.2 1.3 2 3.6 2.4 6.1"></path>
+            <path d="M19.5 2.5 15.7 8h3.6l-3.8 5.5"></path>
+          </svg>
+        </button>
+        <button title="زیرساخت ابری (Cloud Module)" onclick="toggleLeftSidebar('cloud')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M394.49 236.41c.01.81-.13 1.61-.42 2.36l-10.63 27.77c-8.38 21.88-32.31 39.81-54.42 40.83l-186.35 2.36c-1.88.08-3.68 1.46-4.29 3.28-.39 1.17-.24 2.38.4 3.33.63.92 1.66 1.48 2.9 1.55l184.64 2.35c9.75.46 17.78 4.43 22.59 11.17 5.24 7.32 6.4 17.29 3.28 28.06l-2.62 9.06a4.5 4.5 0 0 1-4.21 3.22c-.04 0-.07.01-.1.01l-340.88-.04c-1.79 0-3.29-1.33-3.56-3.11A78 78 0 0 1 0 357.39c0-42.12 33.54-76.38 75.36-77.6a55.2 55.2 0 0 1-1.41-19.09c2.55-25.6 23.12-46.21 48.72-48.76 14.43-1.44 27.85 2.74 38.34 10.61 16.25-47.87 61.56-82.31 114.92-82.31 57.92 0 106.35 40.58 118.43 94.86.1.43.13.87.13 1.31M512 341.72c0 9.48-1.3 18.64-3.75 27.33-.45 1.62-1.95 2.71-3.63 2.71H363.9c-.04 0-.08-.01-.11-.01-1.48-.07-2.48-1.56-1.95-2.96l2.96-7.72c8.38-21.88 32.31-39.81 54.52-40.83l40.9-2.36c1.87-.08 3.66-1.46 4.28-3.28.39-1.17.24-2.39-.41-3.35-.63-.9-1.65-1.46-2.81-1.52l-39.36-2.36c-9.75-.46-17.78-4.42-22.59-11.17-5.24-7.32-6.4-17.28-3.28-28.05l7.26-25.08c.27-.93.98-1.65 1.86-1.96.26-.09.52-.16.8-.17 1.7-.08 3.4-.13 5.11-.13 55.74 0 100.92 45.18 100.92 100.91"
+              fill="currentColor"></path>
+          </svg>
+        </button>
+        <button title="تونل گوگل اسکریپت (Google Script Tunnel)" onclick="toggleLeftSidebar('gst')">
+          <!-- Google "G". Fixed brand colours, so it ignores the rail's currentColor. -->
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24">
+            <path fill="#4285F4"
+              d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.44c-.28 1.48-1.12 2.73-2.38 3.58v3h3.86c2.26-2.09 3.57-5.17 3.57-8.82z" />
+            <path fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z" />
+            <path fill="#FBBC05"
+              d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z" />
+            <path fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
+          </svg>
+        </button>
+        <button title="railway — ساخت خودکار سرور و مدیریت کاربران" onclick="toggleLeftSidebar('vodi')">
+          <!-- Static IP / anchored server: a location pin with a fixed server slab. -->
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21s7-5.3 7-11a7 7 0 1 0-14 0c0 5.7 7 11 7 11z"></path>
+            <rect x="8.5" y="7" width="7" height="4" rx="1"></rect>
+            <circle cx="10" cy="9" r="0.6" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </button>
+        <button title="ماسک، وایرگارد، وارپ در وارپ" onclick="toggleLeftSidebar('aether')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 64 64" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M15.16 17.35c-.77 0-1.42-.58-1.49-1.36-.26-2.82.66-4.59 1.66-5.65.27-3.89 2.87-6.85 6.14-6.85.83 0 1.5.67 1.5 1.5v4.7c2.1-.8 5.46-1.82 9.03-1.82s6.93 1.02 9.03 1.82v-4.7c0-.83.67-1.5 1.5-1.5 3.27 0 5.87 2.96 6.14 6.85 1 1.06 1.92 2.83 1.66 5.63a1.5 1.5 0 0 1-1.63 1.35c-.83-.08-1.43-.81-1.35-1.63.15-1.62-.21-2.78-1.11-3.54-.34-.29-.53-.7-.53-1.15 0-1.71-.67-3.2-1.66-3.97v4.94c0 .52-.27 1.01-.72 1.28s-1 .29-1.47.06c-.05-.02-4.81-2.43-9.84-2.43s-9.8 2.41-9.84 2.43c-.47.24-1.02.22-1.47-.06-.45-.27-.72-.76-.72-1.28V7.03c-.99.76-1.66 2.26-1.66 3.97 0 .44-.19.86-.53 1.15-.9.76-1.27 1.93-1.11 3.56.08.82-.53 1.56-1.35 1.63h-.14zM44.66 46.58H19.34c-2.63 0-4.89-1.06-6.2-2.91-1.23-1.73-1.56-4.02-.98-6.57-1.68-.91-2.97-2.57-3.43-4.53-.51-2.15.07-4.26 1.58-5.9-.23-1.44-.28-2.8-.15-4.06.08-.82.82-1.42 1.64-1.34s1.42.82 1.34 1.64c-.12 1.2-.03 2.54.26 3.98.11.53-.08 1.08-.49 1.43-1.52 1.3-1.44 2.79-1.26 3.55.33 1.39 1.41 2.55 2.69 2.88.41.1.75.37.95.74s.23.81.1 1.2c-.75 2.15-.68 4 .19 5.22.75 1.06 2.09 1.65 3.75 1.65h25.32c1.67 0 3-.58 3.75-1.65.87-1.22.93-3.07.19-5.22-.14-.4-.1-.83.1-1.2s.54-.64.95-.74c1.21-.31 2.27-1.39 2.64-2.69.21-.72.37-2.11-.87-3.41a1.5 1.5 0 0 1 2.17-2.07c1.66 1.74 2.24 4.04 1.58 6.31-.52 1.81-1.77 3.34-3.34 4.2.59 2.55.25 4.84-.97 6.57-1.31 1.85-3.57 2.91-6.2 2.91z"
+              fill="currentColor"></path>
+            <path
+              d="M38.47 60.51H25.55c-2 0-3.79-1.35-4.33-3.27L17.9 45.49c-.13-.45-.04-.94.25-1.31.28-.38.73-.6 1.2-.6h25.34c.47 0 .91.22 1.2.6.28.37.38.86.25 1.31l-3.32 11.75c-.54 1.93-2.33 3.27-4.33 3.27zM21.32 46.58l2.78 9.84c.18.64.78 1.09 1.44 1.09h12.92a1.5 1.5 0 0 0 1.44-1.09l2.78-9.84H21.31z"
+              fill="currentColor"></path>
+            <path
+              d="M35.56 55.57h-7.12c-1.6 0-2.99-1.08-3.39-2.63l-1.92-7.48c-.12-.45-.02-.93.27-1.29s.72-.58 1.19-.58h14.83c.46 0 .9.21 1.19.58s.38.84.27 1.29l-1.92 7.48a3.5 3.5 0 0 1-3.39 2.63zm-9.04-8.99 1.44 5.61c.06.22.26.38.48.38h7.12c.23 0 .43-.15.48-.38l1.44-5.61zM21.38 33.95c-3.64 0-6.61-2.97-6.61-6.61 0-1.71.65-3.33 1.83-4.55a1.5 1.5 0 0 1 2.16 2.08c-.64.66-.99 1.54-.99 2.47 0 1.99 1.62 3.61 3.61 3.61 1.36 0 2.62-.79 3.22-2.01.37-.74 1.27-1.05 2.01-.69.74.37 1.05 1.26.69 2.01a6.64 6.64 0 0 1-5.92 3.69M42.61 33.95c-2.51 0-4.84-1.46-5.93-3.73-.36-.75-.05-1.64.7-2 .74-.36 1.64-.05 2 .7a3.6 3.6 0 0 0 3.23 2.03c1.99 0 3.61-1.62 3.61-3.61 0-.94-.35-1.82-.99-2.47a1.5 1.5 0 0 1 2.14-2.1 6.5 6.5 0 0 1 1.85 4.57 6.61 6.61 0 0 1-6.61 6.61M28.9 42.38c-2.53 0-4.6-2.06-4.6-4.6a4.6 4.6 0 1 1 4.6 4.6m0-6.19c-.88 0-1.6.72-1.6 1.6s.72 1.6 1.6 1.6 1.6-.72 1.6-1.6-.72-1.6-1.6-1.6"
+              fill="currentColor"></path>
+            <path
+              d="M35.1 42.38c-2.53 0-4.6-2.06-4.6-4.6a4.6 4.6 0 1 1 4.6 4.6m0-6.19c-.88 0-1.6.72-1.6 1.6s.72 1.6 1.6 1.6 1.6-.72 1.6-1.6-.72-1.6-1.6-1.6M14.77 43.92H9.21c-3.15 0-5.71-2.56-5.71-5.71 0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5c0 1.5 1.22 2.71 2.71 2.71h5.56c.88 0 1.71-.43 2.22-1.15l.57-.81a6.26 6.26 0 0 1 5.13-2.66h3.12c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3.12a3.3 3.3 0 0 0-2.68 1.39l-.57.81a5.73 5.73 0 0 1-4.67 2.43z"
+              fill="currentColor"></path>
+            <path
+              d="M54.79 43.92h-5.56c-1.86 0-3.6-.91-4.67-2.43l-.57-.81a3.27 3.27 0 0 0-2.68-1.39h-3.12c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5h3.12c2.04 0 3.96 1 5.13 2.66l.57.81c.51.72 1.34 1.15 2.22 1.15h5.56c1.5 0 2.71-1.22 2.71-2.71 0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5c0 3.15-2.56 5.71-5.71 5.71zM34.38 21.45c-.23 0-.47-.05-.69-.17-1.19-.62-2.25-.63-3.32-.02-.72.4-1.64.15-2.04-.57-.41-.72-.15-1.64.57-2.04 1.95-1.09 4.08-1.1 6.17-.02.74.38 1.02 1.29.64 2.02-.27.52-.79.81-1.33.81z"
+              fill="currentColor"></path>
+            <path
+              d="M37.77 18.13c-.23 0-.47-.05-.69-.17-3.56-1.84-6.86-1.85-10.1-.02-.72.4-1.64.15-2.04-.57-.41-.72-.15-1.64.57-2.04 4.13-2.32 8.49-2.33 12.95-.02.74.38 1.02 1.28.64 2.02-.27.52-.79.81-1.33.81zM28.68 36.2c-.6 0-1.16-.36-1.39-.95-3.22-8.11-8.46-11.12-19.34-11.12-.83 0-1.5-.67-1.5-1.5v-8.62c0-.44.2-.87.54-1.15s.79-.4 1.23-.32c10.13 1.85 21.83 6.03 22.39 22.11.03.83-.62 1.52-1.45 1.55-.09 0-.18 0-.27-.01-.07.01-.14.02-.22.02zM9.46 21.15c7.85.22 13.16 2.21 16.84 6.49-2.83-7.5-9.75-10.32-16.84-11.81zM34.84 36.21h-.05c-.83-.03-1.48-.72-1.45-1.55.56-16.07 12.26-20.27 22.39-22.12.44-.08.89.04 1.23.32.34.29.54.71.54 1.15v8.62c0 .83-.67 1.5-1.5 1.5-10.87 0-16.11 3.02-19.34 11.12a1.51 1.51 0 0 1-1.58.94c-.08.01-.16.02-.25.02zM54.5 15.83c-7.41 1.55-14.17 4.35-16.9 11.88 3.69-4.33 9.01-6.34 16.9-6.56z"
+              fill="currentColor"></path>
+          </svg>
+        </button>
+        <button title="GitHub Tunnel (Windows Cloud Session)" onclick="toggleLeftSidebar('github-tunnel')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.77.12 3.06.74.8 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.13 0 1.54-.01 2.79-.01 3.17 0 .31.21.67.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z" />
+          </svg>
+        </button>
+        <button title="موتور مسیر بازی (Game Path Engine)" onclick="toggleLeftSidebar('game')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 12h4M8 10v4"></path>
+            <circle cx="15" cy="11" r="1"></circle>
+            <circle cx="17.5" cy="13.5" r="1"></circle>
+            <path
+              d="M17.32 5H6.68a4 4 0 0 0-3.96 3.4l-1.2 8A3.5 3.5 0 0 0 4.98 20.4c1.1 0 2.1-.5 2.76-1.36L9 17.2h6l1.26 1.84A3.46 3.46 0 0 0 19.02 20.4a3.5 3.5 0 0 0 3.46-4l-1.2-8A4 4 0 0 0 17.32 5">
+            </path>
+          </svg>
+        </button>
+        <button title="تحریم شکن (Sanction Buster)" onclick="toggleLeftSidebar('sanction')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 32 32" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M8.707 5.293a1 1 0 0 0-1.414 0L7 5.586l-.293-.293a1 1 0 1 0-1.414 1.414L5.586 7l-.293.293a1 1 0 1 0 1.414 1.414L7 8.414l.293.293a.997.997 0 0 0 1.414 0 1 1 0 0 0 0-1.414L8.414 7l.293-.293a1 1 0 0 0 0-1.414"
+              fill="currentColor"></path>
+            <path
+              d="M27 2h-5c-1.654 0-3 1.346-3 3v1h-1.586l-1.707-1.707a1 1 0 1 0-1.414 1.414l.293.293H12V5c0-1.654-1.346-3-3-3H5C3.346 2 2 3.346 2 5v4c0 1.654 1.346 3 3 3h4c1.654 0 3-1.346 3-3V8h2.586l-.293.293a1 1 0 1 0 1.414 1.414L17.414 8H19v1c0 1.654 1.346 3 3 3h1.5v3.586l-.293-.293a1 1 0 1 0-1.414 1.414l1.707 1.707V21c0 .552-.449 1-1 1H19v2h3.5c1.654 0 3-1.346 3-3v-2.586l1.707-1.707a1 1 0 1 0-1.414-1.414l-.293.293V12H27c1.654 0 3-1.346 3-3V5c0-1.654-1.346-3-3-3M10 9c0 .552-.449 1-1 1H5c-.551 0-1-.448-1-1V5c0-.552.449-1 1-1h4c.551 0 1 .448 1 1zm18 0c0 .552-.449 1-1 1h-5c-.551 0-1-.448-1-1V5c0-.552.449-1 1-1h5c.551 0 1 .448 1 1z"
+              fill="currentColor"></path>
+            <path
+              d="M25.293 5.293 24 6.586l-.293-.293a1 1 0 1 0-1.414 1.414l1 1a.997.997 0 0 0 1.414 0l2-2a1 1 0 1 0-1.414-1.414M15 16H5c-1.654 0-3 1.346-3 3v8c0 1.654 1.346 3 3 3h10c1.654 0 3-1.346 3-3v-8c0-1.654-1.346-3-3-3M5 18h10c.551 0 1 .448 1 1v3H4v-3c0-.552.449-1 1-1m10 10H5c-.551 0-1-.448-1-1v-3h12v3c0 .552-.449 1-1 1"
+              fill="currentColor"></path>
+            <circle cx="14" cy="20" r="1" fill="currentColor"></circle>
+            <circle cx="11" cy="20" r="1" fill="currentColor"></circle>
+            <circle cx="14" cy="26" r="1" fill="currentColor"></circle>
+            <circle cx="11" cy="26" r="1" fill="currentColor"></circle>
+          </svg>
+        </button>
+        <button title="موتور ضد فیلتر (SNI)" onclick="toggleLeftSidebar('sni')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 64 64" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M36.081 29.387a4.082 4.082 0 0 0-8.162 0c0 1.675 1.036 3.132 2.504 3.749l-2.794 12.767a1.002 1.002 0 0 0 .977 1.214h6.788a1 1 0 0 0 .977-1.214l-2.795-12.772c1.478-.624 2.505-2.075 2.505-3.743zM32 27.314a2.08 2.08 0 0 1 2.081 2.073c0 1.04-.778 1.925-1.846 2.065a1.4 1.4 0 0 1-.449 0c-.021-.003-.034-.002-.057-.005a2.084 2.084 0 0 1-1.81-2.06A2.08 2.08 0 0 1 32 27.314m-2.151 17.803L32 35.287l2.151 9.83h-4.303zM39.768 26.634a1 1 0 1 0-.575 1.915c.369.111.626.457.626.842s-.257.73-.625.841a1 1 0 0 0 .575 1.916c1.208-.362 2.051-1.496 2.051-2.757s-.843-2.395-2.051-2.757z"
+              fill="currentColor" class=""></path>
+            <path
+              d="M46.792 29.391c0-2.797-1.871-5.312-4.55-6.115a1.001 1.001 0 0 0-.574 1.916c1.839.552 3.124 2.278 3.124 4.199s-1.285 3.647-3.124 4.199a1 1 0 1 0 .575 1.916 6.43 6.43 0 0 0 4.55-6.115z"
+              fill="currentColor" class=""></path>
+            <path
+              d="M45.195 21.2a1 1 0 1 0-.574 1.916c2.749.825 4.669 3.405 4.669 6.275s-1.92 5.45-4.669 6.274a1 1 0 1 0 .575 1.916c3.588-1.076 6.095-4.444 6.095-8.19s-2.506-7.114-6.095-8.191zM24.808 28.549a1 1 0 1 0-.575-1.915c-1.208.362-2.051 1.496-2.051 2.757s.844 2.395 2.051 2.757a1.002 1.002 0 0 0 1.246-.671 1 1 0 0 0-.671-1.245c-.368-.11-.625-.456-.625-.841s.257-.731.626-.842z"
+              fill="currentColor" class=""></path>
+            <path
+              d="M22.332 33.59c-1.839-.552-3.124-2.278-3.124-4.199s1.285-3.647 3.124-4.199a1 1 0 1 0-.574-1.916c-2.679.804-4.55 3.318-4.55 6.115s1.871 5.311 4.55 6.115a1.002 1.002 0 0 0 1.246-.671 1 1 0 0 0-.671-1.245z"
+              fill="currentColor" class=""></path>
+            <path
+              d="M19.379 35.666c-2.749-.824-4.669-3.404-4.669-6.274s1.92-5.45 4.669-6.275a1 1 0 1 0-.574-1.916c-3.588 1.077-6.095 4.445-6.095 8.191s2.506 7.114 6.095 8.19a1.002 1.002 0 0 0 1.246-.671 1 1 0 0 0-.671-1.245z"
+              fill="currentColor" class=""></path>
+            <path
+              d="M58.545 9.778a1 1 0 0 0-1.38-.797c-2.412 1.012-8.771 3.065-15.678.273-4.362-1.766-7.124-4.694-8.672-6.84a1 1 0 0 0-.809-.415h-.002c-.32 0-.62.153-.809.412-1.567 2.152-4.346 5.086-8.686 6.843-6.908 2.793-13.265.739-15.678-.273a1 1 0 0 0-1.38.797c-.059.471-5.541 47.149 26.395 52.209a1 1 0 0 0 .312 0c31.937-5.06 26.443-51.738 26.384-52.209zM32.004 59.987C5.022 55.567 6.7 18.685 7.314 11.306c3.226 1.126 9.348 2.472 15.946-.198 4.103-1.66 6.934-4.271 8.741-6.471 1.793 2.196 4.615 4.804 8.736 6.472 6.6 2.669 12.722 1.324 15.947.197.615 7.378 2.301 44.261-24.68 48.681"
+              fill="currentColor" class=""></path>
+          </svg>
+        </button>
+        <button title="نودهای V2RAY" onclick="toggleLeftSidebar('v2ray')"
+          class="text-gs-muted hover:text-gs-text hover:bg-gs-bg p-2.5 rounded-lg transition-all focus:outline-none flex justify-center items-center relative group">
+          <!-- The V2Ray mark: an angular "V" with the stepped top-left stem. -->
+          <svg class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.6 2.6 h6.4 v4.6 H7.9 l4.3 9.6 L18.2 2.6 H23.4 L13.4 21.4 h-2.6 Z" />
+          </svg>
+        </button>
+      </div>
+      <div style="
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 8px;
+          ">
+        <button title="لاگ‌های هسته" onclick="toggleBottomPanel('core')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M141.255 228H34.745C15.586 228 0 212.414 0 193.255V86.745C0 67.586 15.586 52 34.745 52h106.51C160.414 52 176 67.586 176 86.745v106.51C176 212.414 160.414 228 141.255 228M34.745 84A2.75 2.75 0 0 0 32 86.745v106.51A2.75 2.75 0 0 0 34.745 196h106.51a2.75 2.75 0 0 0 2.745-2.745V86.745A2.75 2.75 0 0 0 141.255 84zM141.255 460H34.745C15.586 460 0 444.414 0 425.255v-106.51C0 299.586 15.586 284 34.745 284h106.51C160.414 284 176 299.586 176 318.745v106.51C176 444.414 160.414 460 141.255 460M34.745 316A2.75 2.75 0 0 0 32 318.745v106.51A2.75 2.75 0 0 0 34.745 428h106.51a2.75 2.75 0 0 0 2.745-2.745v-106.51a2.75 2.75 0 0 0-2.745-2.745zM496 132H240c-8.836 0-16-7.164-16-16s7.164-16 16-16h256c8.836 0 16 7.164 16 16s-7.164 16-16 16M408 192H240c-8.836 0-16-7.164-16-16s7.164-16 16-16h168c8.836 0 16 7.164 16 16s-7.164 16-16 16M496 360H240c-8.836 0-16-7.164-16-16s7.164-16 16-16h256c8.836 0 16 7.164 16 16s-7.164 16-16 16M408 424H240c-8.836 0-16-7.164-16-16s7.164-16 16-16h168c8.836 0 16 7.164 16 16s-7.164 16-16 16"
+              fill="currentColor"></path>
+          </svg>
+        </button>
+        <button title="مانیتورینگ مصرف" onclick="toggleBottomPanel('monitor')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 500 500" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M314.652 139.195c4.764 4.813 11.375 7.796 18.683 7.796 18.803 0 31.218-19.042 24.431-36.02a.91.91 0 0 1 .283-1.066l60.598-48.04a.91.91 0 0 1 1.103-.032c17.13 12.003 41.332-.118 41.332-21.565 0-14.521-11.771-26.291-26.291-26.291-18.802 0-31.218 19.04-24.431 36.02a.91.91 0 0 1-.283 1.066l-60.598 48.04a.91.91 0 0 1-1.103.032c-17.132-12.003-41.331.119-41.331 21.565 0 1.76.174 3.479.504 5.143a.91.91 0 0 1-.472.995l-55.424 29.459a.914.914 0 0 1-1.09-.166c-4.765-4.813-11.375-7.796-18.684-7.796-14.521 0-26.291 11.771-26.291 26.291 0 14.521 11.771 26.291 26.291 26.291 16.69 0 29.004-15.292 25.788-31.433a.91.91 0 0 1 .471-.996l55.424-29.459a.91.91 0 0 1 1.09.166m-17.457 201.987 29.922 29.922a.926.926 0 0 0 1.306 0l1.817-1.817c5.682-5.682 14.98-5.682 20.662 0l66.39 66.389c5.682 5.682 5.682 14.98 0 20.662l-25.424 25.424c-5.682 5.682-14.98 5.682-20.662 0l-66.389-66.39c-5.682-5.682-5.682-14.98 0-20.662l1.817-1.817a.926.926 0 0 0 0-1.306l-29.924-29.924a.92.92 0 0 0-1.243-.054c-65.437 54.495-162.823 51.057-224.215-10.335-65.046-65.046-65.046-170.506 0-235.551 66.284-66.285 174.131-64.853 238.695 3.246.206.216.287.49.24.785s-.214.529-.478.669l-35.867 19.064a.91.91 0 0 1-1.047-.128c-49.483-44.11-125.402-42.434-172.872 5.036-49.211 49.211-49.211 128.997 0 178.209 54.333 54.333 144.033 47.733 190.021-13.624a.9.9 0 0 1 .738-.372h45.529c.332 0 .616.16.789.443.172.283.184.61.032.904a165.8 165.8 0 0 1-19.893 29.984.92.92 0 0 0 .056 1.243m-128.212-46.391a6.908 6.908 0 0 1 0-13.816h33.593a.925.925 0 0 0 .923-.923v-43.995c0-8.597 7.012-15.608 15.608-15.608h25.542c8.597 0 15.609 7.013 15.609 15.608v43.995c0 .509.415.923.923.923h42.851a.925.925 0 0 0 .923-.923v-95.136c0-8.597 7.012-15.609 15.609-15.609h25.542c8.597 0 15.608 7.012 15.608 15.609v95.136c0 .509.415.923.923.923h42.851a.925.925 0 0 0 .923-.923v-172.38c0-8.597 7.012-15.608 15.609-15.608h25.541c8.597 0 15.608 7.011 15.608 15.608v172.38c0 .509.415.923.923.923h26.529a6.908 6.908 0 0 1 0 13.816z"
+              clip-rule="evenodd" fill="currentColor"></path>
+          </svg>
+        </button>
+        <button title="ترمینال اسکنر" onclick="toggleBottomPanel('terminal')">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M20 3.5H4A2.503 2.503 0 0 0 1.5 6v12A2.503 2.503 0 0 0 4 20.5h16a2.503 2.503 0 0 0 2.5-2.5V6A2.503 2.503 0 0 0 20 3.5M21.5 18a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V6A1.5 1.5 0 0 1 4 4.5h16A1.5 1.5 0 0 1 21.5 6zm-11.146-6.354a.5.5 0 0 1 0 .707l-4 4a.5.5 0 0 1-.707-.707L9.293 12 5.646 8.354a.5.5 0 0 1 .707-.707zM18.5 16a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1 0-1h6a.5.5 0 0 1 .5.5"
+              fill="currentColor"></path>
+          </svg>
+        </button>
+        <!-- Added in 1.2.2, AFTER every older button on purpose: activity-rail.js keys a button
+             by its position, so anything inserted earlier would shift every saved placement. -->
+        <button title="کانفیگ ایران — بدون سرور" onclick="toggleLeftSidebar('iran')" data-rail-key="rail-modules#iran">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 21.5 21.5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.782 4.736c-2.172-1.708-4.248-1.705-6.36-.141-2.174 1.608-6.072.34-6.518-2.256-.202-1.181-.531-1.036-1.196-.537-.933.701-1.798.988-2.613-.15-.224-.31-.472-.256-.778-.034-.295.218-.37.427-.284.771C.407 3.899.62 5.485 1.877 6.6c.31.272.466.64.255.893-1.367 1.65.025 2.41 1.048 3.227.579.46.972.84 1.054 1.683.05.508.223 1.724 1.038 1.555 1.742-.364 2.017.871 2.751 1.876.984 1.351 2.489 2.471 4.113 2.386 1.329-.066 2.246-.939 3.266.938.546 1.011 2.75.57 4.194.867.934.191.398-1.01.926-1.305.088-.051.171-.115.253-.174.402-.287.763-1.446.693-1.911-.064-.415-.307-.552-.61-.773-.93-.668-2.031-1.346-.711-2.661.259-.259.379-.816-.034-.912-1.441-.326-.783-1.525-1.035-2.321-.365-1.154.618-2.102.661-3.535.264-1.233-1.24-1.133-1.957-1.697"></path>
+          </svg>
+        </button>
+        <button title="دامین فرانتینگ — بدون سرور" onclick="toggleLeftSidebar('fronting')" data-rail-key="rail-modules#fronting">
+          <svg style="width: 24px; height: 24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 8.5h14M14.5 4.5l4 4-4 4M20 15.5H6M9.5 11.5l-4 4 4 4"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <footer class="status-bar" style="height: 28px">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1">
+      <!-- Notifications Bell -->
+      <button id="btn-notifications" title="تنظیمات نوتیفیکیشن" onclick="toggleNotificationMenu()" style="
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            margin-right: 12px;
+          "
+        onmouseover="this.style.background = 'var(--mv-fill-2)'; this.querySelector('i').style.color = 'var(--mv-label)';"
+        onmouseout="this.style.background = 'transparent'; this.querySelector('i').style.color = 'var(--ide-text-dim, #9AA0A6)';">
+        <i class="ph-bold ph-bell-ringing"
+          style="font-size: 15px; color: var(--ide-text-dim, #9AA0A6); transition: color 0.2s;"></i>
+        <div id="notif-indicator"
+          style="position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; background: var(--mv-green); border-radius: 50%; box-shadow: 0 0 4px var(--mv-green); display: none;">
+        </div>
+      </button>
+
+      <!-- Panel Status Lights -->
+      <div id="panel-status-lights" style="display: flex; gap: 8px; align-items: center; margin-right: 4px;">
+        <div id="light-bpb" data-tooltip="شما هیچ اکانت کلادفلری متصل نکرده اید"
+          style="width: 10px; height: 10px; border-radius: 50%; background: var(--mv-fill-3); transition: background 0.3s; cursor: help; box-shadow: 0 0 2px rgba(0,0,0,0.5);">
+        </div>
+        <div id="light-edge" data-tooltip="شما هیچ اکانت کلادفلری متصل نکرده اید"
+          style="width: 10px; height: 10px; border-radius: 50%; background: var(--mv-fill-3); transition: background 0.3s; cursor: help; box-shadow: 0 0 2px rgba(0,0,0,0.5);">
+        </div>
+        <div id="light-zeus" data-tooltip="شما هیچ اکانت کلادفلری متصل نکرده اید"
+          style="width: 10px; height: 10px; border-radius: 50%; background: var(--mv-fill-3); transition: background 0.3s; cursor: help; box-shadow: 0 0 2px rgba(0,0,0,0.5);">
+        </div>
+      </div>
+
+      <div id="footer-progress-container" style="
+            display: none;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            max-width: 500px;
+            margin-right: 16px;
+          ">
+        <button title="توقف اسکن" onclick="stopScan()" style="
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: var(--ide-text-dim);
+              padding: 2px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+              transition: color 0.2s;
+            " onmouseover="this.style.color = 'var(--ide-text-main)'"
+          onmouseout="this.style.color = 'var(--ide-text-dim)'">
+          <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </button>
+        <div style="
+              flex: 1;
+              height: 4px;
+              background: var(--mv-fill-2);
+              border-radius: 2px;
+              overflow: hidden;
+              position: relative;
+            ">
+          <div id="footer-progress-bar" style="
+                height: 100%;
+                width: 0%;
+                background: var(--mv-accent);
+                border-radius: 2px;
+                transition: width 0.2s;
+              "></div>
+        </div>
+        <span id="footer-progress-text" style="
+              color: var(--mv-label-2);
+              font-family: inherit;
+              font-size: 11px;
+              white-space: nowrap;
+            ">در حال اسکن کردن ...</span>
+      </div>
+      <div id="combo-footer-progress-container" style="
+            display: none;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            max-width: 500px;
+            margin-right: 16px;
+          ">
+        <button title="توقف تست"
+          onclick="window.isComboTestingAborted = true; document.getElementById('combo-footer-progress-container').style.display='none';"
+          style="
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: var(--ide-text-dim);
+              padding: 2px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+              transition: color 0.2s;
+            " onmouseover="this.style.color = 'var(--ide-text-main)'"
+          onmouseout="this.style.color = 'var(--ide-text-dim)'">
+          <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </button>
+        <div style="
+              flex: 1;
+              height: 4px;
+              background: var(--mv-fill-2);
+              border-radius: 2px;
+              overflow: hidden;
+              position: relative;
+            ">
+          <div id="combo-footer-progress-bar" style="
+                height: 100%;
+                width: 0%;
+                background: var(--syn-blue);
+                border-radius: 2px;
+                transition: width 0.2s;
+              "></div>
+        </div>
+        <span id="combo-footer-progress-text" style="
+              color: var(--ide-text-muted);
+              font-family:
+                &quot;Vazirmatn&quot;, &quot;IRANSans&quot;, Tahoma, sans-serif;
+              font-size: 11px;
+              white-space: nowrap;
+            ">در حال تست ... 0 / 0</span>
+      </div>
+      <div id="v2ray-footer-progress-container" style="
+            display: none;
+            align-items: center;
+            gap: 12px;
+            width: 250px;
+            max-width: 250px;
+            margin-right: 16px;
+          ">
+        <div style="
+              flex: 1;
+              height: 4px;
+              background: var(--mv-fill-2);
+              border-radius: 2px;
+              overflow: hidden;
+              position: relative;
+            ">
+          <div id="v2ray-footer-progress-bar" style="
+                height: 100%;
+                width: 0%;
+                background: var(--syn-blue);
+                border-radius: 2px;
+                transition: width 0.2s;
+              "></div>
+        </div>
+        <span id="v2ray-footer-progress-text" style="
+              color: var(--ide-text-muted);
+              font-family:
+                &quot;Vazirmatn&quot;, &quot;IRANSans&quot;, Tahoma, sans-serif;
+              font-size: 11px;
+              white-space: nowrap;
+            ">در حال تست ... 0 / 0</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px">
+
+
+
+      <!-- Live Speed Placeholder -->
+      <div id="live-speed-module-container"></div>
+      <a href="https://t.me/mlmvpn" target="_blank" dir="ltr">
+        <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.07.07 0 0 0-.07-.19c-.08-.05-.19-.02-.27 0-.11.03-1.84 1.18-5.21 3.45-.49.34-.94.5-1.35.49-.45-.01-1.32-.26-1.96-.46-.79-.26-1.42-.4-1.36-.84.03-.23.35-.47.97-.73 3.8-1.65 6.34-2.75 7.61-3.28 3.61-1.51 4.36-1.77 4.85-1.78.11 0 .35.03.48.14.11.09.14.22.15.34-.01.07-.01.16-.02.26z" />
+        </svg>
+        mlmvpn
+      </a>
+      <a href="https://youtube.com/@marketmlm" target="_blank" dir="ltr">
+        <svg style="width: 14px; height: 14px" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M21.58 7.19c-.23-.86-.91-1.54-1.77-1.77C18.25 5 12 5 12 5s-6.25 0-7.81.42c-.86.23-1.54.91-1.77 1.77C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.91 1.54 1.77 1.77C5.75 19 12 19 12 19s6.25 0 7.81-.42c.86-.23 1.54-.91 1.77-1.77C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
+        </svg>
+        marketmlm
+      </a>
+    </div>
+  </footer>
+  <!-- Toast -->
+  <div class="toast-container">
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="app.js?v=1781010218584"></script>
+
+  <!-- Guide Module Placeholder -->
+  <div id="guide-module-container"></div>
+
+  <!-- About Module Placeholder -->
+  <div id="about-module-container"></div>
+
+  <!-- «انتخاب اپراتور» حذف شد: selectOperator تعریف نشده بود و showModal('operator-modal') هیچ‌جا صدا زده نمی‌شد. -->
+
+  <script>
+    function showModal(id) {
+      // Removed auto-collapse of maximized sidebar upon user request
+      document.getElementById(id).style.display = "flex";
+    }
+    function hideModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+    // The scan page's inset sidebar (components/scan.js). .mv-side is display:flex, so the
+    // same two values still work — and the menu bar, the rail and shell/apps.js read exactly
+    // this element's style.display to keep their checkmarks in step.
+    function toggleSidebar() {
+      const sb = document.getElementById("scan-sidebar");
+      if (!sb) return;
+      sb.style.display = sb.style.display === "none" ? "flex" : "none";
+    }
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // The appearance is already on <html> (ui/appearance-boot.js); nothing to apply here.
+      if (typeof ensureTab === "function") ensureTab();
+      if (typeof renderActiveTab === "function") renderActiveTab();
+    });
+  </script>
+
+  <!-- «جزئیات نقطه اتصال» حذف شد: closeEndpointDrawer هرگز تعریف نشده بود و هیچ‌چیز بازش نمی‌کرد. -->
+
+  <!-- ======================================================= -->
+  <!-- Settings Module Placeholder -->
+  <div id="settings-module-container"></div>
+
+  <!-- Subdomain Fix Modal -->
+  <div id="subdomain-fix-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    style="font-family: 'Vazirmatn', -apple-system, Roboto, sans-serif;">
+    <div class="absolute inset-0 bg-mv-scrim backdrop-blur-sm transition-opacity" onclick="hideSubdomainFixModal()">
+    </div>
+    <div
+      class="w-full max-w-[500px] max-h-[90vh] bg-gs-panel rounded-[24px] overflow-hidden flex flex-col relative z-10 shadow-2xl border border-gs-border animate-modal text-gs-muted text-right"
+      dir="rtl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gs-border bg-gs-panel">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-gs-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h2 class="text-base font-medium text-gs-muted">ساب‌دامین شما نیاز به تغییر دارد!</h2>
+        </div>
+        <button class="p-2 text-gs-muted hover:text-gs-muted hover:bg-gs-panel rounded-full transition-colors"
+          onclick="hideSubdomainFixModal()">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4 bg-gs-panel overflow-y-auto custom-scrollbar">
+        <p class="text-sm text-gs-muted leading-relaxed">
+          به نظر می‌رسد ساب‌دامین شما (<span id="current-contaminated-subdomain"
+            class="font-mono text-gs-muted font-bold px-1 py-0.5 rounded bg-gs-panel/10">--</span>) حاوی کلماتی است
+          که ممکن است باعث اختلال در اتصال شود. <b>این فقط یک توصیه است</b> و در صورت تمایل می‌توانید یک نام جدید و
+          کاملاً خنثی انتخاب کنید. اگر مایل به تغییر نیستید، کافیست روی «انصراف» کلیک کنید.
+        </p>
+        <div class="bg-gs-panel border border-gs-border rounded-xl p-4">
+          <h4 class="text-xs font-bold text-gs-muted mb-2">⛔ کلمات ممنوعه:</h4>
+          <div class="flex flex-wrap gap-2 text-xs font-mono mb-3 text-gs-muted">
+            <span class="px-2 py-1 bg-gs-panel/10 rounded">bpb</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded">vpn</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded">panel</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded">proxy</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded">vless</span>
+          </div>
+          <h4 class="text-xs font-bold text-gs-muted mb-2">✅ نام‌های پیشنهادی خنثی:</h4>
+          <div class="flex flex-wrap gap-2 text-xs font-mono text-gs-muted mb-3">
+            <span class="px-2 py-1 bg-gs-panel/10 rounded cursor-pointer hover:bg-gs-panel/20"
+              onclick="document.getElementById('new-subdomain-input').value=this.innerText">edge-node-7b21</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded cursor-pointer hover:bg-gs-panel/20"
+              onclick="document.getElementById('new-subdomain-input').value=this.innerText">platform-c16c82</span>
+            <span class="px-2 py-1 bg-gs-panel/10 rounded cursor-pointer hover:bg-gs-panel/20"
+              onclick="document.getElementById('new-subdomain-input').value=this.innerText">cdn-edge-a3f2</span>
+          </div>
+          <p class="text-[11px] text-gs-muted">شما فقط یک بار اجازه تغییر ساب‌دامین را در حساب کلودفلر دارید.</p>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gs-muted mb-2">نام ساب‌دامین جدید (انگلیسی و بدون
+            فاصله):</label>
+          <input type="text" id="new-subdomain-input"
+            class="w-full bg-gs-panel border border-gs-border rounded-xl px-4 py-3 text-sm text-gs-muted font-mono focus:outline-none focus:border-gs-border transition-colors"
+            placeholder="مثال: my-cloud-node-22" dir="ltr"
+            oninput="document.getElementById('subdomain-error').classList.add('hidden')" />
+          <p id="subdomain-error" class="hidden text-[11px] text-gs-muted mt-2 font-bold"></p>
+        </div>
+
+        <!-- Workers Management Section -->
+        <div id="workers-management-section"
+          class="hidden flex-col gap-2 bg-gs-panel border border-gs-border rounded-xl p-4">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-gs-muted">لیست ورکرهای فعلی شما</h4>
+            <button onclick="deleteAllWorkers()"
+              class="px-3 py-1 bg-gs-panel/10 text-gs-muted text-xs rounded hover:bg-gs-panel/20 transition-colors border border-gs-border/20 flex items-center gap-1">
+              <i class="ph-bold ph-trash"></i> حذف همه
+            </button>
+          </div>
+          <p class="text-[11px] text-gs-muted mb-2">شما می‌توانید در صورت تمایل ورکرهای قدیمی خود را حذف کنید.</p>
+          <div id="workers-list-container"
+            class="flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-2 bg-gs-panel border border-gs-border p-2 rounded-lg"
+            style="max-height: 180px;">
+            <!-- Dynamically populated -->
+            <div class="text-[11px] text-gs-muted text-center py-2">در حال بررسی ورکرها...</div>
+          </div>
+        </div>
+
+        <!-- Manual Change Section -->
+        <div id="manual-change-section"
+          class="hidden flex-col gap-3 bg-gs-panel/10 border border-gs-border/30 rounded-xl p-5">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gs-panel/20 flex items-center justify-center text-gs-muted shrink-0">
+              <i class="ph-bold ph-info"></i>
+            </div>
+            <h4 class="text-sm font-bold text-gs-muted">تغییر نام در پنل Cloudflare</h4>
+          </div>
+          <p class="text-xs text-gs-muted leading-relaxed mt-1">
+            کلودفلر محدودیت امنیتی روی اکانت شما قرار داده و اجازه تغییر نام از طریق نرم‌افزار را نمی‌دهد. <b>این یک
+              روال کاملاً عادی است.</b>
+          </p>
+
+          <div class="bg-gs-panel border border-gs-border rounded-lg p-3 text-[11px] text-gs-muted space-y-2 mt-1">
+            <p>مراحل انجام کار:</p>
+            <ol class="list-decimal list-inside space-y-1 text-gs-muted pr-2">
+              <li>روی دکمه آبی رنگ زیر کلیک کنید تا پنل باز شود.</li>
+              <li>در صفحه باز شده، روی <b>Change Subdomain</b> کلیک کنید.</li>
+              <li>یک نام دلخواه ثبت کنید.</li>
+              <li>به این نرم‌افزار برگردید و <b>ادامه استقرار</b> را بزنید.</li>
+            </ol>
+          </div>
+
+          <div class="flex gap-2 mt-2">
+            <a href="https://dash.cloudflare.com/?to=/:account/workers/overview" target="_blank"
+              class="flex-1 text-center py-2.5 bg-gs-panel hover:bg-gs-panel-hover text-mv-label rounded-xl text-xs font-bold transition-colors flex justify-center items-center gap-2">
+              <i class="ph-bold ph-arrow-square-out"></i>
+              باز کردن پنل کلودفلر
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="p-4 border-t border-gs-border bg-gs-panel flex justify-end gap-3 flex-wrap">
+        <button onclick="hideSubdomainFixModal()"
+          class="px-4 py-2 text-sm font-medium text-gs-muted hover:text-gs-muted hover:bg-gs-panel rounded-xl transition-colors">
+          انصراف
+        </button>
+        <button onclick="hideSubdomainFixModal(); deployCloudflare(true)"
+          class="px-4 py-2 text-sm font-medium text-gs-muted hover:text-gs-muted hover:bg-gs-panel rounded-xl transition-colors">
+          ادامه با همین نام (نادیده گرفتن)
+        </button>
+        <button id="btn-save-subdomain" onclick="saveNewSubdomainAndDeploy()"
+          class="px-6 py-2 bg-gs-panel hover:bg-mv-fill-2 text-gs-muted rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+          ذخیره و ادامه استقرار
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Combination Center Modal -->
+  <!-- Combination Center Placeholder -->
+  <div id="combo-module-container"></div>
+
+  <!-- Archive Module Placeholder -->
+  <div id="archive-module-container"></div>
+
+
+
+
+
+  <script src="persistent-storage.js"></script>
+  <!-- Design-system runtime: appearance, prefs, applyTheme(), toast() banners. Before the
+       panels, so everything they call at init already has its new behaviour. -->
+  <script src="ui/mv.js"></script>
+  <script>
+    // One broken component must not stop the others from initialising. Before this guard, a
+    // throw here left the user staring at an unexplained blank page.
+    window.__initErrors = [];
+    function safeInit(name) {
+      var ok = true, why = null;
+      try {
+        if (typeof window[name] === "function") window[name]();
+        else {
+          // Previously silent. A missing init means the module's script never ran, which
+          // is exactly the failure the startup check is there to surface.
+          ok = false;
+          why = "اسکریپت بارگذاری نشد";
+        }
+      } catch (err) {
+        ok = false;
+        why = String(err && err.message || err);
+        window.__initErrors.push({ name: name, error: String(err && err.stack || err) });
+        console.error("[init] " + name + " failed:", err);
+      }
+      // Feeds the phase-1 rows of the startup check with the real outcome of the real call.
+      if (window.__scMark) window.__scMark(name, ok, why);
+    }
+  </script>
+  <!-- Loaded before every panel: they call uiConfirm/uiAlert at click time, and a
+       native confirm() box in the middle of this UI looks like a different program. -->
+  <script src="components/ui-modal.js"></script>
+  <script src="components/dnsclean.js"></script>
+  <script src="components/netdiag.js"></script>
+  <script src="components/changelog.js"></script>
+  <script src="components/qrcode.min.js"></script>
+  <script src="components/archive.js"></script>
+  <script>safeInit("initArchiveModule");</script>
+  <script src="components/combo.js"></script>
+  <script>safeInit("initComboModule");</script>
+  <script src="components/v2ray.js?v=202606230910"></script>
+  <script src="components/free-configs.js"></script>
+  <script src="components/quick.js"></script>
+  <script>safeInit("initQuickModule");</script>
+  <script>safeInit("initV2rayModule");</script>
+  <!-- The builder first: the SNI window picks its configs out with isSniUri. -->
+  <script src="components/sni-builder.js"></script>
+  <script src="components/engine-live.js"></script>
+  <script src="components/fronts.js"></script>
+  <script src="components/store.js"></script>
+  <script>safeInit("initFrontModules");</script>
+  <script src="components/gateway.js"></script>
+  <script>safeInit("initGatewayModule");</script>
+  <script src="components/sni.js"></script>
+  <script>safeInit("initSniModule");</script>
+  <script src="components/cloud.js?v=1782083082302"></script>
+  <script>safeInit("initCloudModule");</script>
+  <script src="components/sanction.js"></script>
+  <script src="components/dedidns.js"></script>
+  <script src="components/iran-profiles.js"></script>
+  <script src="components/iran-configs.js"></script>
+  <script src="components/fronting.js"></script>
+  <script>safeInit("initSanctionModule");</script>
+  <script>safeInit("initDediDnsModule");</script>
+  <script src="components/gst-relay-card.js"></script>
+  <script src="components/gst-health.js"></script>
+  <script src="components/gst-network.js"></script>
+  <script src="components/gst-wizard.js"></script>
+  <script src="components/gst-backup.js"></script>
+  <script src="components/openvpn.js"></script>
+  <script src="components/gst.js"></script>
+  <script>safeInit("initOpenVpnModule");</script>
+  <script>safeInit("initGstModule");</script>
+  <script src="components/vodi.js"></script>
+  <script>safeInit("initVodiModule");</script>
+  <script src="components/route-sheet.js"></script>
+  <script src="components/github-tunnel.js"></script>
+  <script>safeInit("initGithubTunnelModule");</script>
+  <script src="components/aether.js"></script>
+  <script>safeInit("initAetherModule");</script>
+  <script src="components/game.js"></script>
+  <script>safeInit("initGameModule");</script>
+  <script src="components/guide.js"></script>
+  <script>safeInit("initGuideModule");</script>
+  <script src="components/about.js"></script>
+  <script>safeInit("initAboutModule");</script>
+  <script src="components/settings.js"></script>
+  <script src="components/android-settings.js"></script>
+  <script>safeInit("initSettingsModule");</script>
+  <script src="components/header-traffic.js"></script>
+  <script>safeInit("initHeaderTrafficModule");</script>
+  <script src="components/monitor.js?v=202606230946"></script>
+  <script>safeInit("initMonitorModule");</script>
+  <script src="components/live-speed.js"></script>
+  <script>safeInit("initLiveSpeedModule");</script>
+  <script src="components/speed-test.js"></script>
+  <script>safeInit("initSpeedTestModule");</script>
+  <script src="components/brand-title.js"></script>
+  <script src="components/tab-dnd.js"></script>
+  <script src="components/activity-rail.js"></script>
+  <!-- صفحهٔ اسکن. قبل از history.js می‌آید چون #history-list داخل همین صفحه ساخته می‌شود. -->
+  <script src="components/scan.js"></script>
+  <script>safeInit("initScanModule");</script>
+  <!-- دستیار: بعد از scan.js و combo.js بارگذاری می‌شود چون همان انبارها را می‌خواند. -->
+  <script src="components/assistant.js"></script>
+  <script>safeInit("initAssistantModule");</script>
+  <script src="components/history.js"></script>
+  <script>safeInit("initHistoryModule");</script>
+  <!-- scanner-sidebar.js دیگر نوار کناری نمی‌سازد؛ سوکت زندهٔ کل برنامه (connectWS) در آن است. -->
+  <script src="components/scanner-sidebar.js"></script>
+  <script>
+    // Report init failures once, quietly. The app stays usable; this just makes a broken panel
+    // visible instead of silently missing.
+    if (window.__initErrors && window.__initErrors.length) {
+      const names = window.__initErrors.map(e => e.name).join('، ');
+      const show = () => {
+        if (typeof toast === 'function') toast('⚠️ بخشی از برنامه بالا نیامد: ' + names);
+        else console.error('[init] failed modules:', window.__initErrors);
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+      else show();
+    }
+  </script>
+
+  <script>
+    window.showUndeployedModal = function (accountId, btnElement) {
+      const modal = document.getElementById('undeployed-modal');
+      if (!modal) return;
+
+      const deployBtn = document.getElementById('undeployed-modal-deploy-btn');
+      if (deployBtn) {
+        deployBtn.onclick = function () {
+          hideUndeployedModal();
+          if (window._activeCloudAccount && window.deployCloudflare) {
+            window.deployCloudflare(false, btnElement);
+          }
+        };
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        const transformEl = modal.querySelector('.transform');
+        if (transformEl) transformEl.classList.remove('scale-95');
+      }, 10);
+    };
+
+    window.hideUndeployedModal = function () {
+      const modal = document.getElementById('undeployed-modal');
+      if (!modal) return;
+
+      modal.classList.add('opacity-0');
+      const transformEl = modal.querySelector('.transform');
+      if (transformEl) transformEl.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    };
+  </script>
+
+  <!-- ============================================== -->
+  <!-- Edge Users Modal -->
+  <!-- ============================================== -->
+  <!-- ============================================== -->
+
+  <!-- Zeus Users Modal -->
+  <!-- ============================================== -->
+  <div id="zeus-users-modal"
+    class="fixed inset-0 bg-m3-surface/80 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
+    <div
+      class="bg-m3-surface border border-m3-outline rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in-up relative">
+      <div class="p-6 border-b border-m3-outline flex items-center justify-between bg-m3-surface2">
+        <div class="flex items-center gap-3">
+          <h2 class="text-xl font-bold text-m3-onSurface">مدیریت کاربران (Zeus)</h2>
+          <button onclick="loadZeusUsers(window._zeusActiveAcc)"
+            class="px-3 py-1 rounded-lg bg-m3-primary/10 text-m3-primary hover:bg-m3-primary/20 text-xs font-bold transition-colors flex items-center gap-1">
+            <i class="ph-bold ph-arrows-clockwise"></i> بروزرسانی حجم
+          </button>
+        </div>
+        <button onclick="hideZeusUsersModal()" class="text-m3-onSurfaceVariant hover:text-m3-primary transition-colors">
+          <i class="ph-bold ph-x text-2xl"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1 flex flex-col md:flex-row gap-6 relative" id="zeus-users-container">
+        <div id="zeus-users-loading"
+          class="absolute inset-0 bg-m3-surface/50 backdrop-blur-[2px] z-10 flex items-center justify-center hidden">
+          <i class="ph-bold ph-spinner animate-spin text-4xl text-m3-primary"></i>
+        </div>
+
+        <div class="w-full md:w-1/3 bg-m3-surface2 rounded-xl border border-m3-outline p-4 h-fit">
+          <h3 class="font-bold text-m3-onSurface mb-4 text-sm" id="zeus-form-title">کاربر جدید</h3>
+          <form id="zeus-add-user-form" onsubmit="handleZeusAddUser(event)" class="space-y-3">
+            <input type="hidden" id="zeus-edit-mode" value="">
+            <div>
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">نام کاربری</label>
+              <input type="text" id="zeus-user-name" required dir="ltr"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+                placeholder="user1">
+            </div>
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">حجم (GB)</label>
+                <input type="number" step="0.1" id="zeus-user-limit" dir="ltr"
+                  class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+                  placeholder="نامحدود">
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">اعتبار (روز)</label>
+                <input type="number" id="zeus-user-expiry" dir="ltr"
+                  class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+                  placeholder="نامحدود">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">Fingerprint</label>
+              <select id="zeus-user-fp"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none">
+                <option value="chrome">Chrome</option>
+                <option value="firefox">Firefox</option>
+                <option value="safari">Safari</option>
+                <option value="ios">iOS</option>
+                <option value="android">Android</option>
+                <option value="edge">Edge</option>
+                <option value="random">Random</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">آی‌پی تمیز</label>
+              <input type="text" id="zeus-user-ips" dir="ltr"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+                placeholder="آی‌پی یا دامنه (اختیاری)">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">پورت‌ها (کامای لاتین)</label>
+              <input type="text" id="zeus-user-port" required dir="ltr" value="443"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+                placeholder="443, 80">
+            </div>
+
+            <div class="pt-2 flex gap-2">
+              <button type="button" onclick="resetZeusForm()"
+                class="flex-1 px-4 py-2 bg-m3-surface border border-m3-outline hover:bg-m3-surface3 text-m3-onSurface rounded-lg text-xs font-bold transition-colors">لغو</button>
+              <button type="submit" id="zeus-submit-btn"
+                class="flex-[2] px-4 py-2 bg-m3-primary text-m3-onPrimary rounded-lg text-xs font-bold transition-colors hover:shadow-lg">ثبت
+                کاربر</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="w-full md:w-2/3 bg-m3-surface rounded-xl border border-m3-outline overflow-hidden flex flex-col">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-right text-m3-onSurfaceVariant">
+              <thead class="text-xs text-m3-onSurface uppercase bg-m3-surface2 border-b border-m3-outline">
+                <tr>
+                  <th scope="col" class="px-4 py-3">نام / وضعیت</th>
+                  <th scope="col" class="px-4 py-3 text-center">مصرف</th>
+                  <th scope="col" class="px-4 py-3 text-center">اعتبار</th>
+                  <th scope="col" class="px-4 py-3 text-center">عملیات</th>
+                </tr>
+              </thead>
+              <tbody id="zeus-users-tbody">
+              </tbody>
+            </table>
+          </div>
+          <div id="zeus-users-empty" class="hidden text-center py-10 text-m3-onSurfaceVariant text-sm">
+            هیچ کاربری در زئوس ثبت نشده است.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- Zeus Settings Modal -->
+  <!-- ============================================== -->
+  <div id="zeus-settings-modal"
+    class="fixed inset-0 bg-m3-surface/80 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
+    <div
+      class="bg-m3-surface border border-m3-outline rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden animate-fade-in-up relative">
+      <div class="p-5 border-b border-m3-outline flex items-center justify-between bg-m3-surface2">
+        <h2 class="text-lg font-bold text-m3-onSurface">تنظیمات زئوس</h2>
+        <button onclick="hideZeusSettingsModal()"
+          class="text-m3-onSurfaceVariant hover:text-m3-primary transition-colors">
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6 relative">
+        <div id="zeus-settings-loading"
+          class="absolute inset-0 bg-m3-surface/50 backdrop-blur-[2px] z-10 flex items-center justify-center hidden">
+          <i class="ph-bold ph-spinner animate-spin text-3xl text-m3-primary"></i>
+        </div>
+        <form id="zeus-settings-form" onsubmit="handleZeusSettings(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">Proxy IP (دور زدن کلودفلر)</label>
+            <input type="text" id="zeus-set-proxy" required dir="ltr"
+              class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+              placeholder="proxyip.cmliussss.net">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">لوکیشن IATA (اختیاری)</label>
+            <input type="text" id="zeus-set-iata" dir="ltr"
+              class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors"
+              placeholder="FRA, LHR, ...">
+          </div>
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">Fragment Length</label>
+              <input type="text" id="zeus-set-fraglen" dir="ltr" value="20-30"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors">
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs font-medium text-m3-onSurfaceVariant mb-1">Fragment Interval</label>
+              <input type="text" id="zeus-set-fragint" dir="ltr" value="1-2"
+                class="w-full px-3 py-2 bg-m3-surface border border-m3-outline rounded-lg text-sm text-m3-onSurface focus:border-m3-primary focus:outline-none transition-colors">
+            </div>
+          </div>
+          <div class="pt-4 flex">
+            <button type="submit"
+              class="w-full px-4 py-2.5 bg-m3-primary text-m3-onPrimary rounded-lg text-sm font-bold transition-colors hover:shadow-lg">ذخیره
+              تنظیمات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- macOS-style shell: desktop, dock, menu bar, windows. Last in <body> on purpose:
+       it adopts panels that the scripts above have already initialised. -->
+  <script src="shell/icons.js"></script>
+  <script src="shell/apps.js"></script>
+  <script src="shell/wm.js"></script>
+  <script src="shell/wallpaper.js"></script>
+  <script src="shell/widgets.js"></script>
+  <script src="shell/spotlight.js"></script>
+  <script src="shell/notify.js"></script>
+  <script src="shell/dock.js"></script>
+  <script src="shell/menubar.js"></script>
+  <script src="shell/desktop.js"></script>
+  <script src="shell/arrange.js"></script>
+  <script src="shell/boot.js"></script>
+</body>
+
+</html>

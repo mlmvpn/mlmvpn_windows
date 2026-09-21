@@ -1,0 +1,176 @@
+MLMVPN ATTRIBUTION LICENSE
+Version 1.0, September 2026
+
+Copyright (c) 2026 Ehsan (MLMVPN). All rights reserved.
+
+This software is SOURCE-AVAILABLE. You may read it, build it, change it and ship
+it — including commercially — provided you credit MLMVPN as required by Section 3.
+This is not an OSI-approved open-source licence, because Section 3 places a
+condition on distribution that OSI-approved licences do not.
+
+
+1. DEFINITIONS
+
+   "The Software" means the MLMVPN for Windows source code in this repository,
+   the documentation that accompanies it, and any part of either.
+
+   "You" means the person or organisation exercising the permissions below.
+
+   "Derivative Work" means anything you build that contains, is compiled from,
+   or is substantially based on any part of The Software.
+
+   "Distribute" means to make available to anyone other than yourself — by
+   publishing, selling, bundling, hosting as a service, or any other means.
+
+
+2. GRANT
+
+   Subject to Sections 3 to 6, you are granted a worldwide, royalty-free,
+   non-exclusive licence to:
+
+   (a) use The Software for any purpose, personal or commercial;
+   (b) study it and modify it;
+   (c) Distribute it and Distribute Derivative Works of it;
+   (d) charge money for doing so.
+
+   No patent rights are granted by this licence.
+
+
+3. ATTRIBUTION — THE CONDITION OF THIS LICENCE
+
+   If you Distribute The Software or any Derivative Work, you MUST credit
+   MLMVPN, in all three of the following places that apply to what you ship:
+
+   (a) IN THE PRODUCT ITSELF.
+       Somewhere a user can reach without reading source code — an About screen,
+       a credits page, a --version output, a startup banner — state:
+
+           Based on MLMVPN for Windows
+           https://github.com/mlmvpn/mlmvpn_windows
+
+       It must be legible, in a place a user would look, and not hidden behind
+       a debug flag or a developer-only mode.
+
+   (b) IN THE SOURCE.
+       Keep this LICENCE file intact and unmodified in your source tree, keep
+       every existing copyright notice in the files you carry over, and do not
+       remove attribution another party added under this section.
+
+   (c) WHEREVER YOU ANNOUNCE IT.
+       If you have a README, a store listing, a release page, a project website
+       or a download page, name MLMVPN there as the origin, with a link to
+       https://github.com/mlmvpn/mlmvpn_windows
+
+   You may add your own name and branding alongside MLMVPN's. You may not
+   replace it, and you may not present The Software or a Derivative Work as
+   entirely your own original work.
+
+
+4. WHAT YOU MAY NOT DO
+
+   (a) You may not remove, obscure, shrink into illegibility, or misstate the
+       attribution required by Section 3.
+
+   (b) You may not use the name "MLMVPN", the MLMVPN logo, or the names of its
+       authors to endorse or promote your product, or in a way that suggests
+       MLMVPN produced, reviewed, sponsored or supports it. Section 3 requires
+       you to state where the code came from; it does not let you imply a
+       relationship that does not exist.
+
+   (c) You may not sublicense The Software under terms that drop Section 3.
+       Anyone who receives it from you receives it under this licence.
+
+   (d) You may not use The Software to attack, surveil, deanonymise or degrade
+       the security of anyone. This software exists so that people can reach
+       an open internet; turning it against its users is outside this grant.
+
+
+5. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. THE AUTHORS SHALL NOT
+   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   In particular, and without limiting the above: this software routes network
+   traffic and changes operating-system network settings. Whether it is lawful
+   for you to run it, and what happens if you do, is entirely your own
+   responsibility.
+
+
+6. TERMINATION
+
+   If you breach Section 3 or Section 4, this licence ends automatically. It is
+   reinstated if you fix the breach within 30 days of becoming aware of it, the
+   first time. A second breach of the same section ends it permanently.
+
+
+7. THIRD-PARTY COMPONENTS
+
+   This licence covers only the code authored by MLMVPN. The engines this
+   application drives — Xray-core, sing-box, Tor, Psiphon, OpenVPN, Lantern,
+   Geph, WireGuard/AmneziaWG and others — are separate works by other authors,
+   under their own licences, and are NOT redistributed in this repository.
+   See docs/BUILD.md. Their licences govern their use, not this one.
+
+
+────────────────────────────────────────────────────────────────────────────────
+پروانهٔ انتساب MLMVPN — نسخهٔ ۱.۰
+(ترجمهٔ غیررسمی؛ در صورت اختلاف، متن انگلیسی بالا معتبر است)
+────────────────────────────────────────────────────────────────────────────────
+
+حق نشر © ۲۰۲۶ احسان (MLMVPN). همهٔ حقوق محفوظ است.
+
+این نرم‌افزار «سورس‌باز در دسترس» است: می‌توانید بخوانیدش، بسازیدش، تغییرش دهید و
+منتشرش کنید — حتی تجاری — به شرط آن‌که طبق بند ۳ نام MLMVPN را ذکر کنید.
+
+۲. اجازه‌ها
+   استفادهٔ شخصی و تجاری، مطالعه و تغییر، انتشار و انتشار آثار مشتق، و دریافت پول
+   بابت آن — همه آزاد است، مشروط به بندهای ۳ تا ۶.
+
+۳. انتساب — شرط اصلی این پروانه
+   اگر این نرم‌افزار یا اثری مشتق از آن را منتشر کنید، باید در هر سه جای زیر که
+   بر محصول شما صدق می‌کند، نام MLMVPN را بیاورید:
+
+   الف) داخل خود محصول — جایی که کاربر بدون خواندن سورس ببیند (صفحهٔ «درباره»،
+        صفحهٔ اعتبارها، خروجی نسخه، بنر شروع):
+
+            Based on MLMVPN for Windows
+            https://github.com/mlmvpn/mlmvpn_windows
+
+        باید خوانا باشد و پشت حالت اشکال‌زدایی پنهان نشده باشد.
+
+   ب) داخل سورس — این فایل پروانه را دست‌نخورده نگه دارید و اعلان‌های حق نشر
+      فایل‌هایی را که برمی‌دارید حذف نکنید.
+
+   ج) هرجا معرفی‌اش می‌کنید — README، صفحهٔ فروشگاه، صفحهٔ انتشار، وب‌سایت یا
+      صفحهٔ دانلود: MLMVPN را به‌عنوان منبع، همراه با لینک، نام ببرید.
+
+   نام و برند خودتان را می‌توانید کنار نام MLMVPN بگذارید؛ جایگزینش نکنید، و کار
+   را کاملاً از آنِ خود معرفی نکنید.
+
+۴. آنچه مجاز نیست
+   الف) حذف، پنهان‌کردن، ناخوانا کردن یا تحریف انتساب بند ۳.
+   ب) استفاده از نام یا نشان MLMVPN برای تأیید یا تبلیغ محصول شما، یا به‌گونه‌ای
+      که رابطه‌ای را القا کند که وجود ندارد.
+   ج) صدور مجوز فرعی با شرایطی که بند ۳ را حذف کند.
+   د) استفاده از این نرم‌افزار برای حمله، پایش، شناسایی هویت یا تضعیف امنیت کسی.
+      این برنامه برای رسیدن مردم به اینترنت آزاد ساخته شده است.
+
+۵. بدون هیچ ضمانت
+   این نرم‌افزار «همان‌طور که هست» عرضه می‌شود، بدون هیچ ضمانت صریح یا ضمنی.
+   به‌ویژه: این برنامه ترافیک شبکه را مسیریابی می‌کند و تنظیمات شبکهٔ سیستم‌عامل
+   را تغییر می‌دهد. قانونی بودن اجرای آن برای شما و پیامدهایش، کاملاً بر عهدهٔ
+   خود شماست.
+
+۶. پایان پروانه
+   نقض بند ۳ یا ۴ این پروانه را خودبه‌خود پایان می‌دهد. بار اول، اگر ظرف ۳۰ روز از
+   آگاه شدن رفعش کنید، بازمی‌گردد. نقض دوم همان بند، پایان دائمی است.
+
+۷. اجزای شخص ثالث
+   این پروانه فقط کدِ نوشتهٔ MLMVPN را پوشش می‌دهد. موتورهایی که این برنامه آن‌ها
+   را می‌راند — Xray-core، sing-box، Tor، Psiphon، OpenVPN، Lantern، Geph،
+   WireGuard/AmneziaWG و بقیه — آثار جداگانه‌ای از نویسندگان دیگرند، با پروانه‌های
+   خودشان، و در این مخزن بازنشر نشده‌اند. به docs/BUILD.md نگاه کنید.

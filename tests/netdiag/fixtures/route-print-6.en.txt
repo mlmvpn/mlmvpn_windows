@@ -1,0 +1,25 @@
+===========================================================================
+Interface List
+  4...02 00 5e 05 11 22 ......Intel(R) Ethernet Connection I217-LM
+ 28...02 00 5e 13 11 22 ......Microsoft Wi-Fi Direct Virtual Adapter #5
+ 26...02 00 5e 02 11 22 ......Microsoft Wi-Fi Direct Virtual Adapter #6
+ 23...02 00 5e 03 11 22 ......TAP-Windows Adapter V9
+ 34...02 00 5e 01 11 22 ......VPN Client Adapter - VPN
+ 33...02 00 5e 02 11 22 ......Realtek RTL8188FTV Wireless LAN 802.11n USB 2.0 Network Adapter #2
+  8...02 00 5e 04 11 22 ......Kerio Virtual Network Adapter
+  1...........................Software Loopback Interface 1
+===========================================================================
+
+IPv6 Route Table
+===========================================================================
+Active Routes:
+ If Metric Network Destination      Gateway
+  1    331 ::1/128                  On-link
+ 33    306 fe80::/64                On-link
+ 33    306 fe80::d8a7:c91c:dc92:9256/128
+                                    On-link
+  1    331 ff00::/8                 On-link
+ 33    306 ff00::/8                 On-link
+===========================================================================
+Persistent Routes:
+  None

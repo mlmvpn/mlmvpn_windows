@@ -1,0 +1,37 @@
+# Parses every JavaScript file, validates every JSON file, and checks the packaging allow-list.
+#
+# Deliberately NOT `npm test`: most of the suites need the engine binaries in core/, which are not
+# in this repository (see docs/BUILD.md), and several reach the real network — so a red tick here
+# would mean "the runner's line is censored differently from yours", not "your change is broken".
+# Run the suites locally, where both of those are true.
+#
+# What this does catch is the cheap, common damage — a syntax error, a half-written file — and the
+# one packaging mistake that has bitten this project repeatedly: a module missing from the
+# build.files allow-list, which works perfectly from source and crashes for every user.
+#
+# Both steps are plain scripts so you can run exactly what CI runs, before pushing:
+#     node scripts/check-syntax.js
+#     node scripts/check-packaging.js
+
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Everything parses
+        run: node scripts/check-syntax.js
+
+      - name: Every required module is in the packaging allow-list
+        run: node scripts/check-packaging.js

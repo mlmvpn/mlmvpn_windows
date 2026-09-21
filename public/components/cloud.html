@@ -1,0 +1,347 @@
+<div
+                class="relative z-10 max-w-[1000px] mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6"
+                style="
+                  width: 100%;
+                  font-family:
+                    &quot;Vazirmatn&quot;,
+                    -apple-system,
+                    Roboto,
+                    sans-serif;
+                  background-color: #202124;
+                  color: #e8eaed;
+                "
+              >
+                <!-- Header -->
+                <header
+                  class="flex items-center justify-between pb-4 border-b border-gs-border"
+                >
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="p-2.5 bg-gs-panel rounded-full text-gs-muted"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h1
+                        class="text-xl font-medium text-gs-muted tracking-tight"
+                      >
+                        پنل استقرار Cloudflare
+                      </h1>
+                      <p
+                        class="text-[11px] text-gs-muted mt-1 font-medium tracking-wide"
+                      >
+                        مدیریت اتوماتیک ورکر و استخراج کانفیگ
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <button
+                      onclick="showModal('cloud-guide-modal')"
+                      class="text-gs-muted hover:bg-gs-panel/10 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                    >
+                      راهنما
+                    </button>
+                  </div>
+                </header>
+
+                <!-- Main Layout (1 Column Centered for Clean Focus) -->
+                <div class="flex flex-col gap-6 w-full max-w-[800px] mx-auto">
+                  <!-- 1. Cloudflare Setup Card -->
+                  <div
+                    class="bg-gs-panel border border-gs-border rounded-[16px] p-6 shadow-sm relative overflow-hidden group"
+                  >
+                    <div class="flex items-center gap-3 mb-6 relative">
+                      <h2 class="text-base font-medium text-gs-muted">
+                        ورود و استقرار (Deployment)
+                      </h2>
+                    </div>
+
+                    <div
+                      class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 relative"
+                    >
+                      <div class="relative group/input">
+                        <input
+                          id="cloud-api-token"
+                          type="text"
+                          placeholder="Global API Key یا Token"
+                          class="w-full bg-gs-panel border border-gs-border rounded-xl px-4 py-3 text-sm text-gs-muted placeholder-google-muted focus:outline-none focus:border-gs-border focus:bg-gs-panel transition-all font-mono"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          id="cloud-api-email"
+                          type="email"
+                          placeholder="Email Address (برای کلید Global)"
+                          class="w-full bg-gs-panel border border-gs-border rounded-xl px-4 py-3 text-sm text-gs-muted placeholder-google-muted focus:outline-none focus:border-gs-border focus:bg-gs-panel transition-all font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      id="btn-deploy-cloud"
+                      onclick="deployCloudflare()"
+                      class="w-full bg-gs-panel hover:bg-[#aecbfa] text-gs-muted rounded-full py-3 font-medium text-sm transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+                    >
+                      <svg
+                        id="deploy-icon"
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      <span id="deploy-text">استقرار ورکر روی Cloudflare</span>
+                    </button>
+
+                    <!-- Active Accounts List -->
+                    <div class="mt-8 pt-6 border-t border-gs-border">
+                      <h3 class="text-xs font-medium text-gs-muted mb-4">
+                        اکانت متصل شده (ذخیره محلی)
+                      </h3>
+                      <div id="cloud-accounts-list" class="space-y-2">
+                        <!-- Items dynamically inserted by JS -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 2. Terminal / Logs -->
+                  <div
+                    class="bg-gs-panel border border-gs-border rounded-[16px] overflow-hidden flex flex-col h-64"
+                  >
+                    <div
+                      class="bg-gs-panel px-4 py-2.5 border-b border-gs-border flex items-center gap-2"
+                    >
+                      <svg
+                        class="w-4 h-4 text-gs-muted"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <polyline points="4 17 10 11 4 5" />
+                        <line x1="12" y1="19" x2="20" y2="19" />
+                      </svg>
+                      <span
+                        class="text-xs font-mono text-gs-muted tracking-wide mt-0.5"
+                        dir="ltr"
+                        >TERMINAL</span
+                      >
+                    </div>
+                    <div
+                      id="terminal-content"
+                      class="p-4 overflow-y-auto custom-scrollbar font-mono text-xs leading-relaxed space-y-2 relative h-full flex flex-col justify-start"
+                      dir="ltr"
+                    >
+                      <div class="text-gs-muted text-right" dir="rtl">
+                        <span class="text-gs-muted mr-2">></span> سیستم
+                        مدیریت ابری مقداردهی اولیه شد. آماده استقرار.
+                      </div>
+
+                      <!-- Blinking cursor -->
+                      <div id="term-cursor" class="text-right mt-1" dir="rtl">
+                        <span
+                          class="inline-block w-2 h-3.5 bg-gs-panel animate-blink align-middle"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 3. Received Configs Card -->
+                  <div
+                    class="bg-gs-panel border border-gs-border rounded-[16px] p-6 shadow-sm"
+                  >
+                    <div class="flex items-center justify-between mb-6">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="p-2 bg-gs-panel/10 rounded-full text-gs-muted"
+                        >
+                          <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                            />
+                            <path d="m9 12 2 2 4-4" />
+                          </svg>
+                        </div>
+                        <h2 class="text-base font-medium text-gs-muted">
+                          کانفیگهای دریافت شده
+                        </h2>
+                      </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div
+                      id="received-configs-empty"
+                      class="text-center py-6 text-gs-muted text-sm"
+                    >
+                      کانفیگی دریافت نشده است. ابتدا ورکر را مستقر کنید.
+                    </div>
+
+                    <!-- Config Item (Hidden until fetch) -->
+                    <div
+                      id="received-configs-list"
+                      class="hidden bg-gs-panel border border-gs-border rounded-xl p-4 flex-col sm:flex-row items-center justify-between gap-4"
+                    >
+                      <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div
+                          class="w-12 h-12 rounded-full bg-gs-panel flex flex-col items-center justify-center border border-gs-border"
+                        >
+                          <span
+                            id="recv-config-count"
+                            class="text-lg font-bold text-gs-muted leading-none font-mono"
+                            >۰</span
+                          >
+                        </div>
+                        <div>
+                          <h4 class="text-sm font-medium text-gs-muted">
+                            کلاستر کلودفلر
+                          </h4>
+                          <p
+                            id="recv-config-date"
+                            class="text-[11px] text-gs-muted mt-1 font-mono"
+                          >
+                            آخرین بروزرسانی: -
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        class="flex items-center gap-2 w-full sm:w-auto justify-end"
+                      >
+                        <button
+                          onclick="copyCloudConfigs()"
+                          class="px-4 py-2 bg-gs-panel hover:bg-gs-panel text-gs-muted rounded-full text-xs font-medium transition-colors border border-gs-border"
+                        >
+                          کپی کانفیگ‌ها
+                        </button>
+                        <button
+                          onclick="exportCloudConfigs()"
+                          class="px-4 py-2 bg-gs-panel/10 hover:bg-gs-panel/20 text-gs-muted rounded-full text-xs font-medium transition-colors border border-gs-border/20 flex items-center gap-2"
+                        >
+                          <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                          انتقال به پنل ترکیب
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+    <!-- Cloudflare Guide Modal -->
+    <div id="cloud-guide-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+      <div class="bg-m3-surface w-full max-w-xl rounded-3xl shadow-2xl border border-m3-outline p-6 flex flex-col gap-4 text-m3-onSurface" dir="rtl">
+        <div class="flex items-center justify-between border-b border-m3-outline pb-4 mb-2">
+          <h3 class="text-lg font-bold text-m3-onSurface m-0">راهنمای دریافت Global API Key کلودفلر</h3>
+          <button onclick="hideModal('cloud-guide-modal')" class="text-m3-onSurfaceVariant hover:text-red-400 transition-colors bg-transparent border-none cursor-pointer">
+            <i class="ph-bold ph-x text-xl"></i>
+          </button>
+        </div>
+        <div class="text-sm leading-loose max-h-[60vh] overflow-y-auto pl-2 pr-1 custom-scrollbar">
+          <p>
+            برای استفاده از استقرار خودکار، شما به ایمیل و کلید <b>Global API Key</b> اکانت کلودفلر خود نیاز دارید. لطفاً مراحل زیر را دنبال کنید:
+          </p>
+          <ol class="mt-2.5 pr-5 list-decimal pl-4">
+            <li>ابتدا وارد داشبورد کلودفلر خود شوید (<code>dash.cloudflare.com</code>).</li>
+            <li>از بالا سمت راست روی آیکون پروفایل خود کلیک کرده و گزینه <b>My Profile</b> را انتخاب کنید.</li>
+            <li>از منوی سمت چپ، روی گزینه <b>API Tokens</b> کلیک کنید.</li>
+            <li>به پایین صفحه اسکرول کنید تا به بخش <b>API Keys</b> برسید.</li>
+            <li>در ردیف <b>Global API Key</b> روی دکمه <b>View</b> کلیک کنید.</li>
+            <li>رمز عبور اکانت کلودفلر خود را وارد کنید تا کلید به شما نمایش داده شود.</li>
+            <li>این کلید (ترکیبی طولانی از حروف و اعداد) را کپی کنید.</li>
+            <li>در نهایت، ایمیل اکانت کلودفلر و این کلید را در فیلدهای نرم‌افزار وارد کنید.</li>
+          </ol>
+          <div class="bg-red-500/10 p-3 rounded-lg mt-4 border border-red-500/20 text-red-400">
+            <b class="font-bold">⚠️ هشدار امنیتی:</b>
+            <p class="mt-1 mb-0 text-xs">
+              کلید Global API Key دسترسی کامل به اکانت کلودفلر شما دارد. آن را در اختیار هیچکس قرار ندهید. این کلید فقط به صورت محلی در سیستم شما ذخیره می‌شود.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+              </div>
+
+<!-- Undeployed Modal -->
+<div id="undeployed-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="bg-m3-surface w-[90%] max-w-sm rounded-3xl shadow-2xl border border-m3-outline p-6 flex flex-col gap-4 transform scale-95 transition-transform duration-300">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-m3-onSurface">پنل مستقر نشده است</h3>
+                <p class="text-sm text-m3-onSurfaceVariant">ابتدا باید ورکر را مستقر کنید</p>
+            </div>
+        </div>
+        
+        <p class="text-sm text-m3-onSurface leading-relaxed mt-2">
+            برای دریافت کانفیگ، این اکانت باید ابتدا روی کلودفلر مستقر (Deploy) شود. آیا مایلید هم‌اکنون استقرار را شروع کنید؟
+        </p>
+        
+        <div class="flex gap-3 mt-4">
+            <button onclick="hideUndeployedModal()" class="flex-1 py-3 px-4 bg-m3-surface2 hover:bg-m3-surface3 text-m3-onSurfaceVariant rounded-xl text-sm font-bold transition-colors">
+                انصراف
+            </button>
+            <button id="undeployed-modal-deploy-btn" class="flex-[2] py-3 px-4 bg-m3-primary hover:bg-m3-primary/90 text-m3-onPrimary rounded-xl text-sm font-bold shadow-md transition-all">
+                استقرار ورکر
+            </button>
+        </div>
+    </div>
+</div>
+\n
+<!-- Edge Settings Modal -->
+<div id="edgeSettingsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="bg-m3-surface w-[90%] max-w-sm rounded-3xl shadow-2xl border border-m3-outline p-6 flex flex-col gap-4 transform scale-95 transition-transform duration-300">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-m3-onSurface">تنظیمات پنل Edge</h3>
+                <p class="text-sm text-m3-onSurfaceVariant">اختصاصی آی‌پی ثابت</p>
+            </div>
+        </div>
+        
+        <div class="mt-2 space-y-2">
+            <label class="block text-sm font-medium text-m3-onSurfaceVariant">آی‌پی ثابت (Proxy IP):</label>
+            <input type="text" id="edge-proxy-ip" class="w-full bg-m3-surface2 border border-m3-outline rounded-xl px-4 py-2.5 text-sm text-m3-onSurface placeholder-m3-onSurfaceVariant/50 focus:outline-none focus:border-m3-primary transition-colors text-left" dir="ltr" placeholder="مثال: 192.168.1.1">
+            <p class="text-[10px] text-m3-onSurfaceVariant mt-1">در صورت خالی بودن، از پراکسی پیش‌فرض کلودفلر استفاده می‌شود.</p>
+        </div>
+        
+        <div class="flex gap-3 mt-4">
+            <button onclick="hideModal('edgeSettingsModal')" class="flex-1 py-3 px-4 bg-m3-surface2 hover:bg-m3-surface3 text-m3-onSurfaceVariant rounded-xl text-sm font-bold transition-colors">
+                انصراف
+            </button>
+            <button onclick="window.saveEdgeSettings()" class="flex-[2] py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md transition-all">
+                ذخیره تنظیمات
+            </button>
+        </div>
+    </div>
+</div>

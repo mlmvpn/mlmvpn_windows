@@ -1,0 +1,68 @@
+name: "Bug report / گزارش باگ"
+description: "Something is broken. / چیزی خراب است."
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security problems do not go here.** Report them privately — see [SECURITY.md](https://github.com/mlmvpn/mlmvpn_windows/blob/main/SECURITY.md).
+
+        **مشکل امنیتی اینجا نمی‌آید.** خصوصی گزارشش کنید — [SECURITY.md](https://github.com/mlmvpn/mlmvpn_windows/blob/main/SECURITY.md).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: "What happened? / چه شد؟"
+      description: "What you did, what you expected, and what happened instead. / چه کردید، چه انتظاری داشتید، و به‌جایش چه شد."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Which part? / کدام بخش؟"
+      options:
+        - "It will not start / بالا نمی‌آید (black or white window)"
+        - "Connecting — an engine / اتصال — یک موتور"
+        - "IP scanner / اسکنر آی‌پی"
+        - "Cloudflare / زیرساخت ابری"
+        - "Game acceleration / شتاب‌دهی بازی"
+        - "Settings / تنظیمات"
+        - "Something else / چیز دیگر"
+    validations:
+      required: true
+
+  - type: textarea
+    id: startuplog
+    attributes:
+      label: "startup.log"
+      description: |
+        Right-click the tray icon (next to the Windows clock) → **«باز کردن گزارش راه‌اندازی»**, and paste the file here.
+        Its first line has your version, Windows build and whether you are on 32- or 64-bit — which answers most of our questions at once.
+
+        روی آیکون کنار ساعت ویندوز راست‌کلیک کنید ← **«باز کردن گزارش راه‌اندازی»** و فایل را اینجا بچسبانید.
+        خط اولش نسخه، بیلد ویندوز و ۳۲/۶۴ بیت بودن را دارد — که بیشتر سؤال‌های ما را یک‌جا جواب می‌دهد.
+
+        **Have a look at it first.** It records your own machine, including addresses you connected to.
+        **اول نگاهش کنید.** ماشین خودتان را ثبت می‌کند، از جمله آدرس‌هایی که به آن‌ها وصل شده‌اید.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: "Version / نسخه"
+      placeholder: "1.2.3 — x64 — Windows 11 22H2"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: "Before opening / قبل از باز کردن"
+      options:
+        - label: "I read docs/TROUBLESHOOTING.md — my symptom is not covered there, or the fix did not work. / خواندمش؛ نشانهٔ من آنجا نیست یا راه‌حلش جواب نداد."
+          required: false
+        - label: "I removed anything private from the log I pasted. / هر چیز خصوصی را از لاگی که چسباندم حذف کردم."
+          required: false

@@ -1,0 +1,12 @@
+{
+  "source": "patterniha/Serverless-for-Iran",
+  "branch": "main",
+  "vendoredAt": "2026-09-12",
+  "note": "Serverless-fragA/B are @patterniha's files, byte for byte; the v48 pair came with an older release of the same project. scripts/gen-iran-profiles.js builds the profile list from these four, and store/iran-configs.js rebuilds it in the app when upstream changes.",
+  "files": {
+    "serverless-v50-fragA.json": "4d446f761abb028d98e3ec776f0bb9c214ee4843170340cf093bf4c7e247004e",
+    "serverless-v50-fragB.json": "8c2f09133f58221fe886b04225992e44e01e67d16b608f4f4b44d2fc99d974c1",
+    "serverless-v48-low.json": "c7fcf13216f47a486768d16c7181f95cab6d2b771c13adc65517bd8c494c0b4c",
+    "serverless-v48-high.json": "b8358fb8d2f1b972890c6149e1acaa160f783494277ed72a66dca1cf40869a66"
+  }
+}

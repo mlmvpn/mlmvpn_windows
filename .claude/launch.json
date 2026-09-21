@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mlmvpn-server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "server.js"
+      ],
+      "port": 35281,
+      "autoPort": true
+    },
+    {
+      "name": "mlmvpn-ui-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/ui-preview.js"
+      ],
+      "port": 35299
+    },
+    {
+      "name": "mlmvpn-ui-preview-api",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/ui-preview.js",
+        "--api",
+        "--port=35301"
+      ],
+      "port": 35301
+    }
+  ]
+}

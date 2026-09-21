@@ -1,0 +1,236 @@
+{
+  "name": "mlm-vpn",
+  "version": "1.2.3",
+  "description": "MLMVPN for Windows — multi-engine anti-censorship desktop app, clean-IP (CDN) scanner and Cloudflare infrastructure manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "electron": "electron .",
+    "test:store": "node tests/store/run.js",
+    "test:fronts": "node tests/fronts/run.js",
+    "test": "node tests/store/run.js && node tests/fronts/run.js && node tests/gst/run.js && node tests/aether/run.js && node tests/github-tunnel/run.js && node tests/netdiag/run.js && node tests/game/run.js && node tests/v2ray/run.js && node tests/gateway/run.js && node tests/openvpn/run.js && node tests/traffic/feed.test.js",
+    "test:gst": "node tests/gst/run.js",
+    "test:traffic": "node tests/traffic/feed.test.js",
+    "test:aether": "node tests/aether/run.js",
+    "test:github-tunnel": "node tests/github-tunnel/run.js",
+    "test:netdiag": "node tests/netdiag/run.js",
+    "validate:netdiag": "node tests/netdiag/validate.js",
+    "build": "electron-builder --win",
+    "test:game": "node tests/game/run.js",
+    "test:v2ray": "node tests/v2ray/run.js",
+    "test:gateway": "node tests/gateway/run.js",
+    "test:openvpn": "node tests/openvpn/run.js"
+  },
+  "build": {
+    "appId": "com.mlmvpn.scanner",
+    "productName": "MLM VPN",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "core/**/*",
+      "data/**/*",
+      "public/gst/**/*",
+      "traffic_db.json",
+      "config.txt"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "requireAdministrator",
+      "icon": "public/icon.ico"
+    },
+    "nsis": {
+      "artifactName": "${name}-Setup-${version}-${arch}.${ext}",
+      "installerIcon": "public/icon.ico",
+      "uninstallerIcon": "public/icon.ico",
+      "installerHeaderIcon": "public/icon.ico",
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "license": "public/eula.txt"
+    },
+    "portable": {
+      "artifactName": "${name}-Portable-${version}-${arch}.${ext}"
+    },
+    "files": [
+      "config.txt",
+      "server.js",
+      "anti-dpi.js",
+      "ip-provider.js",
+      "scanner.js",
+      "sni-manager.js",
+      "xray-manager.js",
+      "xray-tester.js",
+      "iran-tester.js",
+      "traffic-manager.js",
+      "traffic-feed.js",
+      "mitm-manager.js",
+      "app-routing.js",
+      "network-settings.js",
+      "display-settings.js",
+      "startup-health.js",
+      "app-catalog.js",
+      "cf-resources.js",
+      "system-settings.js",
+      "update-manager.js",
+      "store-manager.js",
+      "iran-profiles-gen.js",
+      "core-paths.js",
+      "store/**/*",
+      "crash-reporter.js",
+      "cloud-manager.js",
+      "sanction-manager.js",
+      "dedicated-dns-manager.js",
+      "dedicated-dns-bridge.js",
+      "dns-manager.js",
+      "aether-manager.js",
+      "warp-manager.js",
+      "gateway-probe.js",
+      "warp-prober.js",
+      "warp-relay.js",
+      "psiphon-manager.js",
+      "psiphon-diagnostics.js",
+      "front-guard.js",
+      "gateway-manager.js",
+      "openvpn-manager.js",
+      "openvpn-catalog.js",
+      "openvpn-creds.js",
+      "tor-manager.js",
+      "tor-control.js",
+      "lantern-manager.js",
+      "geph-manager.js",
+      "engine-processes.js",
+      "aether-dns-bridge.js",
+      "aether-guard.js",
+      "aether-speedtest.js",
+      "leak-audit.js",
+      "leak-check.js",
+      "tls-fingerprint.js",
+      "tun-manager.js",
+      "tun-diag.js",
+      "tun-routes.js",
+      "route-cache.js",
+      "auto-connect.js",
+      "systemcheck.js",
+      "socks-agents.js",
+      "free-configs.js",
+      "quick-connect.js",
+      "geo-label.js",
+      "netdiag/**/*",
+      "main.js",
+      "package.json",
+      "vodi/**/*",
+      "gst/**/*",
+      "github-tunnel/**/*",
+      "game/**/*",
+      "cloudflare-worker/gt-broker/**/*",
+      "data/**/*",
+      "public/index.html",
+      "public/app.js",
+      "public/app.archive.js",
+      "public/app.combo.js",
+      "public/app.v2ray.js",
+      "public/persistent-storage.js",
+      "public/style.css",
+      "public/local-icons.js",
+      "public/compiled-tailwind.css",
+      "public/tailwind.js",
+      "public/worker.js",
+      "public/dns_worker.js",
+      "public/doh_worker.js",
+      "public/edgeworker.js",
+      "public/qrcodewallet.png",
+      "public/world.svg",
+      "public/world-outline.svg",
+      "public/default_servers.csv",
+      "public/eula.txt",
+      "public/icon.ico",
+      "public/icon.png",
+      "public/installerHeader.bmp",
+      "public/installerSidebar.bmp",
+      "public/font/**/*",
+      "public/assets/**/*",
+      "public/components/**/*",
+      "public/shell/**/*",
+      "public/ui/**/*",
+      "public/gst/**/*",
+      "public/zeus.js",
+      "core/**/*",
+      "node_modules/**/*",
+      "!node_modules/**/README*",
+      "!node_modules/**/*.md",
+      "!node_modules/**/*.ts",
+      "!node_modules/**/*.map",
+      "!node_modules/**/.nyc_output",
+      "!node_modules/**/test/**",
+      "!node_modules/**/tests/**",
+      "!node_modules/**/__tests__/**",
+      "!node_modules/**/coverage/**",
+      "!node_modules/**/example/**",
+      "!node_modules/**/examples/**",
+      "!node_modules/**/benchmark/**",
+      "public/design-system.html"
+    ]
+  },
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "axios": "^1.17.0",
+    "express": "^4.21.0",
+    "geoip-lite": "^2.0.2",
+    "http-proxy-agent": "^9.0.0",
+    "libsodium-wrappers": "^0.8.4",
+    "socks-proxy-agent": "^10.1.0",
+    "ssh2": "^1.17.0",
+    "undici": "^7.26.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^42.3.3",
+    "electron-builder": "^26.8.1",
+    "electron-packager": "^17.1.2",
+    "tailwindcss": "^3.4.1"
+  },
+  "keywords": [],
+  "author": "Ehsan (MLMVPN)",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "commonjs",
+  "homepage": "https://github.com/mlmvpn/mlmvpn_windows",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mlmvpn/mlmvpn_windows.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mlmvpn/mlmvpn_windows/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

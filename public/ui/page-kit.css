@@ -1,0 +1,1578 @@
+/* =====================================================================
+   Page kit — what goes INSIDE a window, after macOS 26 (Tahoe).
+   ---------------------------------------------------------------------
+   The anatomy of System Settings, as reusable pieces:
+
+     .mv-split            a window body in two: an inset glass sidebar and the pane
+       .mv-side             the sidebar — floats inside the window, concentric with it
+         .mv-side-top         room for the window's traffic lights
+         .mv-side-search      capsule search that filters the items
+         .mv-side-list > .mv-side-group > .mv-side-item (+ .mv-side-tile)
+       .mv-pane             the content side: a title band and a scrolling form
+         .mv-pane-bar         the toolbar band: back/forward capsule + title (the window's own bar lies over it)
+           .mv-pane-nav         the ‹ › glass capsule — pane history, as in System Settings
+         .mv-pane-scroll      scrolls under the band; a hard edge appears once scrolled
+
+     .mv-form             a grouped form (SwiftUI Form, .grouped)
+       .mv-form-hero        the opening card of a pane that needs one (like «General»): tile, title, one line
+       .mv-form-section     header + group + footer
+         .mv-form-header / .mv-form-footer
+         .mv-form-group     the rounded box
+           .mv-form-row     label on the leading side, control on the trailing side
+             .mv-form-label (+ <small>) · .mv-form-control
+             variants: .is-stack (full-width content), .is-sub (subordinate), .is-link
+
+   Controls tuned for forms: .mv-switch--mini / input.mv-switch-input, select.mv-popup,
+   .mv-field--compact, capsule .mv-btn--lg.
+
+   Window furniture (plan › K1, K2, K5, K6, K7):
+     .mv-toolbar > .mv-tb-seg / .mv-tb-group > .mv-tb-btn   toolbar items in glass capsules
+     .mv-status-head                                       an engine's opening row: tile, name, state
+     .mv-bottom-bar > .mv-bb-lead / .mv-bb-end              the window's footer: state + actions
+     .mv-form-row.mv-callout (.is-warn, .is-danger)         a notice inside a form
+     .mv-steps > .mv-step (.is-done .is-active .is-failed)  progress through named stages
+     .mv-sheet > .mv-sheet-bar / -body / -foot              a dialog over its window
+     .mv-list > .mv-li (.mv-li-lead/-text/-num/-end)        rows of things, inside a group
+     .mv-table (th.is-sortable, td.is-num, tr.is-selected)  a list with columns, inside a group
+
+   Rules taken from Apple's design system (WWDC25 «Get to know the new design system»,
+   HIG › Sidebars, Toggles, Settings): shapes nest concentrically (inner radius = outer
+   radius − padding); large controls are capsules, small ones rounded rectangles; forms
+   use mini switches so every row has one height; settings apply the moment they change;
+   hierarchy comes from grouping, not from borders and colour.
+   ===================================================================== */
+
+/* ── Split view ── */
+.mv-split {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  background: var(--mv-pane);
+  color: var(--mv-label);
+}
+.mv-side {
+  --r: 14px;                       /* = the window's 22px − the 8px inset */
+  flex: none;
+  width: 222px;
+  margin: 8px;
+  margin-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: var(--r);
+  background: var(--mv-side);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-side-edge), var(--mv-side-shadow);
+  overflow: hidden;
+}
+.mv-side-top { flex: none; height: 10px; }   /* 42px in a split window: room for the lights (shell.css) */
+.mv-side-search {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 10px 8px;
+}
+.mv-side-search > i {
+  position: absolute;
+  inset-inline-start: 9px;
+  font-size: 13px;
+  color: var(--mv-label-3);
+  pointer-events: none;
+}
+.mv-side-search > input {
+  width: 100%;
+  height: 28px;
+  padding-inline: 28px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mv-fill-2);
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+.mv-side-search > input::placeholder { color: var(--mv-label-3); }
+.mv-side-search > input:focus { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+.mv-side-search > input::-webkit-search-cancel-button { filter: grayscale(1); opacity: .6; }
+.mv-side-list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 10px; }
+.mv-side-group + .mv-side-group { margin-top: 12px; }
+.mv-side-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 30px;
+  padding-inline: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-side-item > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.mv-side-item:hover { background: var(--mv-fill); }
+.mv-side-item.active,
+.mv-side-item[aria-current="page"] { background: var(--mv-accent); color: #FFFFFF; }
+.mv-side-item[hidden] { display: none; }
+.mv-side-tile {
+  --tint: var(--mv-gray);
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 22.5%;
+  display: grid;
+  place-items: center;
+  color: #FFFFFF;
+  font-size: 13px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 84%, #FFFFFF), color-mix(in srgb, var(--tint) 88%, #000));
+  box-shadow: 0 .5px 1px rgba(0, 0, 0, .25);
+}
+.mv-side-tile > svg { width: 62%; height: 62%; }
+.mv-side-empty { padding: 14px 8px; font-size: 12px; color: var(--mv-label-3); text-align: center; }
+
+/* ── The pane ── */
+.mv-pane { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.mv-pane-bar {
+  flex: none;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-inline: 14px 18px;
+}
+.mv-pane-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--mv-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Back / forward: one glass capsule, two halves (macOS 26 toolbar item group). It sits above
+   the window's transparent bar (shell.css › .is-split, z-index 5) so it stays clickable
+   while the rest of the band still drags the window. */
+.mv-pane-nav {
+  position: relative;
+  z-index: 6;
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--mv-glass-btn);
+  box-shadow: var(--mv-glass-btn-edge);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+}
+.mv-pane-nav > button {
+  width: 30px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mv-label);
+  font-size: 15px;
+  cursor: default;
+}
+.mv-pane-nav > button { position: relative; }
+.mv-pane-nav > button + button::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 6px;
+  bottom: 6px;
+  width: var(--mv-hl);
+  background: var(--mv-sep-2);
+}
+.mv-pane-nav > button:not(:disabled):hover { background: var(--mv-fill); }
+.mv-pane-nav > button:not(:disabled):active { background: var(--mv-fill-2); }
+.mv-pane-nav > button:disabled { color: var(--mv-label-4); }
+.mv-pane-nav > button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+/* Macs draw a hard scroll edge under a toolbar once the content has scrolled under it. */
+.mv-pane.is-scrolled .mv-pane-bar { box-shadow: 0 var(--mv-hl) 0 var(--mv-sep-2); background: var(--mv-pane); }
+.mv-pane-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 4px 24px 32px; container-type: inline-size; }
+/* Any other scrolling content area built with the kit: the width it measures for .mv-form. */
+.mv-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; container-type: inline-size; }
+
+/* ── Grouped form ── */
+.mv-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;          /* components.css has an older .mv-form label grid */
+  grid-template-columns: none;
+  font-size: inherit;
+  gap: 22px;
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* ── Modules: a form uses the width it is given ──────────────────────────
+   Narrow, a form is one column. Wider, its sections become modules that flow into two
+   columns, then three — read down a column, then the next (right to left) — instead of one
+   strip in the middle with empty sides. A section that belongs across the top (the opening
+   card, an engine's status) spans every column: .mv-form-hero or .is-wide.
+   Measured on the scrolling area (.mv-pane-scroll, .mv-scroll), not the screen, so a narrow
+   window on a wide display stays one column. A form with a single section has nothing to set
+   beside it and stays one readable column. */
+/* COUNT ONLY THE SECTIONS THAT ACTUALLY FLOW.
+   A section that spans every column is not one of the columns' contents, so it must not be
+   counted when deciding how many columns there are. Counting it produced a column with
+   nothing in it: V2Ray has three sections, one of them `is-wide`, so a wide window asked for
+   three columns and had two modules to put in them — the whole left third of the window was
+   empty while the node list was squeezed into the middle. `:not(.is-wide)` on each step of
+   the sibling chain is the difference between "three sections" and "three modules". */
+@container (min-width: 720px) {
+  .mv-form:has(> .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide)) {
+    display: block;
+    max-width: none;
+    columns: 2;
+    column-gap: 22px;
+  }
+  .mv-form:has(> .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide)) > * {
+    break-inside: avoid;
+    margin-bottom: 22px;
+  }
+  .mv-form:has(> .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide)) > .mv-form-hero,
+  .mv-form:has(> .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide)) > .is-wide { column-span: all; }
+
+  /* A SPANNING SECTION STILL HAS TO USE THAT WIDTH, NOT STRETCH ONE CONTROL ACROSS IT.
+     Left alone, a switch row in a spanning section is as wide as the window — 1387px on a
+     maximised 1440 window, with the label at one edge, the switch at the other and eleven
+     hundred pixels of nothing between them. Its rows lay out in the same rhythm as the
+     columns beside them instead; the status head keeps the full width, because a tile at the
+     start and live speeds at the end is what that width is for.
+     Flex, not grid: `auto-fit` cannot collapse a track that the full-width status head is
+     spanning, so a grid left two dead tracks beside the two switches. Flex only ever shares
+     the space among the items that exist, which lands each row on the same measure as the
+     module columns below it. */
+  .mv-form > .is-wide > .mv-form-group { display: flex; flex-wrap: wrap; }
+  /* EVERYTHING THAT IS NOT A ROW TAKES THE WHOLE WIDTH.
+     This used to be a list of four class names, and anything not on that list became an ordinary
+     flex item — `flex: 0 1 auto`, i.e. as wide as its own content. The app list in
+     «تونل و برنامه‌ها» is a grid of `repeat(auto-fill, minmax(190px, 1fr))` inside such a group,
+     and a track list of `1fr` inside a shrink-to-fit box resolves against the CONTENT width: one
+     column, about 300px, with the rest of a maximised window empty beside it. A list of names
+     could only ever cover what was already written; the rule is the intent — rows share the
+     measure, everything else uses the width. */
+  /* `box-sizing` explicitly: this app has no global border-box reset, so a basis of 100% on a
+     child that has padding of its own resolves to 100% PLUS that padding and overflows the
+     group it is inside — measured at 780px in a 760px box, clipped by the group's own
+     overflow:hidden and so invisible until something touched the edge. */
+  .mv-form > .is-wide > .mv-form-group > *:not(.mv-form-row) {
+    flex: 1 0 100%; min-width: 0; box-sizing: border-box;
+  }
+  .mv-form > .is-wide > .mv-form-group > .mv-form-row { flex: 1 1 320px; }
+  /* A callout is a sentence, not a control: it takes the whole width even in a section whose rows
+     sit side by side, or it ends up as a narrow column of text beside the things it explains. */
+  .mv-form > .is-wide > .mv-form-group > .mv-form-row.mv-callout { flex: 1 0 100%; }
+  /* The head keeps the full width, but its CONTENT hugs the leading edge instead of being
+     pushed to the two far corners. `.mv-sh-text` is `flex: 1`, so on a maximised window the
+     live speeds ended up thirteen hundred pixels from the connection they describe — far
+     enough that they read as an unrelated widget. Packed together they read as one status. */
+  .mv-form > .is-wide > .mv-form-group > .mv-status-head > .mv-sh-text { flex: 0 1 auto; }
+  .mv-form > .is-wide > .mv-form-group > .mv-status-head::after { content: ""; flex: 1; }
+  /* The row separator is a ::before pinned to the TOP of a row that follows another. Side by
+     side, "the row before" is the one beside it, so that hairline would run along the top of
+     the band instead of between them. Same element, turned on its side — logical insets, so
+     it lands between the two in either direction. */
+  .mv-form > .is-wide > .mv-form-group > .mv-form-row + .mv-form-row::before {
+    top: 9px;
+    bottom: 9px;
+    inset-inline: 0 auto;
+    width: var(--mv-hl);
+    height: auto;
+  }
+}
+@container (min-width: 1240px) {
+  .mv-form:has(> .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide) ~ .mv-form-section:not(.is-wide)) { columns: 3; }
+}
+/* Stacked and centred, like the opening card of System Settings › General. */
+.mv-form-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 28px 18px;
+  border-radius: 12px;
+  background: var(--mv-group);
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+  text-align: center;
+}
+.mv-form-hero .mv-side-tile { width: 52px; height: 52px; font-size: 29px; box-shadow: 0 1px 3px rgba(0, 0, 0, .22); }
+.mv-form-hero h2 { margin: 2px 0 0; font-size: 15px; font-weight: 700; color: var(--mv-label); }
+.mv-form-hero p { margin: 2px auto 0; max-width: 460px; font-size: 12px; line-height: 1.8; color: var(--mv-label-2); }
+.mv-form-section { display: flex; flex-direction: column; }
+.mv-form-header { margin: 0 4px 7px; font-size: 13px; font-weight: 700; color: var(--mv-label); }
+.mv-form-footer { margin: 7px 4px 0; font-size: 11.5px; line-height: 1.8; color: var(--mv-label-2); }
+.mv-form-group {
+  border-radius: 12px;
+  background: var(--mv-group);
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+  overflow: hidden;
+}
+.mv-form-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 42px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.mv-form-row + .mv-form-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 14px 14px;
+  height: var(--mv-hl);
+  background: var(--mv-group-sep);
+}
+.mv-form-label { flex: 1; min-width: 0; line-height: 1.6; color: var(--mv-label); }
+.mv-form-label small { display: block; margin-top: 1px; font-size: 11.5px; line-height: 1.75; color: var(--mv-label-2); }
+.mv-form-control { flex: none; display: flex; align-items: center; gap: 8px; color: var(--mv-label-2); font-size: 12.5px; }
+.mv-form-row.is-stack { flex-direction: column; align-items: stretch; gap: 10px; }
+.mv-form-row.is-top { align-items: flex-start; }      /* a tall control: the label stays at the top */
+.mv-form-row.is-sub { padding-inline-start: 34px; }
+.mv-form-row.is-link { cursor: pointer; }
+.mv-form-row.is-link:hover { background: var(--mv-fill); }
+.mv-form-row.is-link::after { content: "‹"; flex: none; font-size: 17px; line-height: 1; color: var(--mv-label-3); }
+[dir="ltr"] .mv-form-row.is-link::after { content: "›"; }
+.mv-form-value { font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; color: var(--mv-label-2); }
+.mv-form-mono { font-family: var(--mv-font-mono); font-size: 11.5px; color: var(--mv-label-2); direction: ltr; unicode-bidi: isolate; }
+
+/* ── Controls for forms ── */
+/* The mini switch: the height of a button, so every row keeps one height (HIG › Toggles). */
+.mv-switch.mv-switch--mini { width: 30px; height: 18px; }
+.mv-switch.mv-switch--mini::after { width: 14px; height: 14px; }
+.mv-switch.mv-switch--mini[aria-checked="true"]::after { inset-inline-start: 14px; }
+/* A real checkbox drawn as the mini switch — for inputs the app's logic already reads. */
+input.mv-switch-input {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 18px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mv-track);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background var(--mv-d-2) var(--mv-ease-out);
+}
+input.mv-switch-input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mv-knob);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 0 0 .5px rgba(0, 0, 0, .08);
+  transition: inset-inline-start var(--mv-d-2) var(--mv-ease-spring);
+}
+input.mv-switch-input:checked { background: var(--mv-accent); }
+input.mv-switch-input:checked::after { inset-inline-start: 14px; }
+input.mv-switch-input:disabled { opacity: .42; cursor: default; }
+input.mv-switch-input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+
+/* Pop-up button, the way a macOS 26 form draws it: no bezel — the value, then a small round
+   knob with the double chevron at the trailing end; the bezel shows only on hover. */
+select.mv-popup {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 26px;
+  max-width: 340px;
+  padding-block: 0;
+  padding-inline: 8px 32px;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: var(--mv-popup-chev), radial-gradient(circle closest-side, var(--mv-popup-knob) 0 96%, transparent 100%);
+  background-size: 8px 12px, 20px 20px;
+  background-repeat: no-repeat;
+  background-position: left 12px center, left 6px center;
+  box-shadow: none;
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  field-sizing: content;          /* as wide as the chosen value, not the longest option */
+  cursor: default;
+  transition: background-color var(--mv-d-1) var(--mv-ease-out);
+}
+select.mv-popup[dir="ltr"] { background-position: right 12px center, right 6px center; }
+select.mv-popup:hover { background-color: var(--mv-fill); }
+select.mv-popup:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+select.mv-popup option { background: var(--mv-surface); color: var(--mv-label); }
+
+/* Compact field: a number or short value inside a row. */
+.mv-field.mv-field--compact { width: 64px; height: 24px; padding-inline: 6px; text-align: center; font-family: var(--mv-font-tech); }
+/* A control that depends on a switch above it (e.g. the auto-save interval) dims while that switch is off. */
+.mv-form-row .mv-field:disabled { opacity: .45; cursor: default; }
+.mv-form-row .mv-field:disabled + span { opacity: .45; }
+
+/* Large buttons are capsules on macOS 26; small and medium stay rounded rectangles. */
+.mv-btn.mv-btn--lg { border-radius: 999px; padding-inline: 20px; }
+
+/* ── Metrics strip (a row of big figures, e.g. the speed test) ── */
+.mv-metrics { display: flex; justify-content: space-around; gap: 12px; padding: 18px 14px 6px; }
+.mv-metric { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; }
+.mv-metric > span:first-child { font-size: 11.5px; font-weight: 600; color: var(--mv-label-2); }
+.mv-metric b { font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; color: var(--mv-label); }
+.mv-metric small { font-family: var(--mv-font-latin); font-size: 11px; color: var(--mv-label-3); }
+
+/* ── K1 · Toolbar items ──────────────────────────────────────────────────
+   macOS 26 draws toolbar controls as glass capsules. .mv-toolbar is a band inside the content
+   (the old layout, where a panel has no toolbar of its own); on the desktop, shell/apps.js can
+   move the same capsule into the window's bar (.mv-win-tools), and the empty band collapses. */
+.mv-toolbar { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px 4px; }
+.mv-toolbar:not(:has(> *)) { display: none; }
+.mv-tb-group,
+.mv-tb-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--mv-glass-btn);
+  box-shadow: var(--mv-glass-btn-edge);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+}
+.mv-tb-btn,
+.mv-tb-seg > button {
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: default;
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-tb-btn { width: 30px; font-size: 15px; }
+.mv-tb-seg > button { padding-inline: 12px; font-family: var(--mv-font-tech); font-weight: 500; }
+.mv-tb-btn:hover,
+.mv-tb-seg > button:not(.active):not([aria-pressed="true"]):hover { background: var(--mv-fill); }
+/* The chosen segment is a raised thumb, as in a macOS 26 segmented control — not an accent fill. */
+.mv-tb-seg > button.active,
+.mv-tb-seg > button[aria-pressed="true"],
+/* A toolbar button that is a two-state switch (e.g. «همه بازی‌ها») shows the on state the same way. */
+.mv-tb-btn[aria-pressed="true"] { background: var(--mv-control); box-shadow: var(--mv-control-hair); font-weight: 600; }
+.mv-tb-btn:focus-visible,
+.mv-tb-seg > button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+.mv-win-tools > .mv-tb-seg,
+.mv-win-tools > .mv-tb-group { flex: none; }
+
+/* ── K2 · Status head ────────────────────────────────────────────────────
+   The first row of an engine window, like the top row of Wi-Fi or VPN in System Settings:
+   the app's tile, its name and one line of what it does; the live state sits beside it. */
+.mv-status-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.mv-status-head > .mv-side-tile { width: 40px; height: 40px; font-size: 22px; }
+.mv-sh-text { flex: 1; min-width: 0; }
+.mv-sh-text h2 { margin: 0; font-size: 14px; font-weight: 700; color: var(--mv-label); }
+.mv-sh-text p { margin: 2px 0 0; font-size: 12px; line-height: 1.75; color: var(--mv-label-2); }
+.mv-sh-end { flex: none; display: flex; align-items: center; gap: 8px; }
+.mv-status-head + .mv-form-row::before { inset-inline: 14px 14px; }
+
+/* ── K5 · Bottom bar ─────────────────────────────────────────────────────
+   Outside the scrolling content, so the primary action never scrolls away. */
+.mv-bottom-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--mv-pane);
+  box-shadow: inset 0 var(--mv-hl) 0 var(--mv-sep);
+}
+.mv-bb-lead { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--mv-label-2); }
+.mv-bb-end { flex: none; display: flex; align-items: center; gap: 8px; }
+
+/* ── K6 · Callout: a notice inside a form ── */
+.mv-form-row.mv-callout {
+  --tone: var(--mv-blue);
+  --tone-ink: var(--mv-blue-ink);
+  align-items: flex-start;
+  min-height: 0;
+  gap: 10px;
+  background: color-mix(in srgb, var(--tone) 8%, transparent);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--mv-label);
+}
+.mv-callout > i:first-child { flex: none; margin-top: 3px; font-size: 16px; color: var(--tone-ink); }
+.mv-callout b { color: var(--tone-ink); }
+.mv-form-row.mv-callout.is-warn { --tone: var(--mv-orange); --tone-ink: var(--mv-orange-ink); }
+.mv-form-row.mv-callout.is-danger { --tone: var(--mv-red); --tone-ink: var(--mv-red-ink); }
+
+/* ── K8 · Action row: the whole row is the switch ────────────────────────
+   A short list of ready-made things with one thing to do each (the built-in Iran configs, as
+   on Android): no separate button, the row itself is the target. The leading mark carries the
+   state — a spinner while it comes up, a green tick while it carries traffic. */
+.mv-form-row.is-action { width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: start; cursor: pointer; }
+.mv-form-row.is-action:hover { background: var(--mv-fill); }
+.mv-form-row.is-action:focus-visible { outline: 2px solid var(--mv-accent); outline-offset: -2px; }
+.mv-form-row.is-action[aria-busy="true"] { cursor: progress; }
+.mv-row-mark { flex: none; width: 28px; height: 28px; display: grid; place-items: center; font-size: 18px; color: var(--mv-label-2); }
+.mv-row-mark.is-on { font-size: 21px; color: var(--mv-green); }
+.mv-row-end { flex: none; font-size: 18px; color: var(--mv-label-3); }
+.mv-row-end.is-on { color: var(--mv-red); }
+.mv-form-label small.is-on { color: var(--mv-green-ink); font-weight: 600; }
+/* Finished artwork as a status-head tile (it brings its own squircle — see .mv-ic.is-image). */
+.mv-side-tile.is-image { background: none; box-shadow: none; overflow: visible; }
+.mv-side-tile.is-image > svg { width: 111.2%; height: 111.2%; max-width: none; flex: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .16)); }
+
+/* ── K7 · Steps: progress through named stages ── */
+.mv-steps { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.mv-steps.is-list { flex-direction: column; flex-wrap: nowrap; }
+.mv-step { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mv-label-3); }
+.mv-step > i {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--mv-fill-2);
+  color: var(--mv-label-3);
+  font-family: var(--mv-font-tech);
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 700;
+}
+.mv-step.is-done { color: var(--mv-label-2); }
+.mv-step.is-done > i { background: var(--mv-green-fill); color: #FFFFFF; }
+.mv-step.is-active { color: var(--mv-label); font-weight: 700; }
+.mv-step.is-active > i { background: var(--mv-accent); color: #FFFFFF; }
+.mv-step.is-failed { color: var(--mv-red-ink); }
+.mv-step.is-failed > i { background: var(--mv-red-fill); color: #FFFFFF; }
+
+/* ── K8 · Sheet: a dialog over the window it belongs to ───────────────────
+   macOS 26 sheets are a rounded card on the material, with the title centred over the content
+   and the actions where the eye ends up. The card holds a kit form, so a sheet is built from
+   the same pieces as a pane — only the container differs. Panels keep their own show/hide
+   classes (`hidden`, `opacity-0`, `scale-95`); this is only the look. */
+.mv-sheet {
+  width: min(560px, calc(100vw - 40px));
+  max-height: min(86vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: var(--mv-r-xl, 16px);
+  background: var(--mv-window, var(--mv-surface));
+  box-shadow: var(--mv-hair), var(--mv-e5, 0 24px 70px rgba(0, 0, 0, .4));
+  color: var(--mv-label);
+  transition: opacity var(--mv-d-2) var(--mv-ease-out), transform var(--mv-d-2) var(--mv-ease-out);
+}
+.mv-sheet-bar {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px 6px;
+}
+.mv-sheet-bar > h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--mv-label); }
+.mv-sheet-bar > .mv-sheet-close {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 10px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--mv-fill);
+  color: var(--mv-label-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+.mv-sheet-bar > .mv-sheet-close:hover { background: var(--mv-fill-2); color: var(--mv-label); }
+.mv-sheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 18px 18px; container-type: inline-size; }
+.mv-sheet-body > .mv-form { gap: 16px; }
+.mv-sheet-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  box-shadow: 0 calc(-1 * var(--mv-hl)) 0 var(--mv-sep-2);
+}
+
+/* ── K3 · List: rows of things, inside a .mv-form-group ───────────────────
+   A form row carries a label and a control; a LIST row carries an item — an icon or flag, a
+   name with a second line under it, a figure, and its own action. Same height, same hairlines
+   and same hover as the form rows around it, so a group can hold both. */
+.mv-list { display: flex; flex-direction: column; }
+.mv-li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 13px;
+  text-align: start;
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-li + .mv-li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 14px 0;
+  height: var(--mv-hl);
+  background: var(--mv-group-sep);
+}
+.mv-li-lead { flex: none; display: grid; place-items: center; min-width: 24px; color: var(--mv-label-2); }
+.mv-li-text { flex: 1; min-width: 0; line-height: 1.55; }
+.mv-li-text > b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mv-li-text > small { display: block; margin-top: 1px; font-size: 11.5px; color: var(--mv-label-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mv-li-text > small[dir="ltr"] { direction: ltr; unicode-bidi: isolate; text-align: start; font-family: var(--mv-font-tech); }
+.mv-li-num {
+  flex: none;
+  min-width: 42px;
+  text-align: center;
+  font-family: var(--mv-font-tech);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 700;
+}
+.mv-li-num > small { display: block; font-size: 9.5px; font-weight: 400; color: var(--mv-label-3); }
+.mv-li-end { flex: none; }
+/* `is-on` = this row is the live one (green, like an engine lamp); `is-sel` = this row is the
+   chosen one (accent, like a selected item). They mean different things and never share a look. */
+.mv-li.is-on { background: color-mix(in srgb, var(--mv-green) 10%, transparent); }
+.mv-li.is-sel { background: color-mix(in srgb, var(--mv-accent) 12%, transparent); }
+.mv-li.is-sel > .mv-li-text > b { font-weight: 700; }
+.mv-li[role="option"]:hover,
+button.mv-li:hover { background: var(--mv-fill); cursor: pointer; }
+.mv-li:focus-visible { outline: 2px solid var(--mv-accent); outline-offset: -2px; }
+.mv-list > .mv-skel { margin: 9px 14px; }
+
+/* ── K4 · Table: a list with columns, inside a .mv-form-group ─────────────
+   macOS table look: one header row, hairlines between rows, a hover fill, the selected row in
+   the accent. Numbers line up (tabular) and read left-to-right. Wider than its group, it
+   scrolls sideways inside .mv-table-wrap rather than squeezing its columns. */
+.mv-table-wrap { overflow-x: auto; }
+.mv-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; color: var(--mv-label); }
+.mv-table th {
+  padding: 9px 14px 8px;
+  text-align: start;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--mv-label-2);
+  white-space: nowrap;
+  border-bottom: var(--mv-hl) solid var(--mv-sep);
+}
+.mv-table th.is-sortable { cursor: default; }
+.mv-table th.is-sortable:hover { color: var(--mv-label); }
+.mv-table th.is-sortable::after { content: " ⇅"; font-size: 10px; color: var(--mv-label-3); }
+.mv-table td { padding: 9px 14px; white-space: nowrap; border-top: var(--mv-hl) solid var(--mv-group-sep); }
+.mv-table tbody tr:first-child td { border-top: 0; }
+.mv-table tbody tr { transition: background var(--mv-d-1) var(--mv-ease-out); }
+.mv-table tbody tr:hover { background: var(--mv-fill); }
+.mv-table tbody tr.is-selected { background: var(--mv-accent); color: #FFFFFF; }
+.mv-table tbody tr.is-selected td { border-top-color: transparent; }
+.mv-table tbody tr.is-selected + tr td { border-top-color: transparent; }
+.mv-table td.is-num, .mv-table th.is-num { text-align: end; font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; }
+.mv-table .is-ltr { direction: ltr; unicode-bidi: isolate; font-family: var(--mv-font-tech); }
+.mv-table .is-mono { font-family: var(--mv-font-mono); font-size: 11.5px; color: var(--mv-label-2); }
+.mv-table tbody tr.is-selected .is-mono { color: rgba(255, 255, 255, .85); }
+.mv-form-group > .mv-empty { padding: 26px 20px; }
+
+/* ── Settings › اعلان‌ها: the per-event list (app.js › renderNotificationMenu) as form rows ── */
+.mv-nc-types #notif-settings-list { display: block; padding: 0; max-height: none; overflow: visible; }
+.mv-nc-types #notif-settings-list > label {
+  position: relative;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 0;
+  cursor: default;
+}
+.mv-nc-types #notif-settings-list > label:hover { background: transparent; }
+.mv-nc-types #notif-settings-list > label + label::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 44px 14px;
+  height: var(--mv-hl);
+  background: var(--mv-group-sep);
+}
+.mv-nc-types #notif-settings-list > label > div:first-child { gap: 10px; }
+.mv-nc-types #notif-settings-list span { font-size: 13px; font-weight: 400; color: var(--mv-label); }
+.mv-nc-types #notif-settings-list i {
+  --tint: var(--mv-gray);
+  width: 22px;
+  height: 22px;
+  border-radius: 22.5%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: #FFFFFF !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 84%, #FFFFFF), color-mix(in srgb, var(--tint) 88%, #000));
+  box-shadow: 0 .5px 1px rgba(0, 0, 0, .25);
+}
+/* The tints the notification centre gives each event (shell/notify.js › TONE_BY_ID). */
+.mv-nc-types #notif-settings-list i.ph-magnifying-glass { --tint: var(--mv-blue); }
+.mv-nc-types #notif-settings-list i.ph-clock { --tint: var(--mv-indigo); }
+.mv-nc-types #notif-settings-list i.ph-rocket { --tint: var(--mv-green); }
+.mv-nc-types #notif-settings-list i.ph-lightning { --tint: var(--mv-orange); }
+.mv-nc-types #notif-settings-list i.ph-engine { --tint: var(--mv-indigo); }
+.mv-nc-types #notif-settings-list i.ph-shield-check { --tint: var(--mv-purple); }
+.mv-nc-types #notif-settings-list i.ph-globe-hemisphere-west { --tint: var(--mv-pink); }
+/* Mini switches, like every other row in a form. */
+.mv-nc-types #notif-settings-list input + div { width: 30px !important; height: 18px !important; }
+.mv-nc-types #notif-settings-list input + div + div { width: 14px !important; height: 14px !important; }
+.mv-nc-types #notif-settings-list input:checked + div + div { transform: translateX(-12px) !important; }
+
+/* ── Engine page ─────────────────────────────────────────────────────────
+   A window whose whole job is ONE connection: سایفون, تور, لنترن, گف, ماسک,
+   وایرگارد, وارپ در وارپ, تونل گیت‌هاب.
+
+   It is the anatomy Settings and the Store already use — an inset glass sidebar,
+   a pane with a title band — with the Store's product page as the model for the
+   action: a hero that says what is happening and carries the one button, a
+   divided strip of live facts under it, and everything else in its own sidebar
+   section instead of one long scroll of explanations.
+
+   Why sections rather than a single column: an engine page is one decision
+   (connect) plus three preferences (method, coverage, country) whose reasons need
+   paragraphs. Stacked, the paragraphs bury the decision; in sections, the front
+   page is the decision and the reasons are one click away, exactly where System
+   Settings puts them.
+
+   The sidebar's first item is the engine itself — tile, name, live state — the
+   same shape as the Cloudflare account card at the top of Settings. */
+
+.mv-eng-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 20px);
+  margin: 0 10px 8px;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  text-align: start;
+  cursor: default;
+}
+.mv-eng-card > .mv-side-tile { width: 34px; height: 34px; font-size: 18px; flex: none; }
+.mv-eng-card-text { min-width: 0; display: flex; flex-direction: column; }
+.mv-eng-card-text b { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-eng-card-text small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--mv-label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The state dot. Colour is the only difference between four states that otherwise
+   read alike at a glance, so it is never the only signal — the word beside it says
+   the same thing. */
+.mv-eng-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mv-label-3);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mv-label-3) 22%, transparent);
+}
+.mv-eng-dot.is-on { background: var(--mv-green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mv-green) 26%, transparent); }
+.mv-eng-dot.is-busy { background: var(--mv-orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mv-orange) 26%, transparent); }
+.mv-eng-dot.is-bad { background: var(--mv-red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mv-red) 26%, transparent); }
+
+/* ── the hero ── */
+.mv-eng-hero { display: flex; align-items: flex-start; gap: 18px; padding: 18px 0 16px; }
+.mv-eng-hero > .mv-side-tile { width: 76px; height: 76px; border-radius: 18px; font-size: 38px; flex: none; }
+.mv-eng-hero-text { flex: 1 1 auto; min-width: 0; }
+.mv-eng-hero h1 { margin: 0; font-size: 23px; font-weight: 740; line-height: 1.3; letter-spacing: -.01em; }
+.mv-eng-hero p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.85; color: var(--mv-label-2); }
+.mv-eng-hero p code { font-size: .92em; }
+.mv-eng-cta { margin-top: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mv-eng-cta .mv-btn--lg { min-width: 106px; justify-content: center; }
+.mv-eng-note { font-size: 11.5px; line-height: 1.7; color: var(--mv-label-2); }
+
+/* ── the divided strip of live facts ── */
+.mv-eng-stats {
+  display: flex;
+  padding: 12px 0 14px;
+  border-top: var(--mv-hl) solid var(--mv-group-sep, rgba(128, 128, 128, .2));
+  border-bottom: var(--mv-hl) solid var(--mv-group-sep, rgba(128, 128, 128, .2));
+}
+.mv-eng-stat {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 10px;
+  text-align: center;
+  border-inline-start: var(--mv-hl) solid var(--mv-group-sep, rgba(128, 128, 128, .2));
+}
+.mv-eng-stat:first-child { border-inline-start: 0; }
+.mv-eng-stat-k {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--mv-label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mv-eng-stat-v {
+  margin-top: 5px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--mv-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mv-eng-stat-v.is-quiet { color: var(--mv-label-3); font-weight: 600; }
+
+/* ── sections ── */
+.mv-eng-sec { display: none; }
+.mv-eng-sec.is-on { display: block; }
+/* The page uses the window it is given. A centred strip with empty sides is the one thing this
+   project's windows must never do, so nothing here is capped: the cards reflow into more columns as
+   the window grows (the grid's own auto-fit), and the form sections follow the kit's 2- and 3-column
+   rules. Only the paragraphs keep a reading measure, which is theirs, not the page's. */
+.mv-eng-sec { max-width: none; }
+.mv-eng-sec > .mv-form { max-width: none; }
+.mv-eng-stage-text p { max-width: 62ch; }
+/* The pane's own scroller already pads; a section adds only the room the hero needs. */
+.mv-eng-sec > .mv-form { padding-top: 6px; }
+
+/* A compact action in the title band, for the sections where the hero is not on screen.
+   One button is visible at any moment: the hero's, or this one — never both. */
+/* Like .mv-pane-nav, this sits above the window's transparent drag bar (shell.css › .is-split,
+   z-index 5) — without the lift, the band drags the window instead of pressing the button. */
+.mv-pane-bar > .mv-eng-bar-action { margin-inline-start: auto; position: relative; z-index: 6; display: flex; gap: 8px; }
+
+/* ── Engine page · the stage ─────────────────────────────────────────────
+   The front page of an engine window is one decision, so it is built around one control: a power
+   button big enough to be the obvious thing on screen, on a card tinted with that engine's own
+   colour. Everything else on the page is a preference, and preferences are rows.
+
+   The ring around the button is the state: quiet when off, turning while it tries, lit when it is
+   carrying traffic. It is never the only signal — the word under the button says the same thing,
+   because colour alone fails for a colour-blind user and in a screenshot sent to support. */
+
+.mv-eng-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 26px 26px 22px;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  /* Just the button's own height plus the padding: with nothing written under it, the button and
+     the live chart beside it sit on one line and the card stops there. */
+  min-height: 172px;
+  /* Calm, with one corner lit in the engine's colour. An earlier version poured the tint across the
+     whole card, which on a red engine read as an alarm before anything had gone wrong. */
+  background:
+    radial-gradient(120% 130% at 80% -18%, color-mix(in srgb, var(--tint) 24%, transparent), transparent 58%),
+    radial-gradient(80% 90% at 8% 118%, color-mix(in srgb, var(--tint) 10%, transparent), transparent 62%),
+    linear-gradient(165deg, color-mix(in srgb, var(--mv-label) 9%, var(--mv-group)), color-mix(in srgb, var(--mv-label) 2%, var(--mv-group)));
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+}
+.mv-eng-stage-text { flex: 1 1 260px; min-width: 0; }
+.mv-eng-stage-text h1 { margin: 0; font-size: 21px; font-weight: 750; line-height: 1.5; letter-spacing: -.01em; }
+.mv-eng-stage-text p { margin: 8px 0 0; font-size: 12.5px; line-height: 1.9; color: var(--mv-label-2); }
+.mv-eng-stage-text p code { font-size: .92em; }
+.mv-eng-stage-side { flex: 0 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.mv-eng-stage-side .mv-eng-note { text-align: center; }
+
+/* ── the button ── */
+.mv-eng-power-wrap { flex: none; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.mv-eng-power {
+  --ring: var(--mv-label-3);
+  position: relative;
+  width: 124px;
+  height: 124px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+  color: var(--mv-label);
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--mv-label) 10%, transparent), transparent 62%),
+    color-mix(in srgb, var(--mv-label) 8%, var(--mv-group));
+  box-shadow:
+    inset 0 0 0 var(--mv-hl) var(--mv-group-edge),
+    0 0 0 6px color-mix(in srgb, var(--ring) 16%, transparent),
+    0 8px 22px rgba(0, 0, 0, .28);
+  transition: box-shadow var(--mv-d-2) var(--mv-ease-out), transform var(--mv-d-1) var(--mv-ease-out), color var(--mv-d-2) var(--mv-ease-out);
+}
+.mv-eng-power:hover:not(:disabled) { transform: translateY(-1px); }
+.mv-eng-power:active:not(:disabled) { transform: scale(.97); }
+.mv-eng-power:disabled { cursor: default; opacity: .5; }
+.mv-eng-power:focus-visible { outline: none; box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge), 0 0 0 6px var(--mv-accent-ring), 0 8px 22px rgba(0, 0, 0, .28); }
+
+/* The ring itself: a conic sweep that only turns while the engine is trying. */
+.mv-eng-power::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from 0deg, transparent 0 62%, var(--ring) 78%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--mv-d-2) var(--mv-ease-out);
+}
+.mv-eng-power.is-busy { --ring: var(--mv-orange); color: var(--mv-orange); }
+.mv-eng-power.is-busy::before { opacity: 1; animation: mv-eng-sweep 1.15s linear infinite; }
+.mv-eng-power.is-on { --ring: var(--mv-green); color: var(--mv-green); }
+.mv-eng-power.is-on::before {
+  opacity: 1;
+  background: conic-gradient(from 0deg, var(--ring), color-mix(in srgb, var(--ring) 45%, transparent), var(--ring));
+}
+.mv-eng-power.is-bad { --ring: var(--mv-red); color: var(--mv-red); }
+.mv-eng-power.is-bad::before { opacity: 1; background: conic-gradient(from 0deg, var(--ring), color-mix(in srgb, var(--ring) 40%, transparent), var(--ring)); }
+@keyframes mv-eng-sweep { to { transform: rotate(360deg); } }
+html[data-motion="reduced"] .mv-eng-power.is-busy::before { animation: none; opacity: .8; }
+
+/* ── the cards under the stage ── */
+.mv-eng-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+  margin-top: 14px;
+}
+.mv-eng-card2 {
+  border-radius: 14px;
+  background: var(--mv-group);
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.mv-eng-card2-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 13px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.mv-eng-card2-head:hover { background: var(--mv-fill); }
+.mv-eng-card2-head > .mv-eng-glyph {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: var(--tint, var(--mv-blue));
+}
+.mv-eng-card2-head h3 { margin: 0; font-size: 13px; font-weight: 700; flex: 1 1 auto; min-width: 0; }
+.mv-eng-card2-head .mv-eng-card2-end { flex: none; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--mv-label-2); }
+.mv-eng-card2-body { padding: 0 8px 8px; display: flex; flex-direction: column; gap: 4px; }
+/* A header with one small action beside it — «سنجش و انتخاب سریع‌ترین» on the SNI cards. A button
+   cannot live inside a button, so the header and the action are siblings on one row. */
+.mv-eng-card2-top { display: flex; align-items: stretch; }
+.mv-eng-card2-top > .mv-eng-card2-head { flex: 1 1 auto; min-width: 0; }
+/* No hover tint on a header that shares its row: the highlight stopped short of the action beside
+   it and read as half a band lighting up. The chevron already says the header opens something. */
+.mv-eng-card2-top > .mv-eng-card2-head:hover { background: transparent; }
+.mv-eng-card2-act {
+  flex: none;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  margin-inline-end: 9px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--mv-fill);
+  color: var(--mv-label-2);
+  font-size: 14px;
+  cursor: pointer;
+}
+.mv-eng-card2-act:hover:not(:disabled) { background: var(--mv-fill-2); color: var(--mv-label); }
+.mv-eng-card2-act:disabled { opacity: .55; cursor: default; }
+.mv-eng-card2-act:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+.mv-eng-card2-foot { padding: 2px 13px 11px; font-size: 11px; line-height: 1.75; color: var(--mv-label-3); }
+
+/* A pick inside a card: the radio mark, a label, and its one line of reason. */
+.mv-eng-pick {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.mv-eng-pick:hover:not(:disabled) { background: var(--mv-fill); }
+.mv-eng-pick:disabled { cursor: default; opacity: .55; }
+.mv-eng-pick.is-on { background: var(--mv-fill); }
+.mv-eng-pick > i { flex: none; margin-top: 1px; font-size: 16px; color: var(--mv-label-3); }
+.mv-eng-pick.is-on > i { color: var(--mv-accent, var(--mv-blue)); }
+.mv-eng-pick.is-live > i { color: var(--mv-green); }
+.mv-eng-pick-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mv-eng-pick-text b { font-size: 12.5px; font-weight: 620; }
+.mv-eng-pick-text small { font-size: 11px; line-height: 1.6; color: var(--mv-label-2); }
+
+/* ── advanced ── */
+.mv-eng-adv { margin-top: 14px; }
+.mv-eng-kv { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.mv-eng-kv code {
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: var(--mv-fill-2);
+  color: var(--mv-label);
+}
+.mv-eng-copy {
+  border: 0;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--mv-label-2);
+  cursor: pointer;
+  font-size: 14px;
+}
+.mv-eng-copy:hover { background: var(--mv-fill); color: var(--mv-label); }
+
+/* ── the strip along the bottom of the window ── */
+.mv-eng-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  font-size: 11.5px;
+  color: var(--mv-label-2);
+  border-top: var(--mv-hl) solid var(--mv-group-sep, rgba(128, 128, 128, .2));
+  background: var(--mv-pane);
+}
+.mv-eng-foot .mv-eng-foot-end { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
+
+/* ── the sidebar's identity block, as in the mock-up: the engine, centred ── */
+.mv-eng-ident {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 14px;
+  text-align: center;
+}
+.mv-eng-ident > .mv-side-tile { width: 54px; height: 54px; border-radius: 14px; font-size: 27px; }
+.mv-eng-ident b { font-size: 14px; font-weight: 700; }
+.mv-eng-ident small { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--mv-label-2); }
+
+/* ── A flag, as a bundled SVG ─────────────────────────────────────────────
+   Windows has no glyphs for regional-indicator pairs, so an emoji flag renders as two boxed
+   letters. The app carries public/assets/flags/{cc}.svg; the country code sits behind the image,
+   which is what a reader sees if there is no file for that region. */
+.mv-flag {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--mv-label-3);
+  background: var(--mv-fill-2);
+  box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+  vertical-align: -2px;
+}
+.mv-flag > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mv-flag.is-none {
+  background: repeating-linear-gradient(45deg, var(--mv-fill), var(--mv-fill) 3px, var(--mv-fill-2) 3px, var(--mv-fill-2) 4px);
+}
+
+/* ── The country picker ──────────────────────────────────────────────────
+   This page's own control, not the operating system's menu: a <select> cannot carry a flag, and
+   the menu it opens belongs to a different program's design. Collapsed it is one row; open it is a
+   searchable list in the same shape as every other row on the page. */
+.mv-eng-cc-cur,
+.mv-eng-cc-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.mv-eng-cc-cur { background: var(--mv-fill); }
+.mv-eng-cc-cur:hover:not(:disabled),
+.mv-eng-cc-row:hover:not(:disabled) { background: var(--mv-fill-2); }
+.mv-eng-cc-cur:disabled,
+.mv-eng-cc-row:disabled { cursor: default; opacity: .55; }
+.mv-eng-cc-cur > i { margin-inline-start: auto; font-size: 13px; color: var(--mv-label-3); }
+.mv-eng-cc-row.is-on { background: var(--mv-fill); }
+.mv-eng-cc-row > i { margin-inline-start: auto; font-size: 15px; color: var(--mv-accent, var(--mv-blue)); }
+.mv-eng-cc-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mv-eng-cc-text b { font-size: 12.5px; font-weight: 620; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-eng-cc-text small { font-size: 10.5px; color: var(--mv-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* A country this account cannot reach. Shown, not hidden: hiding it leaves the user hunting for
+   a country that is really there, while offering it as an ordinary choice costs them a connect
+   that runs its whole budget and fails. The padlock and the muted text say which it is. */
+.mv-eng-cc-row.is-locked { opacity: .5; }
+.mv-eng-cc-row.is-locked > i { color: var(--mv-label-3); }
+.mv-eng-cc-row.is-locked .mv-eng-cc-text small { color: var(--mv-label-3); }
+
+/* گف's live numbers, and the engine's own speed series beside them. */
+.fr-gstats { display: flex; gap: 8px; }
+.fr-gstat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: var(--mv-fill);
+}
+.fr-gstat small { font-size: 10.5px; color: var(--mv-label-2); }
+.fr-gstat b { font-size: 13px; font-weight: 640; font-variant-numeric: tabular-nums; }
+.fr-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 34px;
+  margin-top: 8px;
+  padding: 0 2px;
+}
+.fr-spark > i {
+  flex: 1;
+  min-width: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--mv-green, #34C759);
+  opacity: .75;
+}
+
+/* The exit sweep sits ABOVE the country list, so its button spans the width and its result
+   reads as a headline rather than a footnote. */
+.fr-sweep-top { margin-bottom: 12px; }
+.mv-btn.is-wide { width: 100%; justify-content: center; }
+.fr-sweep-best {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--mv-fill);
+  font-size: 12px;
+}
+.fr-sweep-best > i { color: var(--mv-yellow, #FFCC00); font-size: 15px; }
+.fr-sweep-best .mv-link { margin-inline-start: auto; }
+/* The verdict is not always a trophy: تور's measurement often ends in «this is as good as the
+   line gets», and a gold cup over that sentence would be reading the result wrong. */
+.fr-sweep-best > i.ph-check-circle { color: var(--mv-green, #34C759); }
+.fr-sweep-best > i.ph-warning { color: var(--mv-orange, #FF9500); }
+
+/* تور's live circuit: the three relays the connection is going through, entry to exit. */
+.fr-circuit {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-bottom: 9px;
+}
+.fr-hop {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: var(--mv-fill);
+  text-align: center;
+}
+.fr-hop > b { font-size: 12px; font-weight: 600; }
+.fr-hop > small { font-size: 10px; color: var(--mv-label-3); }
+/* The relay's own name: Latin, isolated from the Persian around it, and allowed to be cut —
+   «DolfijneTorRelay01» will never fit a third of a card and the country above it is the part
+   that carries meaning. The full name and address are in the title attribute. */
+.fr-hop-nick {
+  display: block;
+  max-width: 100%;
+  font-size: 9.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--mv-label-3);
+  opacity: .75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+}
+.fr-hop-arrow { align-self: center; color: var(--mv-label-3); font-size: 12px; }
+
+/* One measured draw. The number is the point, so it is the thing that is aligned. */
+.fr-draws { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.fr-draw {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: 9px;
+  background: var(--mv-fill);
+  font-size: 12px;
+}
+.fr-draw-n {
+  flex: 0 0 auto;
+  width: 17px; height: 17px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--mv-fill-2, rgba(120,120,128,.16));
+  font-size: 10px;
+  font-weight: 650;
+  color: var(--mv-label-2);
+}
+.fr-draw > b { font-weight: 600; }
+.fr-draw-v {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 620;
+  color: var(--mv-label-2);
+  white-space: nowrap;
+}
+.fr-draw.is-good .fr-draw-v { color: var(--mv-green, #34C759); }
+.fr-draw.is-bad .fr-draw-v { color: var(--mv-label-3); font-weight: 500; }
+
+/* «پل دلخواه»: a place to paste bridge lines, folded away until it is wanted. */
+.fr-bridges { margin-top: 6px; }
+.fr-bridges-body { padding: 10px 12px 12px; }
+.fr-bridges-in {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 9px 10px;
+  border: 1px solid var(--mv-separator);
+  border-radius: 10px;
+  background: var(--mv-fill);
+  color: var(--mv-label);
+  /* A bridge line is one long unbroken token and wrapping it mid-fingerprint makes it unreadable;
+     a monospace face with a scrollbar is the honest way to show it. */
+  font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+  overflow-x: auto;
+}
+.fr-bridges-in:focus { outline: none; border-color: var(--mv-blue); }
+.fr-bridges-note { margin: 8px 0 10px; font-size: 11px; line-height: 1.7; color: var(--mv-label-3); }
+.fr-bridges-note code { font-size: 10px; }
+.fr-bridges-act { display: flex; align-items: center; gap: 12px; }
+
+/* One country's sweep result, written into its own row while the sweep is still running. */
+.fr-cc-res {
+  margin-inline-start: auto;
+  font-size: 11px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  color: var(--mv-label-2);
+  white-space: nowrap;
+}
+.fr-cc-res.is-good { color: var(--mv-green, #34C759); }
+.fr-cc-res.is-bad { color: var(--mv-label-3); font-weight: 500; }
+/* The check/lock glyph must stay at the end once a result sits beside it. */
+.mv-eng-cc-row > .fr-cc-res + i { margin-inline-start: 7px; }
+
+/* The exit sweep: one button, or its progress, plus the last result. */
+.fr-exit-extras .fr-sweep { display: flex; flex-direction: column; gap: 6px; }
+.fr-exit-extras .fr-sweep .mv-btn { align-self: flex-start; }
+.mv-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-inline-start: 6px;
+  font: inherit;
+  font-weight: 620;
+  color: var(--mv-accent, var(--mv-blue));
+  cursor: pointer;
+}
+.mv-link:hover { text-decoration: underline; }
+
+.mv-eng-cc-list { margin-top: 6px; }
+.mv-eng-cc-search { position: relative; display: flex; align-items: center; margin: 0 2px 6px; }
+.mv-eng-cc-search > i { position: absolute; inset-inline-start: 9px; font-size: 13px; color: var(--mv-label-3); pointer-events: none; }
+.mv-eng-cc-search > input {
+  width: 100%;
+  height: 28px;
+  padding-inline: 28px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mv-fill-2);
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+.mv-eng-cc-search > input:focus { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+/* Tall enough to choose from, short enough that the card stays a card. */
+.mv-eng-cc-rows { max-height: 236px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.mv-eng-cc-empty { padding: 10px; font-size: 11.5px; color: var(--mv-label-3); text-align: center; }
+
+/* In its own section the list is already open and has room to breathe. */
+.mv-eng-sec[data-sec="region"] .mv-eng-cc-rows { max-height: none; }
+
+/* ── A spinner that spins true ──────────────────────────────────
+   A DRAWN ring, not a rotating glyph. A font glyph sits on a baseline with its own bearings, so
+   its optical centre is not the centre of its box — rotating it wobbles however well the box is
+   centred. Sized in em, so one rule serves a 12px row marker and a 22px button. */
+.mv-spin-ring { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.mv-spin-ring::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: .85em;
+  height: .85em;
+  border: .14em solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: mv-spin-ring .8s linear infinite;
+}
+@keyframes mv-spin-ring { to { transform: rotate(360deg); } }
+html[data-motion="reduced"] .mv-spin-ring::before { animation: none; }
+
+/* ── Engine page · the run, in one line ───────────────────────────
+   Seven stages for ماسک. Stacked they read as a list of chores; on ONE line between the hero and
+   the cards they read as what they are — a progress bar with names. It scrolls sideways rather
+   than wrapping, so the cards below never jump down a row as the engine advances. */
+.mv-eng-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 14px 2px 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mv-eng-flow::-webkit-scrollbar { display: none; }
+.mv-eng-flow > .mv-steps { flex: 0 0 auto; flex-wrap: nowrap; }
+/* A hairline between one stage and the next, so the row reads as a sequence. */
+.mv-eng-flow .mv-step + .mv-step::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: var(--mv-hl);
+  margin-inline-end: 2px;
+  background: var(--mv-sep-2, rgba(128, 128, 128, .3));
+}
+.mv-eng-flow > .ae-details {
+  margin-inline-start: auto;
+  white-space: nowrap;
+  font-family: var(--mv-font-tech);
+  font-size: 11px;
+  color: var(--mv-label-3);
+}
+
+/* ── Engine page · the live traffic beside the button ──────────────────
+   The side of the hero used to carry one sentence, and that sentence belongs under the button it
+   describes — so this is what the space is for now: what the connection is doing, right now.
+   Download is drawn upward from the midline and upload downward, on one shared scale.
+   The dot is lit only while bytes are arriving; a stale figure must not look live. */
+.mv-eng-live {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 12px 9px;
+  transition: opacity var(--mv-d-2, .25s) var(--mv-ease-out, ease);
+}
+/* No edge, a haze. A hairline box drew a second card inside a card; this is the same faint ground
+   fading out into the hero on every side, so the chart reads as part of the picture behind it. */
+.mv-eng-live::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: 28px;
+  background: radial-gradient(82% 82% at 50% 50%,
+    color-mix(in srgb, var(--mv-label) 10%, transparent) 0%,
+    color-mix(in srgb, var(--mv-label) 8%, transparent) 46%,
+    transparent 74%);
+  filter: blur(8px);
+}
+.mv-eng-live.is-idle { opacity: .74; }
+.mv-eng-live-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--mv-label-2);
+}
+.mv-eng-live-dot {
+  margin-inline-start: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mv-label-4);
+}
+.mv-eng-live-dot.is-live { background: var(--mv-green); animation: mv-live-pulse 1.8s ease-out infinite; }
+@keyframes mv-live-pulse {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mv-green) 55%, transparent); }
+  to { box-shadow: 0 0 0 7px transparent; }
+}
+.mv-eng-live-svg { display: block; width: 100%; height: 62px; }
+.mv-eng-live-mid { stroke: var(--mv-sep-2, rgba(128, 128, 128, .28)); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+.mv-eng-live-ln { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.mv-eng-live-ln.is-down { stroke: var(--mv-green); }
+.mv-eng-live-ln.is-up { stroke: var(--mv-blue); }
+.mv-eng-live-figs { display: flex; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }
+.mv-eng-live-figs > span { display: inline-flex; align-items: baseline; gap: 3px; }
+.mv-eng-live-figs .is-down { color: var(--mv-green-ink, var(--mv-green)); }
+.mv-eng-live-figs .is-up { color: var(--mv-blue-ink, var(--mv-blue)); }
+.mv-eng-live-figs i { font-size: 10px; }
+.mv-eng-live-figs b { font-size: 14.5px; font-weight: 700; }
+.mv-eng-live-figs small { font-size: 10px; opacity: .78; }
+
+/* ── Engine page · the home section has no toolbar ────────────────────
+   Every other section is somewhere you went, so it gets a back button and its name. Home is the
+   window itself — one button and three cards — and a bar reading «اتصال» above a power button that
+   already says so was naming what the reader is looking at. The 52px band stays: the window's own
+   transparent drag bar lies over it (shell.css › .is-split), and the content must start below it. */
+.mv-pane.is-home > .mv-pane-bar { display: none; }
+/* With the band gone the hero starts level with the sidebar's own top edge — but the window's
+   transparent drag bar lies over those 50px, so it is narrowed to the sidebar's strip at the same
+   time (the traffic lights live there anyway). Without that, the top of the power button would
+   drag the window instead of pressing it. */
+.mv-pane.is-home > .mv-pane-scroll { padding-top: 8px; }
+.mv-win.is-split:has(.mv-pane.is-home) > .mv-win-bar { width: 230px; inset-inline-end: auto; }
+
+/* A sidebar item that leaves this window for another one (the store), with the arrow macOS puts
+   on anything that opens elsewhere. */
+.mv-side-item.mv-side-go > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; }
+.mv-side-item.mv-side-go > i:last-child { margin-inline-start: auto; font-size: 11px; color: var(--mv-label-3); }
+.mv-side-item.mv-side-go:hover > i:last-child { color: var(--mv-label-2); }
+
+/* ── Engine page · the hero as a picture ─────────────────────────
+   Settings › صفحه نمایش › «زمینهٔ سربرگ اتصال». The card can wear the desktop's wallpaper or a
+   picture of the reader's own instead of the engine's gradient. The darkness and the frost are
+   theirs to set, because white text over a bright photograph is unreadable and there is no one
+   value that is right for every picture. shell/wallpaper.js publishes the three variables.
+
+   The label tokens are REDEFINED rather than each colour being written again: the button's glass,
+   its ring, the notes and the chart are all built from those tokens already, so one override
+   dresses the whole card for a photograph — and anything added to the hero later inherits it. */
+:root.mv-hero-on .mv-eng-stage {
+  --mv-label: #FFFFFF;
+  --mv-label-2: rgba(255, 255, 255, .84);
+  --mv-label-3: rgba(255, 255, 255, .64);
+  --mv-label-4: rgba(255, 255, 255, .44);
+  --mv-group: rgba(120, 120, 128, .30);
+  --mv-group-edge: rgba(255, 255, 255, .24);
+  --mv-sep-2: rgba(255, 255, 255, .26);
+  color: #FFFFFF;
+  background: var(--mv-hero-image) center / cover no-repeat, #1E1E24;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .34);
+}
+/* The dim and the frost: over the picture, under everything the card says. */
+:root.mv-hero-on .mv-eng-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, var(--mv-hero-dim, .38));
+  -webkit-backdrop-filter: blur(var(--mv-hero-blur, 0px)) saturate(1.15);
+  backdrop-filter: blur(var(--mv-hero-blur, 0px)) saturate(1.15);
+}
+:root.mv-hero-on .mv-eng-stage > * { position: relative; z-index: 1; }
+:root.mv-hero-on .mv-eng-live::before {
+  background: radial-gradient(82% 82% at 50% 50%,
+    rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .15) 46%, transparent 74%);
+}
+/* The vivid colours, not the ink ones: those are tuned for a page's own ground, and this one is a
+   photograph. */
+:root.mv-hero-on .mv-eng-live-figs .is-down { color: color-mix(in srgb, var(--mv-green) 70%, #FFFFFF); }
+:root.mv-hero-on .mv-eng-live-figs .is-up { color: color-mix(in srgb, var(--mv-blue) 60%, #FFFFFF); }
+
+/* ── Sidebar · a group title ─────────────────────────────────────────────
+   Finder and Mail head each sidebar group; Settings does not, because it has only one kind of
+   thing in it. A page whose sidebar carries BOTH documents and sections (the scanner: its saved
+   scans, then its pages) has to say which is which, and the cheapest honest way is a label. */
+.mv-side-head {
+  padding: 4px 10px 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--mv-label-3);
+}
+
+/* ── Engine page · a narrow window ───────────────────────────────────────
+   LAST in the file on purpose. A container query does not raise specificity, so these rules only
+   win if they come after the ones they override — written higher up, the stage kept its desktop
+   padding and the button its full 124px, and the choices fell below the fold. */
+/* Narrow window: the stage stacks instead of squeezing the button — and shrinks with it, or the
+   card alone fills the window and the choices fall below the fold. */
+@container (max-width: 700px) {
+  .mv-eng-stage { flex-direction: column; text-align: center; gap: 14px; padding: 18px 16px; min-height: 0; }
+  /* `flex: 1 1 260px` is a WIDTH in the row layout and a HEIGHT once the axis turns, which is what
+     made the stage 490px tall with three short things in it. */
+  .mv-eng-stage-text, .mv-eng-stage-side { flex: 0 0 auto; }
+  .mv-eng-stage-side { align-self: stretch; }
+  .mv-eng-stage-text h1 { font-size: 18px; }
+  .mv-eng-stage-text p { margin-inline: auto; }
+  .mv-eng-power { width: 96px; height: 96px; font-size: 34px; }
+}

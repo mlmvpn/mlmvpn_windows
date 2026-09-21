@@ -1,0 +1,42 @@
+﻿[
+    {
+        "InterfaceAlias":  "Wi-Fi 3",
+        "InterfaceIndex":  33,
+        "InterfaceDescription":  "Realtek RTL8188FTV Wireless LAN 802.11n USB 2.0 Network Adapter #2",
+        "IPv4Address":  "192.168.1.153",
+        "IPv4DefaultGateway":  "192.168.1.1",
+        "DNSServer":  "1.1.1.1,1.0.0.1"
+    },
+    {
+        "InterfaceAlias":  "Ethernet 4",
+        "InterfaceIndex":  8,
+        "InterfaceDescription":  "Kerio Virtual Network Adapter",
+        "IPv4Address":  "169.254.41.232",
+        "IPv4DefaultGateway":  null,
+        "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+    },
+    {
+        "InterfaceAlias":  "Ethernet 3",
+        "InterfaceIndex":  23,
+        "InterfaceDescription":  "TAP-Windows Adapter V9",
+        "IPv4Address":  "169.254.250.156",
+        "IPv4DefaultGateway":  null,
+        "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+    },
+    {
+        "InterfaceAlias":  "Ethernet",
+        "InterfaceIndex":  4,
+        "InterfaceDescription":  "Intel(R) Ethernet Connection I217-LM",
+        "IPv4Address":  "169.254.219.253",
+        "IPv4DefaultGateway":  null,
+        "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+    },
+    {
+        "InterfaceAlias":  "VPN - VPN Client",
+        "InterfaceIndex":  34,
+        "InterfaceDescription":  "VPN Client Adapter - VPN",
+        "IPv4Address":  "169.254.37.134",
+        "IPv4DefaultGateway":  null,
+        "DNSServer":  "fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3"
+    }
+]

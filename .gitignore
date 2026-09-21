@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  MLMVPN for Windows — what never goes in the repository
+#
+#  Three groups, and the reason each one is here matters:
+#    1. secrets and the developer's own infrastructure  (leaking these is the harm)
+#    2. build outputs and third-party binaries          (hundreds of MB, rebuildable)
+#    3. local scratch                                   (noise)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── 1. secrets, credentials, personal infrastructure ─────────────────────────
+
+# Written fresh every time the Google Script tunnel starts. Contains the Apps
+# Script deployment id and its auth key — live credentials for one deployment.
+data/gst-config.toml
+
+# A developer's scratch Xray config. Points at whatever worker they were testing,
+# with the access UUID in it. Not part of the build (see package.json build.files).
+carries_cfg.json
+
+# Signing keys, tokens, environment overrides — none of these belong in git.
+# The store channel's Ed25519 key lives in ~/.mlmvpn-dev/, outside the tree, and
+# must stay there.
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+secrets.json
+*credentials*.json
+
+# Local machine state that the app or the tools write next to the source.
+t.json
+traffic_db.json
+xray_test_access.log
+xray_test_error.log
+*.log
+!data/sanction-unsupported.log
+
+# Editor/agent local settings — these record absolute paths from one machine.
+.claude/settings.local.json
+.agents/
+.freebuff/
+
+
+# ── 2. build outputs and third-party binaries ────────────────────────────────
+
+node_modules/
+dist/
+build/
+out/
+*.asar
+*.asar.disabled
+
+# The engine binaries: xray, sing-box, tor, psiphon, openvpn, aether, lantern,
+# geph, wintun and their data files. ~450 MB, none of it ours, and all of it
+# fetched or built rather than authored. docs/BUILD.md says where each one comes
+# from and how to put the folder together.
+core/
+
+# Vendored upstream sources kept locally for rebuilding two of those binaries.
+# They are large (gst-src alone carries a Rust target/ directory) and each has
+# its own upstream repository. docs/BUILD.md names them.
+aether-src/
+gst-src/
+
+# The Android app has its own repository: github.com/mlmvpn/mlmvpn_android
+android/
+android.zip
+
+# Snapshots taken before risky changes. This project uses them instead of
+# branches for that purpose; they are whole copies of the tree.
+backup/
+
+# Generated code-knowledge graph.
+graphify-out/
+
+
+# Output from running the test suites: a real Psiphon datastore, session notices and
+# generated configs. Rebuilt by the tests themselves, and it carries live session data.
+tests/**/artifacts/
+
+# Has its own repository: github.com/mlmvpn/cloud-web-panel
+cloud-web-panel/
+
+# ── 3. local scratch ─────────────────────────────────────────────────────────
+
+Microsoft/
+Thumbs.db
+desktop.ini
+.DS_Store
+*.tmp
+*.swp
+*~

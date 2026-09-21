@@ -1,0 +1,439 @@
+/* =====================================================================
+   MLMVPN components — every new piece of UI is built from these.
+   They read tokens only (ui/tokens.css); none of them names a colour.
+   Namespaced .mv-* so nothing collides with the classes panels already use.
+   ===================================================================== */
+
+/* ── Technical values: IPs, ports, hosts, UUIDs, protocol names, config strings.
+      Always LTR, isolated from the surrounding Persian, Latin digits, monospace. ── */
+.mv-tech {
+  font-family: var(--mv-font-mono);
+  font-size: .92em;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.mv-latin { font-family: var(--mv-font-latin); }
+.mv-num { font-variant-numeric: tabular-nums; }
+
+/* ── Buttons ── */
+.mv-btn {
+  --h: 28px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  height: var(--h);
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--mv-label);
+  background: var(--mv-control);
+  box-shadow: var(--mv-control-hair);
+  transition: background var(--mv-d-1) var(--mv-ease-out), filter var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-btn svg, .mv-btn i { font-size: 15px; width: 15px; height: 15px; flex: none; }
+.mv-btn:hover { background: var(--mv-control-hover); }
+.mv-btn:active { background: var(--mv-control-press); }
+.mv-btn[disabled], .mv-btn.is-disabled { opacity: .42; pointer-events: none; cursor: default; }
+.mv-btn--primary {
+  color: var(--mv-on-accent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mv-accent) 88%, #FFFFFF), var(--mv-accent));
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--mv-accent) 70%, #000), 0 1px 1.5px rgba(0, 0, 0, .18);
+  font-weight: 600;
+}
+.mv-btn--primary:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--mv-accent) 80%, #FFFFFF), color-mix(in srgb, var(--mv-accent) 92%, #FFFFFF)); }
+.mv-btn--primary:active { background: var(--mv-accent-2); }
+.mv-btn--plain { background: transparent; box-shadow: none; color: var(--mv-accent); }
+.mv-btn--plain:hover { background: var(--mv-fill); }
+.mv-btn--danger { color: var(--mv-red-ink); }
+.mv-btn--danger-fill {
+  color: #FFFFFF;
+  background: var(--mv-red-fill);
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--mv-red-fill) 70%, #000);
+  font-weight: 600;
+}
+.mv-btn--icon { width: var(--h); padding: 0; background: transparent; box-shadow: none; color: var(--mv-label-2); }
+.mv-btn--icon:hover { background: var(--mv-fill-2); color: var(--mv-label); }
+.mv-btn--sm { --h: 22px; font-size: 12px; padding-inline: 9px; border-radius: 5px; }
+.mv-btn--lg { --h: 34px; font-size: 14px; padding-inline: 18px; border-radius: var(--mv-r-md); }
+.mv-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring), var(--mv-control-hair); }
+
+/* ── Fields ── */
+.mv-field {
+  font: inherit;
+  font-size: 13px;
+  height: 28px;
+  width: 100%;
+  padding-inline: 9px;
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  color: var(--mv-label);
+  background: var(--mv-field);
+  box-shadow: inset 0 0 0 1px var(--mv-sep-2);
+  transition: box-shadow var(--mv-d-1) var(--mv-ease-out);
+}
+textarea.mv-field { height: auto; padding-block: 7px; line-height: 1.7; resize: vertical; }
+.mv-field::placeholder { color: var(--mv-label-3); }
+.mv-field:focus { outline: none; box-shadow: 0 0 0 3px var(--mv-accent-ring), inset 0 0 0 1px var(--mv-accent); }
+.mv-field--tech { font-family: var(--mv-font-mono); font-size: 12.5px; direction: ltr; text-align: left; }
+.mv-field.is-error { box-shadow: 0 0 0 3px color-mix(in srgb, var(--mv-red) 28%, transparent), inset 0 0 0 1px var(--mv-red); }
+.mv-label { display: block; font-size: 12px; font-weight: 600; color: var(--mv-label-2); margin-bottom: 5px; }
+.mv-hint { font-size: 12px; line-height: 1.75; color: var(--mv-label-2); }
+.mv-err { font-size: 12px; color: var(--mv-red-ink); margin-top: 5px; }
+
+.mv-search { position: relative; display: flex; align-items: center; }
+.mv-search > svg, .mv-search > i { position: absolute; inset-inline-start: 9px; width: 14px; height: 14px; font-size: 14px; color: var(--mv-label-3); pointer-events: none; }
+.mv-search .mv-field { padding-inline: 30px 58px; border-radius: var(--mv-r-md); background: var(--mv-fill-2); box-shadow: none; }
+.mv-search .mv-field:focus { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+/* .mv-kbd is direction:ltr (so "Ctrl K" never reorders), which would flip a logical offset:
+   place it by the page direction instead. */
+.mv-search .mv-kbd { position: absolute; left: 7px; }
+[dir="ltr"] .mv-search .mv-kbd { left: auto; right: 7px; }
+
+.mv-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 19px;
+  padding-inline: 6px;
+  border-radius: 5px;
+  font-family: var(--mv-font-latin);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mv-label-2);
+  background: var(--mv-fill-2);
+  box-shadow: inset 0 -1px 0 var(--mv-sep-2);
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+
+/* ── Switch, checkbox, radio (for new markup; old inputs are styled by bridge.css) ── */
+.mv-switch {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--mv-track);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background var(--mv-d-2) var(--mv-ease-out);
+}
+.mv-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--mv-knob);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 0 0 .5px rgba(0, 0, 0, .08);
+  transition: inset-inline-start var(--mv-d-2) var(--mv-ease-spring);
+}
+.mv-switch[aria-checked="true"] { background: var(--mv-accent); }
+.mv-switch[aria-checked="true"]::after { inset-inline-start: 16px; }
+.mv-switch[aria-disabled="true"] { opacity: .42; pointer-events: none; }
+
+/* ── Segmented control ── */
+.mv-seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: var(--mv-r-md); background: var(--mv-fill-2); }
+.mv-seg > button {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--mv-label);
+  border: 0;
+  background: transparent;
+  height: 24px;
+  padding-inline: 12px;
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-seg > button:hover { background: var(--mv-fill); }
+.mv-seg > button[aria-pressed="true"] { background: var(--mv-control); box-shadow: var(--mv-control-hair); font-weight: 600; }
+
+/* ── Menus, tooltip, popover ── */
+.mv-menu {
+  min-width: 200px;
+  padding: 5px;
+  border-radius: var(--mv-r-lg);
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  box-shadow: var(--mv-e2);
+  font-size: 13px;
+  z-index: var(--mv-z-menu);
+}
+.mv-mi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 26px;
+  padding-inline: 9px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font: inherit;
+  color: var(--mv-label);
+  text-align: start;
+  cursor: pointer;
+}
+.mv-mi-check { width: 12px; flex: none; font-size: 11px; text-align: center; }
+.mv-mi-label { white-space: nowrap; }
+/* The shortcut is direction:ltr so "Ctrl ," reads right; its offsets are physical for the
+   same reason as .mv-search .mv-kbd — pushed to the far (left) edge of an RTL menu. */
+.mv-mi .mv-sc { margin-right: auto; padding-right: 18px; font-family: var(--mv-font-latin); font-size: 12px; color: var(--mv-label-3); direction: ltr; unicode-bidi: isolate; }
+[dir="ltr"] .mv-mi .mv-sc { margin-right: 0; padding-right: 0; margin-left: auto; padding-left: 18px; }
+.mv-mi:hover:not([disabled]), .mv-mi.is-active { background: var(--mv-accent); color: #FFFFFF; }
+.mv-mi:hover:not([disabled]) .mv-sc { color: rgba(255, 255, 255, .75); }
+.mv-mi.is-danger { color: var(--mv-red-ink); }
+.mv-mi[disabled] { color: var(--mv-label-4); cursor: default; }
+.mv-msep { height: var(--mv-hl); background: var(--mv-sep-2); margin: 5px 9px; }
+
+.mv-tip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  box-shadow: var(--mv-e2);
+  z-index: var(--mv-z-tooltip);
+}
+.mv-pop {
+  position: relative;
+  padding: 12px 14px;
+  border-radius: var(--mv-r-lg);
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  box-shadow: var(--mv-e2);
+  font-size: 12.5px;
+  line-height: 1.8;
+  z-index: var(--mv-z-menu);
+}
+
+/* ── Notification banners (toast() → MV.toast) ── */
+.mv-banners {
+  position: fixed;
+  top: 48px;
+  left: 14px;
+  z-index: var(--mv-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  direction: rtl;
+}
+.mv-banner {
+  width: 340px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: var(--mv-mat-regular);
+  -webkit-backdrop-filter: var(--mv-blur-regular);
+  backdrop-filter: var(--mv-blur-regular);
+  box-shadow: var(--mv-e2);
+  pointer-events: auto;
+  cursor: default;
+  animation: mv-banner-in var(--mv-d-3) var(--mv-ease-spring);
+}
+.mv-banner.is-leaving { opacity: 0; transform: translateX(-12px); transition: opacity var(--mv-d-2) var(--mv-ease-in), transform var(--mv-d-2) var(--mv-ease-in); }
+@keyframes mv-banner-in { from { opacity: 0; transform: translateY(-8px); } }
+.mv-banner-ic {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 22.5%;
+  display: grid;
+  place-items: center;
+  color: #FFFFFF;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint, var(--mv-blue)) 82%, #FFFFFF), color-mix(in srgb, var(--tint, var(--mv-blue)) 86%, #000));
+  font-size: 16px;
+}
+.mv-banner-body { flex: 1; min-width: 0; }
+.mv-banner-title { display: flex; gap: 8px; align-items: baseline; }
+.mv-banner-title b { font-size: 12.5px; font-weight: 700; color: var(--mv-label); }
+.mv-banner-title span { margin-inline-start: auto; font-size: 11px; color: var(--mv-label-3); }
+.mv-banner-text { font-size: 12.5px; line-height: 1.75; color: var(--mv-label); word-break: break-word; }
+
+/* ── Progress and loading ── */
+.mv-prog { height: 5px; border-radius: 999px; background: var(--mv-track); overflow: hidden; }
+.mv-prog > i { display: block; height: 100%; border-radius: inherit; background: var(--mv-accent); transition: width var(--mv-d-2) var(--mv-ease-out); }
+.mv-prog.is-indeterminate > i { width: 35%; animation: mv-indet 1.3s var(--mv-ease-out) infinite; }
+@keyframes mv-indet { from { transform: translateX(130%); } to { transform: translateX(-300%); } }
+/* A spinner that spins true. Every call site pairs a Phosphor glyph with .mv-spin and rotates
+   the whole <i>; a font glyph sits on a baseline with its own side bearings, so its optical
+   centre is NOT the centre of its box — rotating it wobbles, and steps(8) turned each wobble
+   into a separate jolt. Draw the ring and drop the glyph. Notes:
+   · content needs !important: Phosphor's .ph-bold.ph-spinner-gap:before is (0,2,1).
+   · sized in em, so the 34px empty-state marker and the 12px row marker both come out right.
+   · the old fixed 18px box never applied (an <i> is inline, which ignores width/height) and
+     would now clip the big one, so it is gone; .as-mini-spin still sets its own 14px. */
+.mv-spin { display: inline-flex; align-items: center; justify-content: center; line-height: 1; color: var(--mv-label-2); }
+.mv-spin::before {
+  content: "" !important;
+  display: block;
+  box-sizing: border-box;
+  width: .85em;
+  height: .85em;
+  border: .14em solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: mv-spin .8s linear infinite;
+}
+@keyframes mv-spin { to { transform: rotate(360deg); } }
+html[data-motion="reduced"] .mv-spin::before { animation: none; }
+.mv-skel {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--mv-fill-2) 20%, var(--mv-fill) 40%, var(--mv-fill-2) 60%);
+  background-size: 300% 100%;
+  animation: mv-shim 1.6s linear infinite;
+}
+@keyframes mv-shim { from { background-position: 100% 0; } to { background-position: -50% 0; } }
+
+/* ── Grouped list (System Settings) ── */
+.mv-group { border-radius: var(--mv-r-lg); background: var(--mv-surface); box-shadow: 0 0 0 var(--mv-hl) var(--mv-sep-2); overflow: hidden; }
+.mv-group-title { font-size: 12px; font-weight: 700; color: var(--mv-label-2); margin: 18px 4px 6px; }
+.mv-group-foot { font-size: 11.5px; line-height: 1.75; color: var(--mv-label-3); margin: 6px 4px 0; }
+.mv-row { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 7px 12px; position: relative; font-size: 13px; }
+.mv-row + .mv-row::before { content: ""; position: absolute; top: 0; inset-inline: 12px 0; height: var(--mv-hl); background: var(--mv-sep); }
+.mv-row-text { flex: 1; min-width: 0; line-height: 1.6; }
+.mv-row-text small { display: block; font-size: 11.5px; color: var(--mv-label-2); line-height: 1.7; margin-top: 1px; }
+.mv-row-end { margin-inline-start: auto; flex: none; display: flex; align-items: center; gap: 8px; color: var(--mv-label-2); font-size: 12.5px; }
+
+/* ── Status pill with lamp ── */
+.mv-pill { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding-inline: 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; background: var(--mv-fill-2); color: var(--mv-label-2); }
+.mv-pill > .mv-lampdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.mv-pill.is-ok { background: color-mix(in srgb, var(--mv-green) 16%, transparent); color: var(--mv-green-ink); }
+.mv-pill.is-warn { background: color-mix(in srgb, var(--mv-orange) 16%, transparent); color: var(--mv-orange-ink); }
+.mv-pill.is-bad { background: color-mix(in srgb, var(--mv-red) 14%, transparent); color: var(--mv-red-ink); }
+.mv-pill.is-warn > .mv-lampdot { animation: mv-breathe 1.6s ease-in-out infinite; }
+@keyframes mv-breathe { 50% { opacity: .35; } }
+html[data-motion="reduced"] .mv-pill.is-warn > .mv-lampdot { animation-duration: 3.2s; }
+
+/* ── App icon tile — the same recipe as android/…/ui/home/AppIcon.kt ── */
+.mv-ic {
+  --tint: var(--mv-blue);
+  --sz: 64px;
+  width: var(--sz);
+  height: var(--sz);
+  flex: none;
+  position: relative;
+  border-radius: 22.5%;
+  display: grid;
+  place-items: center;
+  color: #FFFFFF;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 82%, #FFFFFF), color-mix(in srgb, var(--tint) 86%, #000));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 5px 12px rgba(0, 0, 0, .16), inset 0 0 0 .5px rgba(255, 255, 255, .2);
+}
+@supports (corner-shape: squircle) {
+  .mv-ic { border-radius: 30%; corner-shape: squircle; }
+  /* `corner-shape` does not inherit, so the artwork's own clip has to be told the same shape —
+     otherwise a cover icon would be a rounded rectangle among squircles. */
+  .mv-ic.is-cover > svg { corner-shape: squircle; }
+}
+.mv-ic > svg { width: 52%; height: 52%; }
+.mv-ic > i { font-size: calc(var(--sz) * .52); line-height: 1; }
+.mv-ic.is-art { background: linear-gradient(180deg, #FFFFFF, #ECECF0); }
+/* Finished artwork with its own ground (the Settings gear, as on Android). Its squircle sits
+   inset to 90% of the drawing, like a shipped iOS icon asset, so it is scaled 100/90 to land
+   the same size as the tiles beside it; the shadow follows its real silhouette. */
+.mv-ic.is-image { background: none; box-shadow: none; overflow: visible; }
+.mv-ic.is-image > svg {
+  width: 111.2%;
+  height: 111.2%;
+  max-width: none;
+  flex: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .16)) drop-shadow(0 4px 7px rgba(0, 0, 0, .14));
+}
+.mv-ic.is-graphite { background: linear-gradient(180deg, #4B4D55, #25262B); }
+/* A complete square artwork: it fills the tile and the tile's own squircle clips it, so the
+   mark keeps its own ground instead of sitting on a second one. --art-bg matches that ground
+   so the corners the clip rounds off do not show a seam.
+
+   The clip is on the ARTWORK, not on the tile. `overflow: hidden` here would also cut off
+   anything positioned outside the tile — and the engine lamp is deliberately outside it, at
+   -3px/-3px. That is what made the lamp render as a half circle on وارپ، ماسک، وایگارد and گف
+   (every cover icon) while the image icons beside them were round. */
+.mv-ic.is-cover { background: var(--art-bg, #FFFFFF); overflow: visible; }
+.mv-ic.is-cover > svg { border-radius: inherit; overflow: hidden; }
+/* --art-scale shrinks the ARTWORK while --art-bg keeps filling the tile. Because the two
+   colours match, the gap is invisible — which is how a mark whose figure is drawn large inside
+   its own viewBox can be brought back without leaving a border. */
+.mv-ic.is-cover > svg { width: var(--art-scale, 100%); height: var(--art-scale, 100%); }
+/* A logo with no ground of its own, drawn big on a tile rather than at the 52% a small glyph
+   wants. */
+.mv-ic.is-big > svg { width: 82%; height: 82%; }
+/* The engine-is-running lamp: physical top-left in both directions (Android's rule),
+   with a dark ring so it survives on a green tile. */
+.mv-ic > .mv-lamp {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: max(10px, calc(var(--sz) * .22));
+  height: max(10px, calc(var(--sz) * .22));
+  border-radius: 50%;
+  background: linear-gradient(#5AF08A, #2FBF5C);
+  box-shadow: 0 0 0 2px #0B0B0C, 0 2px 4px rgba(0, 0, 0, .4);
+}
+
+/* ── Empty and error states ── */
+.mv-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 28px 20px; }
+.mv-empty > .mv-empty-ic { font-size: 34px; color: var(--mv-label-3); }
+.mv-empty > b { font-size: 14.5px; font-weight: 700; color: var(--mv-label); }
+.mv-empty > p { margin: 0; max-width: 300px; font-size: 12.5px; line-height: 1.8; color: var(--mv-label-2); }
+.mv-error { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: var(--mv-r-lg); background: var(--mv-surface-2); }
+.mv-error-head { display: flex; gap: 8px; align-items: center; font-size: 13.5px; font-weight: 700; color: var(--mv-label); }
+.mv-error-head > :first-child { color: var(--mv-red); }
+.mv-error-observed { font-family: var(--mv-font-mono); font-size: 11.5px; line-height: 1.6; direction: ltr; text-align: left; padding: 7px 9px; border-radius: var(--mv-r-sm); background: var(--mv-code); color: var(--mv-label-2); word-break: break-all; }
+
+/* ── Form layout: labels at the start, aligned toward their controls ── */
+.mv-form { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; font-size: 13px; }
+.mv-form > label { text-align: end; color: var(--mv-label-2); }
+.mv-sep { height: var(--mv-hl); background: var(--mv-sep-2); border: 0; margin: 0; }
+
+/* ── Appearance cards (Settings › ظاهر) ── */
+.mv-apcards { display: flex; gap: 18px; flex-wrap: wrap; }
+.mv-apcard {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--mv-label);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.mv-apcard[disabled] { cursor: default; color: var(--mv-label-3); }
+.mv-apcard-pv {
+  width: 116px;
+  height: 76px;
+  border-radius: var(--mv-r-md);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 var(--mv-hl) var(--mv-sep-2);
+  transition: box-shadow var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-apcard[aria-pressed="true"] .mv-apcard-pv { box-shadow: 0 0 0 3px var(--mv-accent); }
+.mv-apcard[disabled] .mv-apcard-pv { opacity: .45; }
+.mv-apcard-pv > i { position: absolute; display: block; }

@@ -1,0 +1,38 @@
+name: "Feature request / درخواست امکان"
+description: "Something that should exist. / چیزی که باید وجود داشته باشد."
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: "What problem does this solve? / چه مشکلی را حل می‌کند؟"
+      description: |
+        Describe the situation you are in, not the solution you have in mind. The most useful requests
+        in this project's history described a network that did not work, not a feature.
+
+        وضعیتی که در آن هستید را بنویسید، نه راه‌حلی که در ذهن دارید. مفیدترین درخواست‌ها در تاریخ این
+        پروژه، شبکه‌ای را توصیف کردند که کار نمی‌کرد — نه یک امکان را.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: "What would you like it to do? / دوست دارید چه کند؟"
+    validations:
+      required: false
+
+  - type: textarea
+    id: measured
+    attributes:
+      label: "Have you measured anything? / چیزی سنجیده‌اید؟"
+      description: |
+        Numbers from your own line are worth more here than anywhere else — latency, throughput, what
+        connects and what does not, on which operator. This project changes things because a measurement
+        said to, not because an idea sounded right.
+
+        عدد از خط خودتان اینجا از هر جای دیگری ارزشمندتر است — تأخیر، سرعت، چه چیزی وصل می‌شود و چه
+        چیزی نه، روی کدام اپراتور. این پروژه چیزی را عوض می‌کند چون یک سنجش گفته، نه چون ایده‌ای درست
+        به نظر رسیده.
+    validations:
+      required: false

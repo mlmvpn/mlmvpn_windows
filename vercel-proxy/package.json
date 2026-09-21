@@ -1,0 +1,6 @@
+{
+  "name": "mlm-vpngate-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Relays the public VPN Gate server list for the MLM VPN Android app."
+}

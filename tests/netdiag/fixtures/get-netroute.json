@@ -1,0 +1,416 @@
+﻿[
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  2,
+        "ifIndex":  26
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  2,
+        "ifIndex":  28
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  2,
+        "ifIndex":  4
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  2,
+        "ifIndex":  8
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  2,
+        "ifIndex":  23
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  2,
+        "ifIndex":  34
+    },
+    {
+        "DestinationPrefix":  "255.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  2,
+        "ifIndex":  26
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  2,
+        "ifIndex":  28
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  2,
+        "ifIndex":  4
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  2,
+        "ifIndex":  8
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  2,
+        "ifIndex":  23
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  2,
+        "ifIndex":  34
+    },
+    {
+        "DestinationPrefix":  "224.0.0.0/4",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "192.168.1.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "192.168.1.153/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "192.168.1.0/24",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "127.255.255.255/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "127.0.0.1/32",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "127.0.0.0/8",
+        "NextHop":  "0.0.0.0",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "0.0.0.0/0",
+        "NextHop":  "192.168.1.1",
+        "RouteMetric":  0,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23,
+        "ifIndex":  26
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23,
+        "ifIndex":  28
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23,
+        "ifIndex":  4
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23,
+        "ifIndex":  8
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23,
+        "ifIndex":  23
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23,
+        "ifIndex":  34
+    },
+    {
+        "DestinationPrefix":  "ff00::/8",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23,
+        "ifIndex":  1
+    },
+    {
+        "DestinationPrefix":  "fe80::f8fc:a874:97c0:45e5/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23,
+        "ifIndex":  4
+    },
+    {
+        "DestinationPrefix":  "fe80::dc18:e6b0:7539:633c/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23,
+        "ifIndex":  8
+    },
+    {
+        "DestinationPrefix":  "fe80::d8a7:c91c:dc92:9256/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "fe80::b51a:3cb9:5955:5014/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23,
+        "ifIndex":  26
+    },
+    {
+        "DestinationPrefix":  "fe80::52a1:bfef:7124:6927/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23,
+        "ifIndex":  28
+    },
+    {
+        "DestinationPrefix":  "fe80::1856:d07b:e156:c386/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23,
+        "ifIndex":  34
+    },
+    {
+        "DestinationPrefix":  "fe80::157a:e5d4:d151:5eea/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23,
+        "ifIndex":  23
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23,
+        "ifIndex":  26
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23,
+        "ifIndex":  28
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23,
+        "ifIndex":  33
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23,
+        "ifIndex":  4
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23,
+        "ifIndex":  8
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23,
+        "ifIndex":  23
+    },
+    {
+        "DestinationPrefix":  "fe80::/64",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23,
+        "ifIndex":  34
+    },
+    {
+        "DestinationPrefix":  "::1/128",
+        "NextHop":  "::",
+        "RouteMetric":  256,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23,
+        "ifIndex":  1
+    }
+]

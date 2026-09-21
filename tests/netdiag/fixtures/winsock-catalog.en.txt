@@ -1,0 +1,575 @@
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [TCP/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1001
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x20066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [UDP/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1002
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [RAW/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1003
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        3
+Protocol:                           0
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [TCP/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1004
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x20066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [UDP/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1005
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD Tcpip [RAW/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1006
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        3
+Protocol:                           0
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        RSVP TCPv6 Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1007
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x22066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        RSVP TCP Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1008
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x22066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        RSVP UDPv6 Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1009
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x22609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        RSVP UDP Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1010
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x22609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        Hyper-V RAW
+Provider ID:                        {1234191B-4BF7-4CA7-86E0-DFD7C32B5445}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1011
+Version:                            2
+Address Family:                     34
+Max Address Length:                 36
+Min Address Length:                 36
+Socket Type:                        1
+Protocol:                           1
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        AF_UNIX
+Provider ID:                        {A00943D9-9C2E-4633-9B59-0057A3160994}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1012
+Version:                            2
+Address Family:                     1
+Max Address Length:                 110
+Min Address Length:                 2
+Socket Type:                        1
+Protocol:                           0
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD L2CAP [Bluetooth]
+Provider ID:                        {9FC48064-7298-43E4-B7BD-181F2089792A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1013
+Version:                            2
+Address Family:                     32
+Max Address Length:                 30
+Min Address Length:                 30
+Socket Type:                        1
+Protocol:                           256
+Service Flags:                      0x20006
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider
+Description:                        MSAFD RfComm [Bluetooth]
+Provider ID:                        {9FC48064-7298-43E4-B7BD-181F2089792A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1014
+Version:                            2
+Address Family:                     32
+Max Address Length:                 30
+Min Address Length:                 30
+Socket Type:                        1
+Protocol:                           3
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [TCP/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1001
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x20066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [UDP/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1002
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [RAW/IPv6]
+Provider ID:                        {F9EAB0C0-26D4-11D0-BBBF-00AA006C34E4}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1003
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        3
+Protocol:                           0
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [TCP/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1004
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x20066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [UDP/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1005
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD Tcpip [RAW/IP]
+Provider ID:                        {E70F1AA0-AB8B-11CF-8CA3-00805F48A192}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1006
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        3
+Protocol:                           0
+Service Flags:                      0x20609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        RSVP TCPv6 Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1007
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x22066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        RSVP TCP Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1008
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        1
+Protocol:                           6
+Service Flags:                      0x22066
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        RSVP UDPv6 Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1009
+Version:                            2
+Address Family:                     23
+Max Address Length:                 28
+Min Address Length:                 28
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x22609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        RSVP UDP Service Provider
+Provider ID:                        {9D60A9E0-337A-11D0-BD88-0000C082E69A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1010
+Version:                            2
+Address Family:                     2
+Max Address Length:                 16
+Min Address Length:                 16
+Socket Type:                        2
+Protocol:                           17
+Service Flags:                      0x22609
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        Hyper-V RAW
+Provider ID:                        {1234191B-4BF7-4CA7-86E0-DFD7C32B5445}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1011
+Version:                            2
+Address Family:                     34
+Max Address Length:                 36
+Min Address Length:                 36
+Socket Type:                        1
+Protocol:                           1
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        AF_UNIX
+Provider ID:                        {A00943D9-9C2E-4633-9B59-0057A3160994}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1012
+Version:                            2
+Address Family:                     1
+Max Address Length:                 110
+Min Address Length:                 2
+Socket Type:                        1
+Protocol:                           0
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD L2CAP [Bluetooth]
+Provider ID:                        {9FC48064-7298-43E4-B7BD-181F2089792A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1013
+Version:                            2
+Address Family:                     32
+Max Address Length:                 30
+Min Address Length:                 30
+Socket Type:                        1
+Protocol:                           256
+Service Flags:                      0x20006
+Protocol Chain Length:              1
+
+Winsock Catalog Provider Entry
+------------------------------------------------------
+Entry Type:                         Base Service Provider (32)
+Description:                        MSAFD RfComm [Bluetooth]
+Provider ID:                        {9FC48064-7298-43E4-B7BD-181F2089792A}
+Provider Path:                      %SystemRoot%\system32\mswsock.dll
+Catalog Entry ID:                   1014
+Version:                            2
+Address Family:                     32
+Max Address Length:                 30
+Min Address Length:                 30
+Socket Type:                        1
+Protocol:                           3
+Service Flags:                      0x20026
+Protocol Chain Length:              1
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        E-mail Naming Shim Provider
+Provider ID:                        {964ACBA2-B2BC-40EB-8C6A-A6DB40161CAE}
+Name Space:                         37
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        PNRP Cloud Namespace Provider
+Provider ID:                        {03FE89CE-766D-4976-B9C1-BB9BC42C7B4D}
+Name Space:                         39
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        PNRP Name Namespace Provider
+Provider ID:                        {03FE89CD-766D-4976-B9C1-BB9BC42C7B4D}
+Name Space:                         38
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        Tcpip
+Provider ID:                        {22059D40-7E9E-11CF-AE5A-00AA00A7112B}
+Name Space:                         12
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        NTDS
+Provider ID:                        {3B2637EE-E580-11CF-A555-00C04FD8D4AC}
+Name Space:                         32
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        Bluetooth Namespace
+Provider ID:                        {06AA63E0-7D60-41FF-AFB2-3EE6D2D9392D}
+Name Space:                         16
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry
+------------------------------------------------------
+Description:                        @%SystemRoot%\system32\nlasvc.dll,-1000
+Provider ID:                        {6642243A-3BA8-4AA6-BAA5-2E0BD71FDD83}
+Name Space:                         15
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        E-mail Naming Shim Provider
+Provider ID:                        {964ACBA2-B2BC-40EB-8C6A-A6DB40161CAE}
+Name Space:                         37
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        PNRP Cloud Namespace Provider
+Provider ID:                        {03FE89CE-766D-4976-B9C1-BB9BC42C7B4D}
+Name Space:                         39
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        PNRP Name Namespace Provider
+Provider ID:                        {03FE89CD-766D-4976-B9C1-BB9BC42C7B4D}
+Name Space:                         38
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        Tcpip
+Provider ID:                        {22059D40-7E9E-11CF-AE5A-00AA00A7112B}
+Name Space:                         12
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        NTDS
+Provider ID:                        {3B2637EE-E580-11CF-A555-00C04FD8D4AC}
+Name Space:                         32
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        Bluetooth Namespace
+Provider ID:                        {06AA63E0-7D60-41FF-AFB2-3EE6D2D9392D}
+Name Space:                         16
+Active:                             1
+Version:                            0
+
+
+Name Space Provider Entry (32)
+------------------------------------------------------
+Description:                        @%SystemRoot%\system32\nlasvc.dll,-1000
+Provider ID:                        {6642243A-3BA8-4AA6-BAA5-2E0BD71FDD83}
+Name Space:                         15
+Active:                             1
+Version:                            0
+
+

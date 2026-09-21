@@ -1,0 +1,117 @@
+<!-- Header -->
+<div class="px-2 py-1 flex justify-between items-center bg-gs-bg">
+  <div class="flex items-center gap-2">
+    <svg
+      class="text-xl text-gs-primary"
+      style="width: 20px; height: 20px"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+    <div>
+      <h2
+        class="text-sm font-bold tracking-wide text-gs-text leading-tight"
+      >
+        تنظیمات ضد فیلتر
+      </h2>
+      <p class="text-[10px] text-gs-muted mt-0.5">
+        مدیریت و تست SNI
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Scrollable Content Area -->
+<div
+  class="flex-1 overflow-y-auto custom-scrollbar p-0 space-y-4 flex flex-col min-h-[0]"
+>
+  <!-- SECTION 1: Textarea Box -->
+  <div
+    class="border border-gs-border rounded-lg bg-gs-panel p-3 shrink-0 flex flex-col gap-2"
+  >
+    <div class="flex justify-between items-center mb-1">
+      <h3 class="text-xs font-bold text-gs-text flex items-center gap-2">
+        کانفیگ‌های SNI
+        <div class="flex items-center gap-1.5 bg-[#1A1A1A] px-2 py-0.5 rounded border border-[#333]">
+          <span class="relative flex h-2 w-2">
+            <span id="sni-status-ping" class="absolute inline-flex h-full w-full rounded-full bg-gs-muted opacity-20"></span>
+            <span id="sni-status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-gs-muted"></span>
+          </span>
+          <span id="sni-status" class="text-gs-muted font-normal text-[10px]">متوقف شده</span>
+        </div>
+      </h3>
+      <button
+        onclick="loadSniNodes()"
+        class="text-[10px] text-gs-primary hover:text-[#AECBFA] transition-colors border border-gs-border hover:border-gs-primary/50 bg-gs-panel px-2 py-1 rounded"
+      >
+        وارد کردن دستی
+      </button>
+    </div>
+    <textarea
+      id="sni-nodes-input"
+      class="w-full h-20 bg-gs-bg border border-gs-border rounded p-2 text-xs font-mono text-gs-muted resize-none custom-scrollbar transition-colors focus:border-[#8AB4F8] focus:outline-none focus:ring-1 focus:ring-[#8AB4F8]/20"
+      placeholder="کانفیگ‌های JSON را اینجا قرار دهید..."
+      dir="ltr"
+      spellcheck="false"
+    ></textarea>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="flex gap-2 shrink-0">
+    <button id="btn-test-sni" onclick="testSniAll()" class="flex-1 bg-[#1A1A1A] hover:bg-[#222] text-[#DFE1E5] transition-colors rounded py-1.5 text-[11px] font-bold border border-[#333]">
+      تست پینگ و سرعت
+    </button>
+    <button id="btn-start-sni" onclick="startSni()" class="flex-1 bg-[#8AB4F8]/10 hover:bg-[#8AB4F8]/20 text-[#8AB4F8] transition-colors rounded py-1.5 text-[11px] font-bold border border-[#8AB4F8]/30">
+      اجرای کانفیگ
+    </button>
+    <button id="btn-stop-sni" onclick="stopSni()" style="display:none;" class="flex-1 bg-[#F28B82]/10 hover:bg-[#F28B82]/20 text-[#F28B82] transition-colors rounded py-1.5 text-[11px] font-bold border border-[#F28B82]/30">
+      توقف موتور
+    </button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div
+    id="sni-progress-container"
+    style="display: none"
+    class="w-full h-4 bg-gs-panel rounded overflow-hidden relative border border-gs-border shrink-0"
+  >
+    <div
+      id="sni-progress-bar"
+      class="h-full bg-[#519B70] w-0 transition-all duration-300"
+    ></div>
+    <div
+      id="sni-progress-text"
+      class="absolute inset-0 flex items-center justify-center text-[10px] text-white font-bold drop-shadow-md"
+    >
+      0 / 0 (0%)
+    </div>
+  </div>
+
+  <!-- SECTION 2: Table Box (SNI) -->
+  <div
+    class="border border-gs-border rounded-lg bg-gs-panel flex-1 flex flex-col overflow-hidden min-h-[150px]"
+  >
+    <div class="overflow-y-auto flex-1 custom-scrollbar">
+      <table
+        class="w-full text-xs text-left border-collapse"
+        dir="ltr"
+      >
+        <thead
+          class="text-[10px] text-gs-muted font-medium tracking-wider sticky top-0 bg-gs-panel z-10 shadow-[0_1px_0_0_#222222]"
+        >
+          <tr>
+            <th scope="col" class="px-2 py-2 border-b border-gs-border w-8"></th>
+            <th scope="col" class="px-2 py-2 border-b border-gs-border">SNI (Domain)</th>
+            <th scope="col" class="px-2 py-2 border-b border-gs-border">IP:Port</th>
+            <th scope="col" class="px-2 py-2 text-center border-b border-gs-border cursor-pointer hover:text-gs-text" onclick="sortSni('ping')">Ping (TCP)</th>
+            <th scope="col" class="px-2 py-2 text-center border-b border-gs-border cursor-pointer hover:text-gs-text" onclick="sortSni('speed')">Speed (TLS)</th>
+          </tr>
+        </thead>
+        <tbody id="sni-nodes-list"></tbody>
+      </table>
+    </div>
+  </div>
+</div>

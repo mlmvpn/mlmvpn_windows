@@ -1,0 +1,46 @@
+#!/usr/sbin/nft -f
+# Sanction-buster traffic limits. Scoped ONLY to TCP/443 client traffic.
+# Does NOT touch UDP/443 (AmneziaWG), SSH/9011, or panel/3000.
+# Idempotent: flush our own table then rebuild.
+
+table inet sanction
+delete table inet sanction
+
+table inet sanction {
+    # Global client-facing byte counters (read by traffic-guard.sh).
+    counter sni_in  {}
+    counter sni_out {}
+
+    # Per-source-IP daily quota (client -> server direction).
+    set perip {
+        type ipv4_addr
+        flags dynamic
+        timeout 1d
+    }
+
+    # Kill chain: empty normally. traffic-guard.sh inserts a drop here when the
+    # global daily cap is reached; the midnight reset flushes it.
+    chain kill {}
+
+    chain input {
+        type filter hook input priority -150; policy accept;
+
+        # Global kill switch (only affects new sanction connections when armed).
+        tcp dport 443 ct state new jump kill
+
+        # Count all client->server bytes on 443.
+        tcp dport 443 counter name sni_in
+
+        # Per-connection hard cap: kill any single connection over 50 MB (stops downloads).
+        tcp dport 443 ct original bytes gt 52428800 drop
+
+        # Per-IP daily cap: 150 MB/day of client->server. Over -> drop for the rest of the day.
+        tcp dport 443 add @perip { ip saddr quota over 150 mbytes } drop
+    }
+
+    chain output {
+        type filter hook output priority -150; policy accept;
+        # Count server->client bytes on 443.
+        tcp sport 443 counter name sni_out
+    }
+}

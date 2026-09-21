@@ -1,0 +1,47 @@
+﻿[
+    {
+        "Name":  "VPN - VPN Client",
+        "InterfaceGuid":  "{C19BEE7A-9A60-4B54-9261-FCD4D3D340F3}",
+        "InterfaceIndex":  34,
+        "InterfaceDescription":  "VPN Client Adapter - VPN",
+        "Status":  "Disconnected",
+        "MacAddress":  "02-00-5E-01-11-22",
+        "Virtual":  true
+    },
+    {
+        "Name":  "Wi-Fi 3",
+        "InterfaceGuid":  "{BEC3B2CE-5EF3-4297-B49D-B253E42E2805}",
+        "InterfaceIndex":  33,
+        "InterfaceDescription":  "Realtek RTL8188FTV Wireless LAN 802.11n USB 2.0 Network Adapter #2",
+        "Status":  "Up",
+        "MacAddress":  "02-00-5E-02-11-22",
+        "Virtual":  false
+    },
+    {
+        "Name":  "Ethernet 3",
+        "InterfaceGuid":  "{844D6715-6EFA-4DFB-8330-A1E74CFF4095}",
+        "InterfaceIndex":  23,
+        "InterfaceDescription":  "TAP-Windows Adapter V9",
+        "Status":  "Disconnected",
+        "MacAddress":  "02-00-5E-03-11-22",
+        "Virtual":  false
+    },
+    {
+        "Name":  "Ethernet 4",
+        "InterfaceGuid":  "{28F03523-8D83-42A6-B3EB-0719067DD571}",
+        "InterfaceIndex":  8,
+        "InterfaceDescription":  "Kerio Virtual Network Adapter",
+        "Status":  "Disconnected",
+        "MacAddress":  "02-00-5E-04-11-22",
+        "Virtual":  true
+    },
+    {
+        "Name":  "Ethernet",
+        "InterfaceGuid":  "{13556269-8CF6-4E4D-92C8-8027637E678B}",
+        "InterfaceIndex":  4,
+        "InterfaceDescription":  "Intel(R) Ethernet Connection I217-LM",
+        "Status":  "Disconnected",
+        "MacAddress":  "02-00-5E-05-11-22",
+        "Virtual":  false
+    }
+]

@@ -1,0 +1,13 @@
+[
+    {
+        "DestinationPrefix":  "0.0.0.0/0",
+        "NextHop":  "192.168.1.1",
+        "RouteMetric":  0,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2,
+        "CimInstanceProperties":  "System.Object[]",
+        "CimSystemProperties":  "Microsoft.Management.Infrastructure.CimSystemProperties",
+        "CimClass":  "Microsoft.Management.Infrastructure.CimClass"
+    }
+]

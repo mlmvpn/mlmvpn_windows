@@ -1,0 +1,273 @@
+<!-- SETTINGS MODAL (Google Dark Style)                      -->
+    <!-- ======================================================= -->
+    <div
+      id="settings-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+      style="
+        font-family:
+          &quot;Vazirmatn&quot;,
+          -apple-system,
+          Roboto,
+          sans-serif;
+      "
+    >
+      <!-- Backdrop -->
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onclick="hideSettingsModal()"
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="w-full max-w-[600px] bg-gs-panel rounded-[24px] overflow-hidden flex flex-col max-h-[90vh] relative z-10 shadow-2xl border border-gs-border animate-modal text-gs-muted text-right"
+        dir="rtl"
+      >
+        <!-- Header -->
+        <div
+          class="flex items-center justify-between px-6 py-4 border-b border-gs-border bg-gs-panel shrink-0"
+        >
+          <div class="flex items-center gap-3">
+            <svg
+              class="w-5 h-5 text-gs-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+              />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <h2 class="text-base font-medium text-gs-muted">
+              پیکربندی و ساخت کانفیگ
+            </h2>
+          </div>
+          <button
+            class="p-2 text-gs-muted hover:text-gs-muted hover:bg-gs-panel rounded-full transition-colors"
+            onclick="hideSettingsModal()"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div
+          class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gs-panel"
+        >
+          <!-- Protocols -->
+          <div>
+            <h3
+              class="text-xs font-medium text-gs-muted mb-3 flex items-center gap-2"
+            >
+              پروتکلهای خروجی
+            </h3>
+            <div class="flex gap-4">
+              <label
+                class="flex items-center gap-3 cursor-pointer group bg-gs-panel px-4 py-2.5 rounded-xl border border-gs-border hover:bg-gs-panel transition-colors flex-1"
+              >
+                <input
+                  type="checkbox"
+                  id="cloud-proto-vless"
+                  class="md-checkbox"
+                  checked
+                />
+                <span class="text-sm text-gs-muted">VLESS</span>
+              </label>
+              <label
+                class="flex items-center gap-3 cursor-pointer group bg-gs-panel px-4 py-2.5 rounded-xl border border-gs-border hover:bg-gs-panel transition-colors flex-1"
+              >
+                <input
+                  type="checkbox"
+                  id="cloud-proto-trojan"
+                  class="md-checkbox"
+                />
+                <span class="text-sm text-gs-muted">Trojan</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ports -->
+          <div>
+            <h3 class="text-xs font-medium text-gs-muted mb-3">
+              پورتهای ارتباطی
+            </h3>
+            <div
+              class="bg-gs-panel border border-gs-border rounded-xl p-4 space-y-4"
+            >
+                            <div>
+                <span class="text-[11px] text-gs-muted block mb-2 font-mono"
+                  >TLS Ports</span
+                >
+                <div class="flex flex-wrap gap-2 font-mono">
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="443" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">443</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="8443" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">8443</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="2053" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2053</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="2083" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2083</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="2087" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2087</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-tls-port-new" value="2096" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2096</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <span class="text-[11px] text-gs-muted block mb-2 font-mono"
+                  >Non-TLS Ports</span
+                >
+                <div class="flex flex-wrap gap-2 font-mono">
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="80" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">80</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="8080" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">8080</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="8880" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">8880</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="2052" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2052</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="2082" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2082</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="2086" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2086</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer bg-gs-panel px-3 py-1.5 rounded-lg border border-gs-border hover:bg-gs-panel transition-colors">
+                    <input type="checkbox" name="cloud-nontls-port-new" value="2095" class="md-checkbox">
+                    <span class="text-xs text-gs-muted font-medium">2095</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proxy Mode Add -->
+          <div class="bg-gs-panel border border-gs-border rounded-xl p-4 space-y-4">
+            <div>
+              <span class="text-sm text-gs-muted block mb-3">Proxy IP Mode</span>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="cloud-proxy-mode" value="proxyip" checked class="accent-google-blue w-4 h-4" onchange="document.getElementById('proxyip-container').classList.remove('hidden'); document.getElementById('nat64-container').classList.add('hidden');">
+                  <span class="text-sm text-gs-muted">Proxy IP</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="cloud-proxy-mode" value="prefix" class="accent-google-blue w-4 h-4" onchange="document.getElementById('proxyip-container').classList.add('hidden'); document.getElementById('nat64-container').classList.remove('hidden');">
+                  <span class="text-sm text-gs-muted">NAT64 Prefix</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="proxyip-container">
+              <span class="text-[11px] text-gs-muted block mb-2 font-mono">Proxy IPs / Domains</span>
+              <select id="cloud-proxyip-new" class="w-full bg-gs-panel border border-gs-border rounded-xl px-4 py-2 text-sm text-gs-muted focus:outline-none focus:border-gs-border focus:bg-gs-panel transition-all">
+                <option value="">None (Empty)</option>
+                <option value="bpb.yousef.isegaro.com">bpb.yousef.isegaro.com</option>
+                <option value="213.108.198.116">🇩🇪 213.108.198.116 (NKtelecom)</option>
+                <option value="62.60.245.255">🇳🇱 62.60.245.255 (NetCrafters)</option>
+                <option value="88.198.82.155">🇩🇪 88.198.82.155 (Hetzner)</option>
+                <option value="51.38.98.202">🇩🇪 51.38.98.202 (OVH)</option>
+              </select>
+            </div>
+
+            <div id="nat64-container" class="hidden">
+              <span class="text-[11px] text-gs-muted block mb-2 font-mono">NAT64 Prefixes</span>
+              <select id="cloud-nat64-new" class="w-full bg-gs-panel border border-gs-border rounded-xl px-4 py-2 text-sm text-gs-muted focus:outline-none focus:border-gs-border focus:bg-gs-panel transition-all">
+                <option value="">None (Empty)</option>
+                <option value="[2a02:898:146:64::]">[2a02:898:146:64::] (Netherland)</option>
+                <option value="[2602:fc59:b0:64::]">[2602:fc59:b0:64::] (USA)</option>
+                <option value="[2602:fc59:11:64::]">[2602:fc59:11:64::] (USA)</option>
+              </select>
+            </div>
+          </div>
+
+                                    
+            <!-- Advanced Cloud Settings Container -->
+            <div id="cloud-advanced-settings-container" class="space-y-6 mt-6 border-t border-gs-border pt-6">
+              <!-- LAN & IPv6 -->
+              <div class="flex flex-wrap gap-4">
+                <label class="flex items-center gap-3 cursor-pointer group bg-gs-panel px-4 py-2.5 rounded-xl border border-gs-border hover:bg-gs-panel transition-colors flex-1">
+                  <input type="checkbox" id="cloud-allow-lan" class="md-checkbox" />
+                  <span class="text-sm text-gs-muted">Allow LAN Connection</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer group bg-gs-panel px-4 py-2.5 rounded-xl border border-gs-border hover:bg-gs-panel transition-colors flex-1">
+                  <input type="checkbox" id="cloud-ipv6-new" class="md-checkbox" />
+                  <span class="text-sm text-gs-muted">Enable IPv6</span>
+                </label>
+              </div>
+
+              <!-- Fragment Toggle -->
+              <div>
+                <h3 class="text-xs font-medium text-gs-muted mb-3">تنظیمات فرگمنت</h3>
+                <div class="bg-gs-panel border border-gs-border rounded-xl p-4 space-y-4">
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" id="cloud-frag-toggle" class="md-checkbox" onchange="document.getElementById('frag-settings-container').classList.toggle('hidden', !this.checked)" />
+                    <span class="text-sm text-gs-muted">فعال‌سازی Fragment</span>
+                  </label>
+                  <div id="frag-settings-container" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <span class="text-[11px] text-gs-muted block mb-1">طول (Length)</span>
+                      <input type="text" id="cloud-frag-len" value="100-200" class="w-full bg-gs-panel border border-gs-border rounded-lg px-3 py-2 text-sm text-gs-muted focus:outline-none focus:border-gs-border transition-all" />
+                    </div>
+                    <div>
+                      <span class="text-[11px] text-gs-muted block mb-1">فاصله زمانی (Interval)</span>
+                      <input type="text" id="cloud-frag-int" value="10-20" class="w-full bg-gs-panel border border-gs-border rounded-lg px-3 py-2 text-sm text-gs-muted focus:outline-none focus:border-gs-border transition-all" />
+                    </div>
+                    <div>
+                      <span class="text-[11px] text-gs-muted block mb-1">پیکج (Packets)</span>
+                      <select id="cloud-frag-pak" class="w-full bg-gs-panel border border-gs-border rounded-lg px-3 py-2 text-sm text-gs-muted focus:outline-none focus:border-gs-border transition-all">
+                        <option value="tlshello">tlshello</option>
+                        <option value="1-3">1-3</option>
+                        <option value="1">1</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="flex items-center gap-3 mt-4">
+                <button onclick="fetchCloudNodes(this)" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-[#202124] shadow-md transition-colors hover:bg-[#aecbfa] active:scale-[0.98]" style="background-color: #8ab4f8;">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                  </svg>
+                  ثبت و دریافت نود
+                </button>
+              </div>
+            </div>
+
+            
+        </div> <!-- End flex-1 -->
+      </div> <!-- End w-full -->
+    </div> <!-- End settings-modal -->

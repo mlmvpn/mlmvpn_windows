@@ -1,0 +1,1461 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLMVPN - Admin Panel</title>
+    <script>
+        const originalWarn = console.warn;
+        console.warn = (...args) => {
+            if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+            originalWarn(...args);
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        panel: {
+                            bg: '#171717',
+                            card: '#202124',
+                            hover: '#292a2d',
+                            border: '#3c4043',
+                            blue: '#8ab4f8',
+                            green: '#81c995',
+                            yellow: '#fde293',
+                            purple: '#c58af9',
+                            red: '#f28b82',
+                            muted: '#9aa0a6',
+                            text: '#e8eaed'
+                        }
+                    },
+                    borderRadius: { '2xl': '1rem', '3xl': '1.5rem' },
+                    boxShadow: {
+                        'glow-blue': '0 0 20px rgba(138,180,248,0.15)',
+                        'glow-green': '0 0 20px rgba(129,201,149,0.15)',
+                        'glow-yellow': '0 0 20px rgba(253,226,147,0.15)',
+                        'glow-purple': '0 0 20px rgba(197,138,249,0.15)',
+                        'card': '0 2px 8px rgba(0,0,0,0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Vazirmatn', sans-serif; background: #171717; color: #e8eaed; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #202124; }
+        ::-webkit-scrollbar-thumb { background: #3c4043; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5f6368; }
+        .glass { background: rgba(32,33,36,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .card-glow-blue:hover { box-shadow: 0 0 24px rgba(138,180,248,0.18), 0 2px 8px rgba(0,0,0,0.4); }
+        .card-glow-green:hover { box-shadow: 0 0 24px rgba(129,201,149,0.18), 0 2px 8px rgba(0,0,0,0.4); }
+        .card-glow-yellow:hover { box-shadow: 0 0 24px rgba(253,226,147,0.18), 0 2px 8px rgba(0,0,0,0.4); }
+        .card-glow-purple:hover { box-shadow: 0 0 24px rgba(197,138,249,0.18), 0 2px 8px rgba(0,0,0,0.4); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        select option { background: #202124; color: #e8eaed; }
+        input:-webkit-autofill, input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #202124 inset !important;
+            -webkit-text-fill-color: #e8eaed !important;
+        }
+        @keyframes toast-in { from { opacity:0; transform: translateY(16px) scale(0.96); } to { opacity:1; transform: translateY(0) scale(1); } }
+        @keyframes toast-out { from { opacity:1; } to { opacity:0; transform: translateY(-8px); } }
+        .toast-enter { animation: toast-in 0.28s ease forwards; }
+        .toast-exit { animation: toast-out 0.22s ease forwards; }
+        @keyframes ping-slow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+        .animate-ping-slow { animation: ping-slow 2s ease-in-out infinite; }
+        .btn-action { display:inline-flex; align-items:center; justify-content:center; padding:6px; border-radius:8px; border:1px solid #3c4043; background:#202124; transition:all 0.18s ease; cursor:pointer; }
+        .btn-action:hover { background:#292a2d; transform:translateY(-1px); }
+        .sub-btn { display:inline-flex; align-items:center; justify-content:center; gap:4px; padding:5px 8px; border-radius:8px; border:1px solid; font-size:11px; font-weight:700; transition:all 0.18s ease; cursor:pointer; white-space:nowrap; }
+        .modal-overlay { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
+        .modal-overlay.open { opacity:1; pointer-events:auto; }
+        .modal-card { transition:opacity 0.2s ease, transform 0.2s ease; opacity:0; transform:scale(0.95); }
+        .modal-overlay.open .modal-card { opacity:1; transform:scale(1); }
+        .checkbox-port { display:none; }
+        .port-label { display:flex; align-items:center; justify-content:center; padding:6px 10px; border:1px solid #3c4043; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; background:#171717; color:#9aa0a6; font-family:'JetBrains Mono',monospace; user-select:none; }
+        .checkbox-port:checked + .port-label { background:rgba(138,180,248,0.12); border-color:#8ab4f8; color:#8ab4f8; }
+        .checkbox-port.nontls:checked + .port-label { background:rgba(253,226,147,0.10); border-color:#fde293; color:#fde293; }
+        tr.user-row:hover { background:#1e1f22; }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    </style>
+</head>
+<body class="min-h-screen" style="background:#171717;color:#e8eaed;">
+
+    <!-- Toast Container -->
+    <div id="toast-container" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;width:max-content;max-width:90vw;"></div>
+
+    <header class="glass sticky top-0 z-40" style="border-bottom:1px solid #3c4043;">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo + Brand -->
+            <div class="flex items-center gap-3" dir="ltr">
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,rgba(138,180,248,0.18),rgba(197,138,249,0.12));border:1px solid rgba(138,180,248,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8ab4f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:800;color:#e8eaed;letter-spacing:-0.3px;" dir="ltr">MLMVPN</div>
+                    <div style="font-size:10px;color:#9aa0a6;font-weight:500;">Admin Panel</div>
+                </div>
+                <span style="font-size:10px;padding:2px 8px;background:rgba(138,180,248,0.12);color:#8ab4f8;border:1px solid rgba(138,180,248,0.25);border-radius:20px;font-weight:700;" dir="ltr">v1.0</span>
+            </div>
+            <!-- Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSettingsModal(true)" title="تنظیمات" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid #3c4043;background:#202124;color:#9aa0a6;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='#292a2d';this.style.color='#8ab4f8';this.style.borderColor='rgba(138,180,248,0.4)';" onmouseout="this.style.background='#202124';this.style.color='#9aa0a6';this.style.borderColor='#3c4043';">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button onclick="logoutAdmin()" title="خروج" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid #3c4043;background:#202124;color:#9aa0a6;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='rgba(242,139,130,0.1)';this.style.color='#f28b82';this.style.borderColor='rgba(242,139,130,0.35)';" onmouseout="this.style.background='#202124';this.style.color='#9aa0a6';this.style.borderColor='#3c4043';">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+            <!-- Total Users -->
+            <div class="card-glow-blue relative overflow-hidden rounded-2xl p-5 flex items-center justify-between cursor-default" style="background:#202124;border:1px solid #3c4043;box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:border-color 0.2s,box-shadow 0.2s;" onmouseover="this.style.borderColor='rgba(138,180,248,0.4)';" onmouseout="this.style.borderColor='#3c4043';">
+                <div style="position:absolute;left:-20px;bottom:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(138,180,248,0.12),transparent 70%);border-radius:50%;"></div>
+                <div style="position:relative;z-index:1;">
+                    <div style="font-size:12px;font-weight:600;color:#9aa0a6;margin-bottom:6px;">تعداد کل کاربران</div>
+                    <div id="stat-total-users" style="font-size:32px;font-weight:900;color:#e8eaed;line-height:1;">0</div>
+                    <div style="font-size:11px;color:#8ab4f8;margin-top:6px;display:flex;align-items:center;gap:5px;">
+                        <span style="width:7px;height:7px;background:#8ab4f8;border-radius:50%;display:inline-block;"></span>
+                        کل کاربران تعریف شده
+                    </div>
+                </div>
+                <div style="padding:12px;background:rgba(138,180,248,0.1);border-radius:14px;color:#8ab4f8;position:relative;z-index:1;flex-shrink:0;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+            </div>
+
+            <!-- Online Users -->
+            <div class="card-glow-green relative overflow-hidden rounded-2xl p-5 flex items-center justify-between cursor-default" style="background:#202124;border:1px solid #3c4043;box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:border-color 0.2s,box-shadow 0.2s;" onmouseover="this.style.borderColor='rgba(129,201,149,0.4)';" onmouseout="this.style.borderColor='#3c4043';">
+                <div style="position:absolute;left:-20px;bottom:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(129,201,149,0.12),transparent 70%);border-radius:50%;"></div>
+                <div style="position:relative;z-index:1;">
+                    <div style="font-size:12px;font-weight:600;color:#9aa0a6;margin-bottom:6px;">کاربران آنلاین</div>
+                    <div id="stat-active-users" style="font-size:32px;font-weight:900;color:#81c995;line-height:1;">0</div>
+                    <div style="font-size:11px;color:#81c995;margin-top:6px;display:flex;align-items:center;gap:5px;">
+                        <span class="animate-ping-slow" style="width:7px;height:7px;background:#81c995;border-radius:50%;display:inline-block;"></span>
+                        متصل در این لحظه
+                    </div>
+                </div>
+                <div style="padding:12px;background:rgba(129,201,149,0.1);border-radius:14px;color:#81c995;position:relative;z-index:1;flex-shrink:0;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+            </div>
+
+            <!-- Total Usage -->
+            <div class="card-glow-purple relative overflow-hidden rounded-2xl p-5 flex items-center justify-between cursor-default" style="background:#202124;border:1px solid #3c4043;box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:border-color 0.2s,box-shadow 0.2s;" onmouseover="this.style.borderColor='rgba(197,138,249,0.4)';" onmouseout="this.style.borderColor='#3c4043';">
+                <div style="position:absolute;left:-20px;bottom:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(197,138,249,0.12),transparent 70%);border-radius:50%;"></div>
+                <div style="position:relative;z-index:1;">
+                    <div style="font-size:12px;font-weight:600;color:#9aa0a6;margin-bottom:6px;">کل حجم مصرفی</div>
+                    <div id="stat-total-usage" style="font-size:28px;font-weight:900;color:#c58af9;line-height:1;">0 GB</div>
+                    <div style="font-size:11px;color:#c58af9;margin-top:6px;display:flex;align-items:center;gap:5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>
+                        مصرف کل کاربران
+                    </div>
+                </div>
+                <div style="padding:12px;background:rgba(197,138,249,0.1);border-radius:14px;color:#c58af9;position:relative;z-index:1;flex-shrink:0;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+            </div>
+
+            <!-- Top User -->
+            <div class="card-glow-yellow relative overflow-hidden rounded-2xl p-5 flex items-center justify-between cursor-default" style="background:#202124;border:1px solid #3c4043;box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:border-color 0.2s,box-shadow 0.2s;" onmouseover="this.style.borderColor='rgba(253,226,147,0.4)';" onmouseout="this.style.borderColor='#3c4043';">
+                <div style="position:absolute;left:-20px;bottom:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(253,226,147,0.10),transparent 70%);border-radius:50%;"></div>
+                <div style="position:relative;z-index:1;min-width:0;flex:1;">
+                    <div style="font-size:12px;font-weight:600;color:#9aa0a6;margin-bottom:6px;">پر مصرف‌ترین کاربر</div>
+                    <div id="stat-top-user" style="font-size:22px;font-weight:900;color:#fde293;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;">-</div>
+                    <div id="stat-top-user-usage" style="font-size:11px;color:#fde293;margin-top:6px;">۰ GB مصرف شده</div>
+                </div>
+                <div style="padding:12px;background:rgba(253,226,147,0.08);border-radius:14px;color:#fde293;position:relative;z-index:1;flex-shrink:0;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-16">
+            <div style="display:inline-flex;align-items:center;gap:10px;color:#9aa0a6;font-size:14px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8ab4f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0110 10" stroke="#8ab4f8"/></svg>
+                در حال بارگذاری کاربران...
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="mb-5 rounded-2xl p-4" style="background:#202124;border:1px solid #3c4043;">
+            <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                <!-- Search -->
+                <div style="position:relative;flex:1;max-width:360px;">
+                    <div style="position:absolute;inset-y:0;right:0;display:flex;align-items:center;padding-right:12px;pointer-events:none;color:#9aa0a6;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </div>
+                    <input type="text" id="search-input" oninput="filterAndRenderUsers()" placeholder="جستجوی نام کاربری یا UUID..." style="width:100%;padding:9px 40px 9px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;transition:border-color 0.18s;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                </div>
+                <!-- Filters -->
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                    <select id="filter-status" onchange="filterAndRenderUsers()" style="padding:9px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;cursor:pointer;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        <option value="all">همه وضعیت‌ها</option>
+                        <option value="active">فعال</option>
+                        <option value="inactive">غیرفعال</option>
+                        <option value="online">آنلاین</option>
+                        <option value="offline">آفلاین</option>
+                        <option value="expired">منقضی شده</option>
+                    </select>
+                    <select id="sort-users" onchange="filterAndRenderUsers()" style="padding:9px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;cursor:pointer;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        <option value="newest">جدیدترین</option>
+                        <option value="name">نام کاربری (الفبا)</option>
+                        <option value="usage-desc">بیشترین مصرف</option>
+                        <option value="usage-asc">کمترین مصرف</option>
+                        <option value="expiry-asc">کمترین زمان باقی‌مانده</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users List Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <h2 style="font-size:15px;font-weight:800;color:#e8eaed;">لیست کاربران</h2>
+            <button onclick="openCreateModal()" title="افزودن کاربر جدید" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#7b5cf9);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(138,180,248,0.3);transition:transform 0.18s,box-shadow 0.18s;" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 20px rgba(138,180,248,0.45)';" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 14px rgba(138,180,248,0.3)';">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 4v16m8-8H4"/></svg>
+            </button>
+        </div>
+
+        <!-- Users Table -->
+        <div id="users-table-container" class="hidden" style="border-radius:16px;overflow:hidden;border:1px solid #3c4043;background:#202124;">
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;text-align:right;">
+                    <thead>
+                        <tr style="background:#171717;border-bottom:1px solid #3c4043;">
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">نام کاربر و عملیات</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">لینک ساب</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">پروتکل</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">پورت</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">وضعیت حجم</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">وضعیت اعتبار</th>
+                            <th style="padding:12px 16px;font-size:11px;font-weight:700;color:#9aa0a6;white-space:nowrap;">تاریخ ساخت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden" style="padding:48px 24px;border:2px dashed #3c4043;border-radius:16px;text-align:center;">
+            <div style="color:#9aa0a6;font-size:13px;line-height:1.7;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3c4043" stroke-width="1.5" style="margin:0 auto 12px;" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                <p id="empty-state-msg">کاربری وجود ندارد. برای ساخت اولین کاربر روی دکمه «+» کلیک کنید.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="margin-top:60px;border-top:1px solid #3c4043;background:#202124;padding:24px 16px;">
+        <div class="max-w-6xl mx-auto" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
+            <div style="display:flex;align-items:center;gap:10px;" dir="ltr">
+                <div style="width:30px;height:30px;background:rgba(138,180,248,0.12);border:1px solid rgba(138,180,248,0.2);border-radius:9px;display:flex;align-items:center;justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8ab4f8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:800;color:#e8eaed;" dir="ltr">MLMVPN</div>
+                    <div style="font-size:10px;color:#9aa0a6;">Multi Layer Multiplexer</div>
+                </div>
+            </div>
+            <div style="font-size:11px;color:#5f6368;text-align:center;flex-grow:1;">
+                ساخته شده با محبت برای ایرانیان &nbsp;|&nbsp; MLMVPN &copy; 2026
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;">
+                <!-- Telegram -->
+                <a href="https://t.me/mlmvpn" target="_blank" rel="noopener" title="Telegram" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid #3c4043;background:#202124;color:#9aa0a6;transition:all 0.18s;text-decoration:none;" onmouseover="this.style.background='rgba(138,180,248,0.1)';this.style.color='#8ab4f8';this.style.borderColor='rgba(138,180,248,0.3)';" onmouseout="this.style.background='#202124';this.style.color='#9aa0a6';this.style.borderColor='#3c4043';">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.829.941z"/></svg>
+                </a>
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@marketmlm" target="_blank" rel="noopener" title="YouTube" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid #3c4043;background:#202124;color:#9aa0a6;transition:all 0.18s;text-decoration:none;" onmouseover="this.style.background='rgba(242,139,130,0.1)';this.style.color='#f28b82';this.style.borderColor='rgba(242,139,130,0.3)';" onmouseout="this.style.background='#202124';this.style.color='#9aa0a6';this.style.borderColor='#3c4043';">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+                <!-- GitHub -->
+                <a href="https://github.com/mlmvpn" target="_blank" rel="noopener" title="GitHub" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid #3c4043;background:#202124;color:#9aa0a6;transition:all 0.18s;text-decoration:none;" onmouseover="this.style.background='rgba(197,138,249,0.1)';this.style.color='#c58af9';this.style.borderColor='rgba(197,138,249,0.3)';" onmouseout="this.style.background='#202124';this.style.color='#9aa0a6';this.style.borderColor='#3c4043';">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- User Create/Edit Modal -->
+    <div id="user-modal" class="modal-overlay" onclick="if(event.target===this)toggleModal(false);">
+        <div id="user-modal-card" class="modal-card w-full" style="max-width:560px;background:#202124;border:1px solid #3c4043;border-radius:20px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+            <div style="padding:18px 22px;border-bottom:1px solid #3c4043;display:flex;justify-content:space-between;align-items:center;background:#171717;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:#8ab4f8;box-shadow:0 0 8px rgba(138,180,248,0.5);"></div>
+                    <h3 id="modal-title" style="font-size:15px;font-weight:800;color:#e8eaed;">ایجاد کاربر جدید</h3>
+                </div>
+                <button onclick="toggleModal(false)" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:none;background:transparent;color:#9aa0a6;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#292a2d';this.style.color='#e8eaed';" onmouseout="this.style.background='transparent';this.style.color='#9aa0a6';">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="create-user-form" onsubmit="handleFormSubmit(event)" style="padding:20px 22px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <!-- Username -->
+                    <div>
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">نام کاربری</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute;inset-y:0;right:0;display:flex;align-items:center;padding-right:11px;color:#9aa0a6;pointer-events:none;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <input type="text" id="input-name" placeholder="ali" required style="width:100%;padding:10px 36px 10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:600;color:#e8eaed;outline:none;transition:border-color 0.18s;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        </div>
+                    </div>
+                    <!-- Limit + Expiry -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div>
+                            <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">حجم مجاز (GB)</label>
+                            <input type="number" id="input-limit" min="0" step="any" placeholder="نامحدود" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:600;color:#e8eaed;outline:none;transition:border-color 0.18s;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">مدت اعتبار (روز)</label>
+                            <input type="number" id="input-expiry" min="0" placeholder="نامحدود" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:600;color:#e8eaed;outline:none;transition:border-color 0.18s;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        </div>
+                    </div>
+                    <!-- Daily Limit -->
+                    <div>
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">سقف مصرف روزانه (GB)</label>
+                        <input type="number" id="input-daily" min="0" step="any" placeholder="نامحدود" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:600;color:#e8eaed;outline:none;transition:border-color 0.18s;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                    </div>
+                    <!-- Ports -->
+                    <div style="border-top:1px solid #3c4043;padding-top:16px;">
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px;">پورت‌های اتصال (انتخاب چندگانه)</label>
+                        <div style="padding:14px;background:#171717;border:1px solid #3c4043;border-radius:14px;margin-bottom:10px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+                                <span style="width:7px;height:7px;background:#8ab4f8;border-radius:50%;display:inline-block;box-shadow:0 0 6px rgba(138,180,248,0.5);"></span>
+                                <span style="font-size:11px;font-weight:700;color:#8ab4f8;">پورت‌های امن (TLS)</span>
+                            </div>
+                            <div id="tls-ports-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                        </div>
+                        <div style="padding:14px;background:#171717;border:1px solid #3c4043;border-radius:14px;">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+                                <span style="width:7px;height:7px;background:#fde293;border-radius:50%;display:inline-block;box-shadow:0 0 6px rgba(253,226,147,0.4);"></span>
+                                <span style="font-size:11px;font-weight:700;color:#fde293;">پورت‌های معمولی (Non-TLS)</span>
+                            </div>
+                            <div id="nontls-ports-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                        </div>
+                    </div>
+                    <!-- Clean IPs -->
+                    <div style="border-top:1px solid #3c4043;padding-top:16px;">
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">آی‌پی تمیز کلودفلر (هر خط یک آی‌پی)</label>
+                        <textarea id="input-ips" rows="2" placeholder="104.16.0.1" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:12px;font-weight:500;color:#e8eaed;outline:none;resize:none;font-family:'JetBrains Mono',monospace;transition:border-color 0.18s;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';"></textarea>
+                    </div>
+                    <!-- Proxy Select -->
+                    <div>
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">پروکسی اختصاصی</label>
+                        <select id="input-proxy-select" onchange="if(this.value==='custom'){document.getElementById('input-proxy').style.display='block';}else{document.getElementById('input-proxy').style.display='none';}" style="width:100%;padding:10px 12px;margin-bottom:8px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:12px;font-weight:600;color:#e8eaed;outline:none;cursor:pointer;font-family:Vazirmatn,sans-serif;appearance:none;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                            <option value="">بدون پروکسی (مستقیم)</option>
+                            <option value="proxyip.cmliussss.net">آمریکا (Cmliussss)</option>
+                            <option value="sg.proxyip.cmliussss.net">سنگاپور (Cmliussss)</option>
+                            <option value="hk.proxyip.cmliussss.net">هنگ‌کنگ (Cmliussss)</option>
+                            <option value="jp.proxyip.cmliussss.net">ژاپن (Cmliussss)</option>
+                            <option value="uk.proxyip.cmliussss.net">انگلیس (Cmliussss)</option>
+                            <option value="proxyip.aliilapro.com">آمریکا (AliilaPro)</option>
+                            <option value="proxyip.futa.gg">متغیر (Futa.gg)</option>
+                            <option value="custom">آی‌پی سرور شخصی / سفارشی</option>
+                        </select>
+                        <input type="text" id="input-proxy" placeholder="مثال: 123.45.67.89 یا دامنه پروکسی شخصی" style="display:none;width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:600;color:#e8eaed;outline:none;transition:border-color 0.18s;font-family:Vazirmatn,sans-serif;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                    </div>
+                    <!-- Fingerprint -->
+                    <div>
+                        <label style="display:block;font-size:10px;font-weight:700;color:#9aa0a6;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px;">Fingerprint مرورگر</label>
+                        <select id="fingerprint-select" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:12px;font-weight:600;color:#e8eaed;outline:none;cursor:pointer;font-family:Vazirmatn,sans-serif;appearance:none;" onfocus="this.style.borderColor='rgba(138,180,248,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                            <option value="chrome" selected>Chrome (پیش‌فرض)</option>
+                            <option value="firefox">Firefox</option>
+                            <option value="safari">Safari</option>
+                            <option value="ios">iOS Device</option>
+                            <option value="android">Android Device</option>
+                            <option value="edge">Microsoft Edge</option>
+                            <option value="360">360 Browser</option>
+                            <option value="qq">QQ Browser</option>
+                            <option value="random">Random (اتفاقی)</option>
+                            <option value="randomized">Randomized (پویا)</option>
+                        </select>
+                    </div>
+                    <!-- Buttons -->
+                    <div style="display:flex;gap:10px;padding-top:8px;">
+                        <button type="button" onclick="toggleModal(false)" style="flex:1;padding:11px;background:#292a2d;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:700;color:#9aa0a6;cursor:pointer;transition:all 0.18s;font-family:Vazirmatn,sans-serif;" onmouseover="this.style.background='#3c4043';this.style.color='#e8eaed';" onmouseout="this.style.background='#292a2d';this.style.color='#9aa0a6';">انصراف</button>
+                        <button type="submit" id="submit-btn" style="flex:1;padding:11px;background:linear-gradient(135deg,#4f8ef7,#7b5cf9);border:none;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:Vazirmatn,sans-serif;box-shadow:0 4px 14px rgba(138,180,248,0.25);">ایجاد کاربر</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qr-modal" class="modal-overlay" onclick="if(event.target===this)toggleQRModal(false);">
+        <div class="modal-card" style="width:100%;max-width:340px;background:#202124;border:1px solid #3c4043;border-radius:20px;overflow:hidden;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 id="qr-modal-title" style="font-size:15px;font-weight:800;color:#e8eaed;">اسکن کد QR</h3>
+                <button onclick="toggleQRModal(false)" style="width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:none;background:#292a2d;color:#9aa0a6;cursor:pointer;" onmouseover="this.style.color='#e8eaed';" onmouseout="this.style.color='#9aa0a6';">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div style="background:#fff;padding:12px;border-radius:14px;display:inline-block;margin-bottom:16px;">
+                <div id="qrcode-box" style="width:192px;height:192px;display:flex;align-items:center;justify-content:center;margin:0 auto;"></div>
+            </div>
+            <button onclick="toggleQRModal(false)" style="width:100%;padding:10px;background:#292a2d;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:700;color:#9aa0a6;cursor:pointer;font-family:Vazirmatn,sans-serif;" onmouseover="this.style.color='#e8eaed';" onmouseout="this.style.color='#9aa0a6';">بستن</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)toggleSettingsModal(false);">
+        <div class="modal-card" style="width:100%;max-width:440px;background:#202124;border:1px solid #3c4043;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+            <!-- Header -->
+            <div style="padding:18px 22px;border-bottom:1px solid #3c4043;display:flex;justify-content:space-between;align-items:center;background:#171717;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:#c58af9;box-shadow:0 0 8px rgba(197,138,249,0.5);"></div>
+                    <h3 style="font-size:15px;font-weight:800;color:#e8eaed;">تنظیمات پنل</h3>
+                </div>
+                <button onclick="toggleSettingsModal(false)" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:none;background:transparent;color:#9aa0a6;cursor:pointer;" onmouseover="this.style.background='#292a2d';this.style.color='#e8eaed';" onmouseout="this.style.background='transparent';this.style.color='#9aa0a6';">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- Body -->
+            <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px;">
+                <!-- Location -->
+                <div>
+                    <label style="display:block;font-size:11px;font-weight:700;color:#9aa0a6;margin-bottom:8px;">موقعیت جغرافیایی پروکسی (Cloudflare)</label>
+                    <select id="location-select" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;cursor:pointer;font-family:Vazirmatn,sans-serif;appearance:none;" onfocus="this.style.borderColor='rgba(197,138,249,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        <option value="">در حال بارگذاری...</option>
+                    </select>
+                </div>
+                <!-- Fragment -->
+                <div style="border-top:1px solid #3c4043;padding-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#9aa0a6;margin-bottom:8px;" dir="ltr">Fragment Length</label>
+                        <input type="text" id="frag-length" placeholder="20-30" dir="ltr" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;text-align:center;font-family:'JetBrains Mono',monospace;" onfocus="this.style.borderColor='rgba(197,138,249,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:11px;font-weight:700;color:#9aa0a6;margin-bottom:8px;" dir="ltr">Fragment Interval</label>
+                        <input type="text" id="frag-interval" placeholder="1-2" dir="ltr" style="width:100%;padding:10px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;text-align:center;font-family:'JetBrains Mono',monospace;" onfocus="this.style.borderColor='rgba(197,138,249,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                    </div>
+                </div>
+                <!-- Change Password -->
+                <div style="border-top:1px solid #3c4043;padding-top:16px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f28b82" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        <span style="font-size:12px;font-weight:700;color:#e8eaed;">تغییر رمز عبور مدیریت</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div>
+                            <label style="display:block;font-size:10px;color:#9aa0a6;font-weight:600;margin-bottom:6px;">رمز عبور فعلی</label>
+                            <input type="password" id="change-pwd-current" style="width:100%;padding:9px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;text-align:center;font-family:'JetBrains Mono',monospace;" onfocus="this.style.borderColor='rgba(242,139,130,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:10px;color:#9aa0a6;font-weight:600;margin-bottom:6px;">رمز عبور جدید</label>
+                            <input type="password" id="change-pwd-new" style="width:100%;padding:9px 12px;background:#171717;border:1px solid #3c4043;border-radius:12px;font-size:13px;color:#e8eaed;outline:none;text-align:center;font-family:'JetBrains Mono',monospace;" onfocus="this.style.borderColor='rgba(242,139,130,0.5)';" onblur="this.style.borderColor='#3c4043';">
+                        </div>
+                        <button type="button" onclick="changeAdminPassword()" id="change-pwd-btn" style="width:100%;padding:10px;background:rgba(242,139,130,0.12);border:1px solid rgba(242,139,130,0.3);border-radius:12px;font-size:12px;font-weight:700;color:#f28b82;cursor:pointer;font-family:Vazirmatn,sans-serif;" onmouseover="this.style.background='rgba(242,139,130,0.2)';" onmouseout="this.style.background='rgba(242,139,130,0.12)';">تغییر رمز عبور</button>
+                    </div>
+                </div>
+                <!-- Footer Buttons -->
+                <div style="display:flex;gap:10px;border-top:1px solid #3c4043;padding-top:16px;">
+                    <button type="button" onclick="toggleSettingsModal(false)" style="flex:1;padding:10px;background:#292a2d;border:1px solid #3c4043;border-radius:12px;font-size:13px;font-weight:700;color:#9aa0a6;cursor:pointer;font-family:Vazirmatn,sans-serif;" onmouseover="this.style.color='#e8eaed';" onmouseout="this.style.color='#9aa0a6';">انصراف</button>
+                    <button type="button" onclick="saveSettings()" id="save-settings-btn" style="flex:1;padding:10px;background:linear-gradient(135deg,#4f8ef7,#7b5cf9);border:none;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:Vazirmatn,sans-serif;box-shadow:0 4px 14px rgba(138,180,248,0.2);">ذخیره تنظیمات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.globalFragLen = "20-30";
+        window.globalFragInt = "1-2";
+
+        const tlsPorts = ['443', '2053', '2083', '2087', '2096', '8443'];
+        const nonTlsPorts = ['80', '8080', '8880', '2052', '2082', '2086', '2095'];
+
+        let isEditMode = false;
+        let editingUsername = '';
+
+        // Toast notification system
+        function showToast(message, type) {
+            type = type || 'info';
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: { bg: 'rgba(32,33,36,0.97)', border: 'rgba(129,201,149,0.4)', icon: '#81c995', dot: '#81c995' },
+                error: { bg: 'rgba(32,33,36,0.97)', border: 'rgba(242,139,130,0.4)', icon: '#f28b82', dot: '#f28b82' },
+                warning: { bg: 'rgba(32,33,36,0.97)', border: 'rgba(253,226,147,0.4)', icon: '#fde293', dot: '#fde293' },
+                info: { bg: 'rgba(32,33,36,0.97)', border: 'rgba(138,180,248,0.4)', icon: '#8ab4f8', dot: '#8ab4f8' }
+            };
+            const c = colors[type] || colors.info;
+            const icons = {
+                success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>',
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>',
+                warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>',
+                info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+            };
+            const toast = document.createElement('div');
+            toast.className = 'toast-enter';
+            toast.style.cssText = 'display:flex;align-items:center;gap:10px;padding:11px 16px;background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.5);pointer-events:auto;max-width:340px;min-width:200px;cursor:pointer;';
+            toast.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + c.icon + '" stroke-width="2">' + (icons[type]||icons.info) + '</svg>' +
+                '<span style="font-size:13px;font-weight:600;color:#e8eaed;flex:1;font-family:Vazirmatn,sans-serif;">' + message + '</span>';
+            toast.onclick = function() { removeToast(toast); };
+            container.appendChild(toast);
+            setTimeout(function() { removeToast(toast); }, 4000);
+        }
+        function removeToast(toast) {
+            if (!toast.parentNode) return;
+            toast.className = 'toast-exit';
+            setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 250);
+        }
+
+        function renderPortCheckboxes() {
+            const tlsContainer = document.getElementById('tls-ports-list');
+            const nonTlsContainer = document.getElementById('nontls-ports-list');
+
+            tlsContainer.innerHTML = tlsPorts.map(function(port) {
+                var isCheckedDefault = port === '443' ? 'checked' : '';
+                return '<label style="cursor:pointer;">' +
+                    '<input type="checkbox" name="ports" value="' + port + '" ' + isCheckedDefault + ' class="checkbox-port">' +
+                    '<div class="port-label">' + port + '</div>' +
+                '</label>';
+            }).join('');
+
+            nonTlsContainer.innerHTML = nonTlsPorts.map(function(port) {
+                return '<label style="cursor:pointer;">' +
+                    '<input type="checkbox" name="ports" value="' + port + '" class="checkbox-port nontls">' +
+                    '<div class="port-label">' + port + '</div>' +
+                '</label>';
+            }).join('');
+        }
+
+        // Initialize 443 active state immediately
+        setTimeout(function() {
+            const cb443 = document.querySelector('input[name="ports"][value="443"]');
+            if (cb443) cb443.checked = true;
+        }, 100);
+
+        function toggleSettingsModal(show) {
+            const modal = document.getElementById('settings-modal');
+            if (show) {
+                modal.classList.add('open');
+            } else {
+                modal.classList.remove('open');
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('user-modal');
+            if (show) {
+                modal.classList.add('open');
+            } else {
+                modal.classList.remove('open');
+                isEditMode = false;
+                editingUsername = '';
+                document.getElementById('modal-title').innerText = 'ایجاد کاربر جدید';
+                document.getElementById('submit-btn').innerText = 'ایجاد کاربر';
+                document.getElementById('input-name').disabled = false;
+                document.getElementById('create-user-form').reset();
+                // Ensure port 443 remains checked as default when form is reset
+                const cb443 = document.querySelector('input[name="ports"][value="443"]');
+                if (cb443) cb443.checked = true;
+            }
+        }
+
+        function openCreateModal() {
+            isEditMode = false;
+            editingUsername = '';
+            document.getElementById('modal-title').innerText = 'ایجاد کاربر جدید';
+            document.getElementById('submit-btn').innerText = 'ایجاد کاربر';
+            document.getElementById('input-name').disabled = false;
+            document.getElementById('create-user-form').reset();
+
+            document.getElementById('input-proxy-select').value = '';
+            document.getElementById('input-proxy').style.display = 'none';
+            document.getElementById('input-proxy').value = '';
+
+            toggleModal(true);
+        }
+
+        async function loadUsers(silent = false) {
+            const loadingState = document.getElementById('loading-state');
+            const tableContainer = document.getElementById('users-table-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!silent) {
+                loadingState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                emptyState.classList.add('hidden');
+            }
+            
+            try {
+                const res = await fetch('/api/users?t=' + Date.now());
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                renderUsersUI(data);
+            } catch (err) {
+                if (!silent) {
+                    loadingState.innerHTML = '<span style="color:#f28b82;font-size:13px;">خطا در دریافت اطلاعات از سرور</span>';
+                }
+            }
+        }
+
+        function renderUsersUI(data) {
+            try {
+                const users = data.users || [];
+                window.allUsers = users;
+                const serverTime = data.serverTime || Date.now();
+                window.lastServerTime = serverTime;
+                
+                const totalUsersCount = users.length;
+                const activeUsersCount = users.filter(u => u.is_online === 1).length;
+                const totalGbUsage = users.reduce((sum, u) => sum + (u.used_gb || 0), 0);
+                
+                document.getElementById('stat-total-users').innerText = totalUsersCount;
+                document.getElementById('stat-active-users').innerText = activeUsersCount;
+                document.getElementById('stat-total-usage').innerText = totalGbUsage < 1 ? (totalGbUsage * 1024).toFixed(0) + ' MB' : totalGbUsage.toFixed(2) + ' GB';
+                
+                const topUser = users.reduce((max, u) => (u.used_gb || 0) > (max.used_gb || 0) ? u : max, { username: 'هیچکدام', used_gb: 0 });
+                document.getElementById('stat-top-user').innerText = topUser.username;
+                const topUsage = topUser.used_gb || 0;
+                document.getElementById('stat-top-user-usage').innerText = topUsage < 1 ? (topUsage * 1024).toFixed(0) + ' MB مصرف شده' : topUsage.toFixed(2) + ' GB مصرف شده';
+
+                filterAndRenderUsers();
+            } catch (err) {
+                document.getElementById('loading-state').innerHTML = '<span style="color:#f28b82;font-size:13px;">خطا در پردازش اطلاعات کاربران</span>';
+            }
+        }
+
+        function filterAndRenderUsers() {
+            if (!window.allUsers) return;
+            const searchQuery = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            const filterStatus = document.getElementById('filter-status').value;
+            const sortVal = document.getElementById('sort-users').value;
+            const serverTime = window.lastServerTime || Date.now();
+            
+            let filtered = [...window.allUsers];
+            
+            // Search filter
+            if (searchQuery) {
+                filtered = filtered.filter(u => 
+                    (u.username || '').toLowerCase().includes(searchQuery) || 
+                    (u.uuid || '').toLowerCase().includes(searchQuery)
+                );
+            }
+            
+            // Status filter
+            if (filterStatus !== 'all') {
+                filtered = filtered.filter(u => {
+                    const isOnline = u.is_online === 1;
+                    const isActive = u.is_active === 1;
+                    
+                    let isExpired = false;
+                    if (u.limit_gb && u.used_gb >= u.limit_gb) isExpired = true;
+                    if (u.expiry_days && u.created_at) {
+                        const created = new Date(u.created_at);
+                        const expiryDate = new Date(created.getTime() + (u.expiry_days * 24 * 60 * 60 * 1000));
+                        if (new Date(serverTime) > expiryDate) isExpired = true;
+                    }
+                    
+                    if (filterStatus === 'active') return isActive && !isExpired;
+                    if (filterStatus === 'inactive') return !isActive;
+                    if (filterStatus === 'online') return isOnline;
+                    if (filterStatus === 'offline') return !isOnline;
+                    if (filterStatus === 'expired') return isExpired || !isActive;
+                    return true;
+                });
+            }
+            
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortVal === 'newest') {
+                    return b.id - a.id;
+                }
+                if (sortVal === 'name') {
+                    return (a.username || '').localeCompare(b.username || '');
+                }
+                if (sortVal === 'usage-desc') {
+                    return (b.used_gb || 0) - (a.used_gb || 0);
+                }
+                if (sortVal === 'usage-asc') {
+                    return (a.used_gb || 0) - (b.used_gb || 0);
+                }
+                if (sortVal === 'expiry-asc') {
+                    const getRemaining = (u) => {
+                        if (!u.expiry_days) return Infinity;
+                        if (!u.created_at) return Infinity;
+                        const created = new Date(u.created_at);
+                        const expiryDate = new Date(created.getTime() + (u.expiry_days * 24 * 60 * 60 * 1000));
+                        return expiryDate - new Date(serverTime);
+                    };
+                    return getRemaining(a) - getRemaining(b);
+                }
+                return 0;
+            });
+            
+            renderFilteredUsers(filtered, serverTime);
+        }
+
+        function renderFilteredUsers(users, serverTime) {
+            const loadingState = document.getElementById('loading-state');
+            const tableContainer = document.getElementById('users-table-container');
+            const emptyState = document.getElementById('empty-state');
+            const tbody = document.getElementById('users-tbody');
+            
+            if (users.length === 0) {
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                if (window.allUsers && window.allUsers.length > 0) {
+                    document.getElementById('empty-state-msg').innerText = 'کاربری با مشخصات جستجو شده یافت نشد.';
+                } else {
+                    document.getElementById('empty-state-msg').innerText = 'کاربری وجود ندارد. برای ساخت اولین کاربر روی دکمه «+» کلیک کنید.';
+                }
+            } else {
+                loadingState.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+                
+                tbody.innerHTML = users.map(user => {
+                    const createdDate = user.created_at ? new Date(user.created_at).toLocaleDateString('fa-IR') : '-';
+                    let daysRemaining = 'نامحدود';
+                    let daysPercent = 100;
+                    if (user.expiry_days) {
+                        if (user.created_at) {
+                            const created = new Date(user.created_at);
+                            const expiryDate = new Date(created.getTime() + (user.expiry_days * 24 * 60 * 60 * 1000));
+                            const diffDays = Math.ceil((expiryDate - new Date(serverTime)) / (1000 * 60 * 60 * 24));
+                            daysRemaining = diffDays > 0 ? diffDays : 0;
+                            daysPercent = Math.max(0, Math.min(100, (daysRemaining / user.expiry_days) * 100));
+                        } else {
+                            daysRemaining = user.expiry_days;
+                        }
+                    }
+
+                    const usedGb = user.used_gb || 0;
+                    const formattedUsed = usedGb < 1 ? (usedGb * 1024).toFixed(0) + ' MB' : usedGb.toFixed(2) + ' GB';
+
+                    let volumeHtml = '';
+                    if (user.limit_gb) {
+                        const limitPercent = Math.min((usedGb / user.limit_gb) * 100, 100);
+                        const limitHue = 120 - (limitPercent * 1.2);
+                        const formattedLimit = user.limit_gb < 1 ? (user.limit_gb * 1024).toFixed(0) + ' MB' : user.limit_gb + ' GB';
+                        volumeHtml = '<div class="flex flex-col gap-1.5 w-full min-w-[130px]">' +
+                            '<div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">' +
+                                '<span>مصرف: ' + formattedUsed + '</span>' +
+                                '<span>کل: ' + formattedLimit + '</span>' +
+                            '</div>' +
+                            '<div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-1.5 overflow-hidden">' +
+                                '<div class="h-1.5 rounded-full transition-all duration-500" style="width: ' + limitPercent + '%; background-color: hsl(' + limitHue + ', 80%, 45%)"></div>' +
+                            '</div>' +
+                        '</div>';
+                    } else {
+                        volumeHtml = '<div class="flex flex-col gap-1.5 w-full min-w-[130px]">' +
+                            '<div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">' +
+                                '<span>مصرف: ' + formattedUsed + '</span>' +
+                                '<span>کل: نامحدود</span>' +
+                            '</div>' +
+                            '<div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-1.5 overflow-hidden">' +
+                                '<div class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 100%"></div>' +
+                            '</div>' +
+                        '</div>';
+                    }
+
+                    let dailyHtml = '';
+                    {
+                        const dailyUsed = user.daily_used_gb || 0;
+                        const fmtDailyUsed = dailyUsed < 1 ? (dailyUsed * 1024).toFixed(0) + ' MB' : dailyUsed.toFixed(2) + ' GB';
+                        if (user.daily_limit_gb) {
+                            const dPercent = Math.min((dailyUsed / user.daily_limit_gb) * 100, 100);
+                            const dHue = 120 - (dPercent * 1.2);
+                            const fmtDailyLimit = user.daily_limit_gb < 1 ? (user.daily_limit_gb * 1024).toFixed(0) + ' MB' : user.daily_limit_gb + ' GB';
+                            dailyHtml = '<div class="flex flex-col gap-1 w-full min-w-[130px] mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-zinc-800">' +
+                                '<div class="flex justify-between text-[10px] text-gray-400 font-medium">' +
+                                    '<span>امروز: ' + fmtDailyUsed + '</span>' +
+                                    '<span>روزانه: ' + fmtDailyLimit + '</span>' +
+                                '</div>' +
+                                '<div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-1 overflow-hidden">' +
+                                    '<div class="h-1 rounded-full transition-all duration-500" style="width: ' + dPercent + '%; background-color: hsl(' + dHue + ', 80%, 45%)"></div>' +
+                                '</div>' +
+                            '</div>';
+                        } else {
+                            dailyHtml = '<div class="text-[10px] text-gray-400 mt-2 pt-2 border-t border-dashed border-gray-200 dark:border-zinc-800">امروز: ' + fmtDailyUsed + ' • روزانه: نامحدود</div>';
+                        }
+                    }
+
+                    let expiryHtml = '';
+                    if (user.expiry_days) {
+                        const expiryHue = daysPercent * 1.2;
+                        expiryHtml = '<div class="flex flex-col gap-1.5 w-full min-w-[130px]">' +
+                            '<div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">' +
+                                '<span>باقی‌مانده: ' + daysRemaining + ' روز</span>' +
+                                '<span>کل: ' + user.expiry_days + ' روز</span>' +
+                            '</div>' +
+                            '<div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-1.5 overflow-hidden flex justify-end">' +
+                                '<div class="h-1.5 rounded-full transition-all duration-500" style="width: ' + daysPercent + '%; background-color: hsl(' + expiryHue + ', 80%, 45%)"></div>' +
+                            '</div>' +
+                        '</div>';
+                    } else {
+                        expiryHtml = '<div class="flex flex-col gap-1.5 w-full min-w-[130px]">' +
+                            '<div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">' +
+                                '<span>باقی‌مانده: نامحدود</span>' +
+                                '<span>کل: نامحدود</span>' +
+                            '</div>' +
+                            '<div class="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-1.5 overflow-hidden flex justify-end">' +
+                                '<div class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 100%"></div>' +
+                            '</div>' +
+                        '</div>';
+                    }
+
+                    const statusBtnColor = user.is_active === 0 ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30';
+                    const statusBtnTitle = user.is_active === 0 ? 'فعال کردن کاربر' : 'قطع کردن کاربر';
+                    const statusBtnIcon = user.is_active === 0 
+                        ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                        : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+
+                    return '<tr class="hover:bg-gray-50 dark:hover:bg-zinc-900/40 border-b border-gray-100 dark:border-zinc-800 last:border-0">' +
+                            '<td class="p-4">' +
+                                '<div class="flex flex-col gap-3">' +
+                                    '<div class="flex items-center gap-2">' +
+                                        '<span class="font-bold text-gray-900 dark:text-zinc-100">' + user.username + '</span>' +
+                                        (user.is_active === 0 ? '<span class="px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 rounded-md">قطع</span>' : '<span class="px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-md">فعال</span>') +
+                                        (user.is_online === 1 ? '<span class="px-1.5 py-0.5 text-[10px] font-medium bg-emerald-500 text-white rounded-md animate-pulse">● آنلاین</span>' : '<span class="px-1.5 py-0.5 text-[10px] font-medium bg-gray-200 text-gray-600 dark:bg-zinc-800 dark:text-zinc-400 rounded-md">آفلاین</span>') +
+                                    '</div>' +
+                                    '<div class="flex gap-1.5">' +
+                                        '<button onclick="copyConfig(\'' + encodeURIComponent(user.username) + '\')" title="کپی کانفیگ" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md transition shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>' +
+                                        '<button onclick="copyJsonConfig(\'' + encodeURIComponent(user.username) + '\')" title="کپی JSON" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-md transition shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></button>' +
+                                        '<button onclick="showQR(\'' + encodeURIComponent(user.username) + '\')" title="کد QR" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-green-50 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 rounded-md transition shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg></button>' +
+                                        '<button onclick="toggleUserStatus(\'' + encodeURIComponent(user.username) + '\')" title="' + statusBtnTitle + '" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 ' + statusBtnColor + ' rounded-md transition shadow-sm">' + statusBtnIcon + '</button>' +
+                                        '<button onclick="editUser(\'' + encodeURIComponent(user.username) + '\')" title="ویرایش" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-md transition shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>' +
+                                        '<button onclick="deleteUser(\'' + encodeURIComponent(user.username) + '\')" title="حذف" class="p-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 rounded-md transition shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</td>' +
+                            '<td class="p-4">' +
+                                '<div class="flex flex-col gap-2 min-w-[140px]">' +
+                                    '<div class="flex gap-1">' +
+                                        '<button onclick="copySubLink(\'' + encodeURIComponent(user.username) + '\')" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg text-xs font-bold transition border border-indigo-200 dark:border-indigo-800">' +
+                                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>' +
+                                            'ساب متنی' +
+                                        '</button>' +
+                                        '<button onclick="showSubQR(\'' + encodeURIComponent(user.username) + '\', \'normal\')" title="QR ساب متنی" class="px-2 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg text-xs font-bold transition border border-indigo-200 dark:border-indigo-800">' +
+                                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>' +
+                                        '</button>' +
+                                    '</div>' +
+                                    '<div class="flex gap-1">' +
+                                        '<button onclick="copyJsonSubLink(\'' + encodeURIComponent(user.username) + '\')" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg text-xs font-bold transition border border-purple-200 dark:border-purple-800">' +
+                                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>' +
+                                            'ساب JSON' +
+                                        '</button>' +
+                                        '<button onclick="showSubQR(\'' + encodeURIComponent(user.username) + '\', \'json\')" title="QR ساب JSON" class="px-2 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg text-xs font-bold transition border border-purple-200 dark:border-purple-800">' +
+                                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>' +
+                                        '</button>' +
+                                    '</div>' +
+                                    '<div class="flex gap-1">' +
+                                        '<button onclick="copyStatusLink(\'' + encodeURIComponent(user.username) + '\')" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg text-xs font-bold transition border border-emerald-200 dark:border-emerald-800">' +
+                                            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>' +
+                                            'صفحه وضعیت' +
+                                        '</button>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</td>' +
+                            '<td class="p-4 text-xs font-mono uppercase text-blue-500 font-semibold">VLESS</td>' +
+                            '<td class="p-4 text-xs">' + 
+                                '<div class="flex flex-wrap gap-1 max-w-[160px]">' +
+                                    String(user.port || "").split(",").map(function(p) {
+                                        p = p.trim();
+                                        if (!p) return "";
+                                        var isTls = tlsPorts.includes(p);
+                                        return '<span class="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded ' + (isTls ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400') + '">' + p + '</span>';
+                                    }).join("") +
+                                '</div>' +
+                            '</td>' +
+                            '<td class="p-4">' + volumeHtml + dailyHtml + '</td>' +
+                            '<td class="p-4">' + expiryHtml + '</td>' +
+                            '<td class="p-4 text-xs text-gray-500">' + createdDate + '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+        }
+
+        async function toggleUserStatus(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            try {
+                const response = await fetch('/api/users/' + encodeURIComponent(username), {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ toggle_only: true })
+                });
+                if (response.ok) {
+                    await loadUsers(true);
+                } else {
+                    const errData = await response.json();
+                    showToast('خطا: ' + (errData.error || 'عملیات ناموفق بود'), 'error');
+                }
+            } catch (err) {
+                showToast('خطا در برقراری ارتباط با سرور', 'error');
+            }
+        }
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const submitButton = document.getElementById('submit-btn');
+            submitButton.disabled = true;
+            submitButton.innerText = isEditMode ? 'در حال ذخیره تغییرات...' : 'در حال ایجاد...';
+
+            const username = document.getElementById('input-name').value;
+            const limit = document.getElementById('input-limit').value || null;
+            const daily = document.getElementById('input-daily').value || null;
+            const expiry = document.getElementById('input-expiry').value || null;
+            
+            // Gather multiple selected ports
+            const checkedPorts = Array.from(document.querySelectorAll('input[name="ports"]:checked')).map(cb => cb.value);
+            
+            // Validation: Ensure at least one port is selected
+            if (checkedPorts.length === 0) {
+                showToast('لطفا حداقل یک پورت را برای اتصال انتخاب کنید!', 'warning');
+                submitButton.disabled = false;
+                submitButton.innerText = isEditMode ? 'ذخیره تغییرات' : 'ایجاد کاربر';
+                return;
+            }
+
+            const port = checkedPorts.join(',');
+            const tls = checkedPorts.some(p => tlsPorts.includes(p)) ? 'on' : 'off';
+            
+            const ips = document.getElementById('input-ips').value;
+            
+            let proxy_ip = document.getElementById('input-proxy-select').value;
+            if (proxy_ip === 'custom') {
+                proxy_ip = document.getElementById('input-proxy').value;
+            }
+
+            const fingerprint = document.getElementById('fingerprint-select').value;
+
+            const url = isEditMode ? '/api/users/' + encodeURIComponent(editingUsername) : '/api/users';
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, limit_gb: limit, daily_limit_gb: daily, expiry_days: expiry, tls, port, ips, proxy_ip, fingerprint })
+                });
+                
+                if (response.ok) {
+                    toggleModal(false);
+                    await loadUsers(true);
+                } else {
+                    const errData = await response.json();
+                    showToast('خطا: ' + (errData.error || 'عملیات ناموفق بود'), 'error');
+                }
+            } catch (err) {
+                showToast('خطا در برقراری ارتباط با سرور', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerText = isEditMode ? 'ذخیره تغییرات' : 'ایجاد کاربر';
+            }
+        }
+
+        function toggleQRModal(show, link, title) {
+            link = link || '';
+            title = title || 'اسکن کد QR';
+            const modal = document.getElementById('qr-modal');
+            const qrBox = document.getElementById('qrcode-box');
+            const titleEl = document.getElementById('qr-modal-title');
+            if (show) {
+                titleEl.innerText = title;
+                qrBox.innerHTML = '';
+                new QRCode(qrBox, {
+                    text: link,
+                    width: 192,
+                    height: 192,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.M
+                });
+                modal.classList.add('open');
+            } else {
+                modal.classList.remove('open');
+            }
+        }
+
+        function getVlessLink(username) {
+            const user = window.allUsers.find(u => u.username === username);
+            if (!user) return '';
+            const host = window.location.hostname;
+            
+            let ips = [host];
+            if (user.ips) {
+                const parsedIps = user.ips.split('\n').map(ip => ip.trim()).filter(ip => ip.length > 0);
+                if (parsedIps.length > 0) ips = parsedIps;
+            }
+            
+            const ports = String(user.port || '443').split(',').map(p => p.trim()).filter(p => p.length > 0);
+            const fp = user.fingerprint || 'chrome';
+            const links = [];
+
+            ips.forEach((ip, ipIndex) => {
+                ports.forEach((portStr) => {
+                    const isTlsPort = tlsPorts.includes(portStr);
+                    const tlsVal = isTlsPort ? 'tls' : 'none';
+                    const remark = ips.length > 1 
+                        ? (user.username + '-' + (ipIndex + 1) + '-' + portStr) 
+                        : (user.username + '-' + portStr);
+                    
+                    links.push('vle' + 'ss://' + (user.uuid || '') + '@' + ip + ':' + portStr + '?type=xhttp&security=' + tlsVal + '&sni=' + host + '&host=' + host + '&path=%2F&fp=' + fp + '&encryption=none&allowInsecure=0&extra=' + encodeURIComponent(JSON.stringify({mode:'auto',maxUploadSize:1000000,maxConcurrentUploads:10})) + '#' + encodeURIComponent(remark));
+                });
+            });
+
+            return links.join('\n');
+        }
+
+        function getSubLink(username) {
+            return window.location.origin + '/feed/' + encodeURIComponent(username);
+        }
+
+        function getJsonSubLink(username) {
+            return window.location.origin + '/feed/json/' + encodeURIComponent(username);
+        }
+
+        function getStatusLink(username) {
+            return window.location.origin + '/status/' + encodeURIComponent(username);
+        }
+
+        function copySubLink(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            navigator.clipboard.writeText(getSubLink(username)).then(() => {
+                showToast('لینک ساب متنی با موفقیت کپی شد!', 'success');
+            }).catch(() => {
+                showToast('خطا در کپی کردن لینک ساب!', 'error');
+            });
+        }
+
+        function copyStatusLink(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            navigator.clipboard.writeText(getStatusLink(username)).then(() => {
+                showToast('لینک صفحه وضعیت با موفقیت کپی شد!', 'success');
+            }).catch(() => {
+                showToast('خطا در کپی کردن لینک صفحه وضعیت!', 'error');
+            });
+        }
+
+        function copyJsonSubLink(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            navigator.clipboard.writeText(getJsonSubLink(username)).then(() => {
+                showToast('لینک ساب JSON با موفقیت کپی شد!', 'success');
+            }).catch(() => {
+                showToast('خطا در کپی کردن لینک ساب JSON!', 'error');
+            });
+        }
+
+        function showSubQR(encodedUsername, type) {
+            const username = decodeURIComponent(encodedUsername);
+            if (type === 'normal') {
+                toggleQRModal(true, getSubLink(username), 'QR ساب متنی');
+            } else if (type === 'json') {
+                toggleQRModal(true, getJsonSubLink(username), 'QR ساب JSON');
+            }
+        }
+
+        function copyConfig(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            const link = getVlessLink(username);
+            if (!link) return;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('کانفیگ VLESS با موفقیت کپی شد!', 'success');
+            }).catch(() => {
+                showToast('خطا در کپی کردن کانفیگ!', 'error');
+            });
+        }
+
+        function copyJsonConfig(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            const user = window.allUsers.find(u => u.username === username);
+            if (!user) return;
+            const host = window.location.hostname;
+            let ips = [host];
+            if (user.ips) {
+                ips = user.ips.split('\n').map(ip => ip.trim()).filter(ip => ip.length > 0);
+                if (ips.length === 0) ips = [host];
+            }
+            
+            const ports = String(user.port || '443').split(',').map(p => p.trim()).filter(p => p.length > 0);
+            const fp = user.fingerprint || 'chrome';
+
+            const configArray = [];
+            ips.forEach((ip, ipIndex) => {
+              ports.forEach((portStr) => {
+                const isTlsPort = tlsPorts.includes(portStr);
+                const tlsVal = isTlsPort ? 'tls' : 'none';
+                const remark = ips.length > 1 ? (user.username + ' - IP ' + (ipIndex + 1) + ' - Port ' + portStr) : (user.username + ' - Port ' + portStr);
+                
+                const jsonConfig = {
+                  "remarks": remark,
+                  "version": { "min": "25.10.15" },
+                  "log": { "loglevel": "none" },
+                  "dns": {
+                    "servers": [
+                      { "address": "https://8.8.8.8/dns-query", "tag": "remote-dns" },
+                      { "address": "8.8.8.8", "domains": ["full:" + host], "skipFallback": true }
+                    ],
+                    "queryStrategy": "UseIP",
+                    "tag": "dns"
+                  },
+                  "inbounds": [
+                    {
+                      "listen": "127.0.0.1", "port": 10808, "protocol": "socks",
+                      "settings": { "auth": "noauth", "udp": true },
+                      "sniffing": { "destOverride": ["http", "tls"], "enabled": true, "routeOnly": true },
+                      "tag": "mixed-in"
+                    },
+                    {
+                      "listen": "127.0.0.1", "port": 10853, "protocol": "dokodemo-door",
+                      "settings": { "address": "1.1.1.1", "network": "tcp,udp", "port": 53 },
+                      "tag": "dns-in"
+                    }
+                  ],
+                  "outbounds": [
+                    {
+                      "protocol": "vle" + "ss",
+                      "settings": {
+                        ["vne" + "xt"]: [
+                          { "address": ip, "port": parseInt(portStr), "users": [{ "id": user.uuid, "encryption": "none" }] }
+                        ]
+                      },
+                      ["stream" + "Settings"]: {
+                        "network": ('xh' + 'ttp'),
+                        ['xh' + 'ttp' + 'Settings']: { "host": host, "path": "/", "mode": 'auto' },
+                        "security": tlsVal,
+                        "sockopt": { ["dialer" + "Proxy"]: "fragment" }
+                      },
+                      "tag": "proxy"
+                    },
+                    {
+                      "protocol": "freedom",
+                      "settings": {
+                        "fragment": {
+                          "packets": "tlshello",
+                          "length": window.globalFragLen || "20-30",
+                          "interval": window.globalFragInt || "1-2"
+                        }
+                      },
+                      "streamSettings": {
+                        "sockopt": {
+                          "domainStrategy": "UseIP",
+                          "happyEyeballs": { "tryDelayMs": 250, "prioritizeIPv6": false, "interleave": 2, "maxConcurrentTry": 4 }
+                        }
+                      },
+                      "tag": "fragment"
+                    },
+                    { "protocol": "dns", "settings": { "nonIPQuery": "reject" }, "tag": "dns-out" },
+                    { "protocol": "freedom", "settings": { "domainStrategy": "UseIP" }, "tag": "direct" },
+                    { "protocol": "blackhole", "settings": { "response": { "type": "http" } }, "tag": "block" }
+                  ],
+                  "routing": {
+                    "domainStrategy": "IPIfNonMatch",
+                    "rules": [
+                      { "inboundTag": ["mixed-in"], "port": 53, "outboundTag": "dns-out", "type": "field" },
+                      { "inboundTag": ["dns-in"], "outboundTag": "dns-out", "type": "field" },
+                      { "inboundTag": ["remote-dns"], "outboundTag": "proxy", "type": "field" },
+                      { "inboundTag": ["dns"], "outboundTag": "direct", "type": "field" },
+                      { "domain": ["geosite:private"], "outboundTag": "direct", "type": "field" },
+                      { "ip": ["geoip:private"], "outboundTag": "direct", "type": "field" },
+                      { "network": "udp", "outboundTag": "block", "type": "field" },
+                      { "network": "tcp", "outboundTag": "proxy", "type": "field" }
+                    ]
+                  }
+                };
+                
+                if (tlsVal === 'tls') {
+                  jsonConfig.outbounds[0]["stream" + "Settings"]["tls" + "Settings"] = {
+                    "serverName": host, "fingerprint": fp, "alpn": ["http/1.1"], "allowInsecure": false
+                  };
+                }
+                configArray.push(jsonConfig);
+              });
+            });
+
+            navigator.clipboard.writeText(JSON.stringify(configArray, null, 2)).then(() => {
+                showToast('کانفیگ JSON با موفقیت کپی شد!', 'success');
+            }).catch(() => {
+                showToast('خطا در کپی کردن کانفیگ JSON!', 'error');
+            });
+        }
+
+        function showQR(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            const link = getVlessLink(username);
+            if (!link) return;
+            toggleQRModal(true, link, 'QR کانفیگ VLESS');
+        }
+
+        function editUser(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            const user = window.allUsers.find(u => u.username === username);
+            if (!user) {
+                showToast('کاربر یافت نشد!', 'error');
+                return;
+            }
+
+            isEditMode = true;
+            editingUsername = username;
+
+            document.getElementById('modal-title').innerText = 'ویرایش کاربر: ' + username;
+            document.getElementById('submit-btn').innerText = 'ذخیره تغییرات';
+
+            const nameInput = document.getElementById('input-name');
+            nameInput.value = username;
+            nameInput.disabled = true;
+
+            document.getElementById('input-limit').value = user.limit_gb || '';
+            document.getElementById('input-daily').value = user.daily_limit_gb || '';
+            document.getElementById('input-expiry').value = user.expiry_days || '';
+            document.getElementById('input-ips').value = user.ips || '';
+            
+            const proxy_ip = user.proxy_ip || '';
+            const selectEl = document.getElementById('input-proxy-select');
+            const customEl = document.getElementById('input-proxy');
+            
+            let optionExists = false;
+            for(let i=0; i<selectEl.options.length; i++) {
+                if (selectEl.options[i].value === proxy_ip) {
+                    optionExists = true; break;
+                }
+            }
+
+            if (proxy_ip === '' || proxy_ip === 'none') {
+                selectEl.value = '';
+                customEl.style.display = 'none';
+            } else if (optionExists) {
+                selectEl.value = proxy_ip;
+                customEl.style.display = 'none';
+            } else {
+                selectEl.value = 'custom';
+                customEl.value = proxy_ip;
+                customEl.style.display = 'block';
+            }
+
+            document.getElementById('fingerprint-select').value = user.fingerprint || 'chrome';
+
+            const userPorts = String(user.port || '').split(',').map(p => p.trim());
+            document.querySelectorAll('input[name="ports"]').forEach(cb => {
+                cb.checked = userPorts.includes(cb.value);
+            });
+
+            toggleModal(true);
+        }
+
+        async function deleteUser(encodedUsername) {
+            const username = decodeURIComponent(encodedUsername);
+            if (confirm('آیا از حذف کاربر ' + username + ' مطمئن هستید؟')) {
+                try {
+                    const response = await fetch('/api/users/' + encodeURIComponent(username), { method: 'DELETE' });
+                    if (response.ok) {
+                        showToast('کاربر با موفقیت حذف شد.', 'success');
+                        await loadUsers(true);
+                    } else {
+                        const errData = await response.json();
+                        showToast('خطا: ' + (errData.error || 'عملیات ناموفق بود'), 'error');
+                    }
+                } catch (err) {
+                    showToast('خطا در برقراری ارتباط با سرور', 'error');
+                }
+            }
+        }
+
+        function getFlagEmoji(countryCode) {
+            if (!countryCode) return '🌐';
+            const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+            try {
+                return String.fromCodePoint(...codePoints);
+            } catch (e) {
+                return '🌐';
+            }
+        }
+
+        function renderLocationsUI(locations, activeIata) {
+            const select = document.getElementById('location-select');
+            locations.sort((a, b) => (a.cca2 || '').localeCompare(b.cca2 || ''));
+
+            let html = '<option value="">🌐 پیش‌فرض (لوکیشن خودکار)</option>';
+            locations.forEach(loc => {
+                if (loc.iata && loc.city) {
+                    const flag = getFlagEmoji(loc.cca2);
+                    const isSelected = loc.iata.toUpperCase() === activeIata.toUpperCase() ? 'selected' : '';
+                    html += '<option value="' + loc.iata + '" ' + isSelected + '>' + flag + ' ' + loc.city + ' (' + loc.iata + ')</option>';
+                }
+            });
+            select.innerHTML = html;
+        }
+
+        async function loadLocations() {
+            const select = document.getElementById('location-select');
+            const cachedLocations = localStorage.getItem('cached_locations_list');
+            const cachedActiveIata = localStorage.getItem('cached_active_iata') || '';
+            let hasCachedLocs = false;
+            
+            if (cachedLocations) {
+                try {
+                    const parsedLocs = JSON.parse(cachedLocations);
+                    if (Array.isArray(parsedLocs) && parsedLocs.length > 0) {
+                        renderLocationsUI(parsedLocs, cachedActiveIata);
+                        hasCachedLocs = true;
+                    }
+                } catch(e) {}
+            }
+            
+            try {
+                const statusRes = await fetch('/api/proxy-ip');
+                let activeIata = '';
+                if (statusRes.ok) {
+                    const statusData = await statusRes.json();
+                    activeIata = statusData.iata || '';
+                    localStorage.setItem('cached_active_iata', activeIata);
+                    
+                    if(statusData.frag_len) {
+                        window.globalFragLen = statusData.frag_len;
+                        document.getElementById('frag-length').value = statusData.frag_len;
+                    }
+                    if(statusData.frag_int) {
+                        window.globalFragInt = statusData.frag_int;
+                        document.getElementById('frag-interval').value = statusData.frag_int;
+                    }
+                }
+
+                const res = await fetch('/locations');
+                if (!res.ok) throw new Error();
+                const locations = await res.json();
+                
+                localStorage.setItem('cached_locations_list', JSON.stringify(locations));
+                renderLocationsUI(locations, activeIata);
+            } catch (err) {
+                if (!hasCachedLocs) {
+                    select.innerHTML = '<option value="">خطا در دریافت لوکیشن‌ها</option>';
+                }
+            }
+        }
+
+        async function saveSettings() {
+            const select = document.getElementById('location-select');
+            const fragLen = document.getElementById('frag-length').value || "20-30";
+            const fragInt = document.getElementById('frag-interval').value || "1-2";
+            const iata = select.value;
+            const btn = document.getElementById('save-settings-btn');
+            
+            btn.disabled = true;
+            btn.innerText = 'در حال ذخیره...';
+            
+            try {
+                let resolvedIp = 'proxyip.cmliussss.net';
+                if (iata) {
+                    const domain = iata.toLowerCase() + '.proxyip.cmliussss.net';
+                    const dnsRes = await fetch('https://cloudflare-dns.com/dns-query?name=' + domain + '&type=A', {
+                        headers: { 'accept': 'application/dns-json' }
+                    });
+                    resolvedIp = domain;
+                    if (dnsRes.ok) {
+                        const dnsData = await dnsRes.json();
+                        if (dnsData.Answer && dnsData.Answer.length > 0) {
+                            const ips = dnsData.Answer.filter(ans => ans.type === 1).map(ans => ans.data);
+                            if (ips.length > 0) {
+                                resolvedIp = ips[Math.floor(Math.random() * ips.length)];
+                            }
+                        }
+                    }
+                }
+
+                const response = await fetch('/api/proxy-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proxy_ip: resolvedIp, iata: iata ? iata.toUpperCase() : '', frag_len: fragLen, frag_int: fragInt })
+                });
+
+                if (response.ok) {
+                    window.globalFragLen = fragLen;
+                    window.globalFragInt = fragInt;
+                    showToast('تنظیمات با موفقیت ذخیره شد.' + (iata ? ' آی‌پی: ' + resolvedIp : ''), 'success');
+                    toggleSettingsModal(false);
+                } else {
+                    showToast('خطا در ذخیره تنظیمات', 'error');
+                }
+            } catch (err) {
+                showToast('خطا در برقراری ارتباط با سرور', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'ذخیره تنظیمات';
+            }
+        }
+
+        async function changeAdminPassword() {
+            const currentPwd = document.getElementById('change-pwd-current').value;
+            const newPwd = document.getElementById('change-pwd-new').value;
+            const btn = document.getElementById('change-pwd-btn');
+            
+            if (!currentPwd || !newPwd) {
+                showToast('وارد کردن رمز عبور فعلی و جدید الزامی است!', 'warning');
+                return;
+            }
+            if (newPwd.length < 4) {
+                showToast('رمز عبور جدید باید حداقل ۴ کاراکتر باشد!', 'warning');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerText = 'در حال تغییر...';
+            
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_password: currentPwd, new_password: newPwd })
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showToast('رمز عبور با موفقیت تغییر کرد.', 'success');
+                    document.getElementById('change-pwd-current').value = '';
+                    document.getElementById('change-pwd-new').value = '';
+                    toggleSettingsModal(false);
+                } else {
+                    showToast('خطا: ' + (data.error || 'عملیات ناموفق بود'), 'error');
+                }
+            } catch (err) {
+                showToast('خطا در برقراری ارتباط با سرور', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'تغییر رمز عبور';
+            }
+        }
+
+        async function logoutAdmin() {
+            if (confirm('آیا می‌خواهید از پنل خارج شوید؟')) {
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                } catch (err) {}
+                window.location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPortCheckboxes();
+            loadUsers();
+            loadLocations();
+            setInterval(() => loadUsers(true), 60000);
+        });
+    </script>
+</body>
+</html>

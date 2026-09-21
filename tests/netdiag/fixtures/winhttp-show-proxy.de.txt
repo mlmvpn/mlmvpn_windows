@@ -1,0 +1,5 @@
+
+Aktuelle WinHTTP-Proxyeinstellungen:
+
+    Direkter Zugriff (kein Proxyserver).
+

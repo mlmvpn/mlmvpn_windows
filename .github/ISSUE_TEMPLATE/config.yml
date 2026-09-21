@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "Security vulnerability / آسیب‌پذیری امنیتی"
+    url: https://github.com/mlmvpn/mlmvpn_windows/security/advisories/new
+    about: "Report privately, never in a public issue. / خصوصی گزارش دهید، هرگز در issue عمومی."
+  - name: "Telegram — @mlmvpn"
+    url: https://t.me/mlmvpn
+    about: "Questions and help. / سؤال و راهنمایی."

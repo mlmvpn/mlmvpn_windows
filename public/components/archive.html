@@ -1,0 +1,218 @@
+<!-- IP Archive Modal -->
+    <div
+      id="ip-archive-wrapper"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999999;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      "
+    >
+      <div
+        id="ip-archive-overlay"
+        class="bg-black/60"
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: -1;
+        "
+        onclick="closeIpArchive()"
+      ></div>
+
+      <div
+        id="ip-archive-modal"
+        class="w-full max-w-5xl bg-gs-panel rounded-[24px] overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl border border-gs-border animate-modal"
+        style="z-index: 1000000; margin: auto"
+      >
+        <div
+          class="flex items-center justify-between px-6 py-4 border-b border-gs-border bg-gs-panel shrink-0"
+        >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="closeIpArchive()"
+              class="p-2 -mr-2 text-gs-muted hover:text-gs-muted hover:bg-gs-panel rounded-full transition-colors"
+              title="بستن"
+            >
+              <svg
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <div>
+              <h1
+                class="text-[1.15rem] font-medium text-gs-muted tracking-tight"
+              >
+                آی‌پی‌های پیدا شده (آرشیو ۱۰۰٪ سالم)
+              </h1>
+              <p
+                class="text-xs text-gs-muted mt-0.5 flex items-center gap-1.5"
+                id="archive-modal-subtitle"
+              >
+                <span class="w-2 h-2 rounded-full bg-gs-panel"></span>
+                <span id="archive-count-text">0</span> آی‌پی ذخیره شده
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button
+              class="text-gs-muted hover:bg-gs-panel/10 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+              onclick="clearIpArchive()"
+            >
+              پاکسازی کل آرشیو
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gs-panel"
+        >
+          <section
+            class="bg-gs-panel rounded-2xl overflow-hidden border border-gs-border flex flex-col"
+          >
+            <div
+              class="p-4 border-b border-gs-border bg-gs-panel flex flex-wrap items-center justify-between gap-4"
+            >
+              <div class="flex items-center gap-4">
+                <h2 class="text-base font-medium text-gs-muted">
+                  لیست آی‌پی‌های بایگانی شده
+                </h2>
+                <div
+                  class="text-xs text-gs-muted border border-gs-border px-2 py-1 rounded bg-gs-panel"
+                >
+                  با اسکن موفق، آی‌پی‌های سالم خودکار به اینجا اضافه می‌شوند
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  onclick="deleteSelectedArchive()"
+                  class="px-4 py-2 text-gs-muted hover:bg-gs-panel/10 border border-gs-border rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+                  title="حذف انتخاب‌شده‌ها"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path
+                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                    />
+                  </svg>
+                  حذف
+                </button>
+
+                <button
+                  onclick="retestArchiveNodes()"
+                  class="px-5 py-2 bg-gs-panel hover:bg-gs-panel text-gs-muted border border-gs-border rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                  <svg
+                    id="archive-test-icon"
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
+                  <svg
+                    id="archive-test-spinner"
+                    class="w-4 h-4 md-spinner hidden"
+                    viewBox="25 25 50 50"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="5"
+                    />
+                  </svg>
+                  <span id="archive-test-text">تست مجدد</span>
+                </button>
+
+                <div class="w-px h-5 bg-gs-panel mx-1"></div>
+
+                <button
+                  onclick="copySelectedArchive()"
+                  class="px-4 py-2 text-gs-muted hover:bg-gs-panel/10 border border-gs-border rounded-full text-sm font-medium transition-colors"
+                >
+                  کپی سالم‌ها
+                </button>
+                <button
+                  onclick="transferArchiveToCombo()"
+                  class="px-4 py-2 bg-gs-panel hover:bg-gs-panel/90 text-gs-muted font-medium rounded-full text-sm transition-colors shadow-sm flex items-center gap-2"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                  انتقال به پنل ترکیب
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center px-4 py-2 bg-gs-panel border-b border-gs-border text-xs font-medium text-gs-muted"
+            >
+              <div class="w-10 text-center flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  id="archive-master-check"
+                  class="md-checkbox w-4 h-4"
+                  onchange="toggleAllArchiveNodes(this)"
+                  checked
+                />
+              </div>
+              <div class="flex-1 px-2">مشخصات نود (IP / SNI)</div>
+              <div class="w-24 text-center">پورت</div>
+              <div class="w-24 text-left pr-4">تأخیر ثبت شده</div>
+            </div>
+
+            <div
+              class="bg-gs-panel max-h-[400px] overflow-y-auto custom-scrollbar"
+              id="archive-nodes-list"
+            >
+              <!-- Dynamic Nodes -->
+            </div>
+
+            <div
+              id="archive-progress-container"
+              class="h-[3px] w-full bg-transparent overflow-hidden"
+            >
+              <div
+                id="archive-progress-bar"
+                class="h-full bg-gs-panel w-0 transition-all duration-300"
+              ></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <!-- END IP Archive Modal -->

@@ -1,0 +1,28 @@
+name = "xhttp-panel"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# observability عمداً خاموش است (هیچ لاگی ذخیره/تحلیل نشود — کاهش ردپا)
+[observability]
+enabled = false
+
+# ───────────────────────────────────────────────────────────
+# دیتابیس D1 (ذخیره‌سازی کاربرها، مصرف و تنظیمات)
+# پس از ساخت دیتابیس، مقدار database_id را اینجا جایگذاری کن:
+#   wrangler d1 create xhttp-panel-db
+# ───────────────────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "ehsan"
+database_id = "dbc871c3-2467-4f8d-84f8-b502b75ee113"
+
+# ───────────────────────────────────────────────────────────
+# رمز پنل از طریق Secret ست می‌شود (نه اینجا):
+#   wrangler secret put ADMIN_PASSWORD
+# یا از داشبورد: Settings → Variables and Secrets → ADMIN_PASSWORD
+# ورود به پنل: https://<your-worker-domain>/admin
+# ───────────────────────────────────────────────────────────
+
+[vars]
+DEBUG = "1"

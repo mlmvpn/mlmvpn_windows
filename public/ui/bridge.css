@@ -1,0 +1,566 @@
+/* =====================================================================
+   Bridge — puts the existing markup onto the new tokens.
+   ---------------------------------------------------------------------
+   The ~40 panels were written against --ide-* / --syn-* variables, the
+   Tailwind gs-* / m3-* colours (which read those variables), a handful of
+   shared classes in style.css, and styles that components inject at
+   runtime. This file re-points all of them at ui/tokens.css, so every
+   panel picks up the new look without its markup being touched.
+
+   Selectors that must beat a runtime-injected <style> (ui-modal, the
+   tooltip, workspace tabs, the activity rail) carry an extra `html` /
+   `html body` for specificity instead of !important. !important appears
+   only where style.css itself used it.
+
+   Panels are moved onto the tokens properly, one by one, in redesign
+   phase 4; this file shrinks as they are.
+   ===================================================================== */
+
+/* ── 1. Legacy variables → tokens ── */
+:root,
+html[data-appearance] {
+  --ide-bg: var(--mv-window);
+  --ide-panel: var(--mv-surface);
+  --ide-sidebar: var(--mv-surface-2);
+  --ide-activity: var(--mv-window);
+  --ide-border: var(--mv-sep-2);
+  --ide-border-hover: var(--mv-sep-3);
+  --ide-text-main: var(--mv-label);
+  --ide-text-muted: var(--mv-label-2);
+  --ide-text-dim: var(--mv-label-3);
+  --ide-hover: var(--mv-fill);
+  --ide-selection: var(--mv-accent-soft);
+  --ide-bg-active: var(--mv-fill-2);
+  --ide-radius: var(--mv-r-lg);
+
+  /* Text-safe ("ink") variants: --syn-* are used for text as often as for fills. */
+  --syn-blue: var(--mv-accent);
+  --syn-cyan: var(--mv-teal-ink);
+  --syn-green: var(--mv-green-ink);
+  --syn-purple: var(--mv-purple-ink);
+  --syn-yellow: var(--mv-orange-ink);
+  --syn-red: var(--mv-red-ink);
+
+  --m3-primary: var(--mv-accent);
+  --m3-surface3: var(--mv-fill-3);
+  --gs-primary-rgb: var(--mv-accent-rgb);
+}
+
+/* ── 2. Base ── */
+html,
+body,
+body.layout {
+  background: var(--mv-window);
+}
+body {
+  font-family: var(--mv-font);
+  font-size: var(--mv-fs-body);
+  color: var(--mv-label);
+  -webkit-font-smoothing: antialiased;
+}
+body.layout { border-radius: 0; }
+/* The Android-Studio halo belonged to the old IDE look. */
+body::before { content: none; }
+
+::selection { background: var(--mv-accent-soft); }
+.font-mono, code, pre, kbd, samp { font-family: var(--mv-font-mono); }
+/* Technical values keep Latin digits (tokens.css › MV Latin Digits): what the user types
+   into a field and every left-to-right run the markup marks as such — IPs, hosts, ports,
+   e-mails, config links. Only the digit glyphs change; Persian letters keep IRANSansX.
+   `html` in front so Tailwind's runtime `font-sans` (injected after this sheet) loses. */
+html input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html textarea,
+html select,
+html [dir="ltr"]:not(.font-mono):not(code):not(pre),
+html .mv-tech-digits { font-family: var(--mv-font-tech); }
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+progress { accent-color: var(--mv-accent); }
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--mv-accent-ring);
+  outline-offset: 1px;
+}
+
+/* ── 3. Scrollbars: thin, borderless, over the content ── */
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; border: none; box-shadow: none; }
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--mv-fill-3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: var(--mv-label-3); }
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner { background: transparent; }
+
+/* ── 4. Buttons ── */
+.btn-primary {
+  background: var(--mv-accent);
+  color: var(--mv-on-accent);
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--mv-accent) 70%, #000), 0 1px 1.5px rgba(0, 0, 0, .18);
+  transition: filter var(--mv-d-1) var(--mv-ease-out);
+}
+.btn-primary:hover:not(:disabled) { background: var(--mv-accent); filter: brightness(1.08); }
+.btn-primary:active:not(:disabled) { filter: brightness(.9); }
+.btn-primary:disabled { opacity: .42; cursor: default; }
+
+.btn-sm {
+  background: var(--mv-control);
+  border: 0;
+  color: var(--mv-label);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 11.5px;
+  box-shadow: var(--mv-control-hair);
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.btn-sm:hover:not(:disabled) { background: var(--mv-control-hover); border: 0; }
+.btn-sm:active:not(:disabled) { background: var(--mv-control-press); }
+.btn-sm:disabled { opacity: .42; cursor: default; }
+/* The title-bar buttons (راهنما / درباره ما) are plain toolbar items, not push buttons:
+   their inline style clears the background but would still inherit the frame. */
+.header-bar .btn-sm { box-shadow: none; }
+
+/* ── 5. Text fields ── */
+.ide-input,
+.input-custom {
+  background-color: var(--mv-field) !important;
+  border: 1px solid var(--mv-sep-2) !important;
+  color: var(--mv-label) !important;
+  border-radius: var(--mv-r-sm);
+  transition: border-color var(--mv-d-1) var(--mv-ease-out), box-shadow var(--mv-d-1) var(--mv-ease-out);
+}
+.ide-input:focus,
+.input-custom:focus {
+  outline: none;
+  border-color: var(--mv-accent) !important;
+  box-shadow: 0 0 0 3px var(--mv-accent-ring) !important;
+  background-color: var(--mv-field) !important;
+}
+.ide-input::placeholder,
+.input-custom::placeholder { color: var(--mv-label-3) !important; }
+
+.ide-chip-input:checked + div,
+.chip-input:checked + .chip-label {
+  background: var(--mv-accent-soft);
+  color: var(--mv-accent);
+  border-color: color-mix(in srgb, var(--mv-accent) 55%, transparent);
+}
+
+/* ── 6. Checkboxes and radios ── */
+.checkbox-custom,
+.md-checkbox {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin: 0;
+  border: 0;
+  border-radius: var(--mv-r-xs);
+  background-color: var(--mv-control);
+  box-shadow: inset 0 0 0 1px var(--mv-sep-3);
+  position: relative;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background-color var(--mv-d-1) var(--mv-ease-out);
+}
+.checkbox-custom:checked,
+.md-checkbox:checked {
+  background-color: var(--mv-accent);
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--mv-accent) 70%, #000);
+}
+.checkbox-custom:checked::after,
+.md-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 4px;
+  height: 8px;
+  border: solid #FFFFFF;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  font-size: 0;
+  color: transparent;
+}
+
+.radio-custom,
+.material-radio {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--mv-control);
+  box-shadow: inset 0 0 0 1px var(--mv-sep-3);
+  position: relative;
+  display: inline-grid;
+  place-content: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.radio-custom:checked,
+.material-radio:checked {
+  background-color: var(--mv-accent);
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--mv-accent) 70%, #000);
+}
+.radio-custom:checked::after { width: 6px; height: 6px; background-color: #FFFFFF; }
+.material-radio::before { width: 6px; height: 6px; background-color: #FFFFFF; }
+
+/* ── 7. Switches. macOS switches use the accent colour (iOS's are green).
+      RTL: "off" rests at the start (right), "on" moves to the end (left). ── */
+.md-switch,
+.material-toggle {
+  appearance: none;
+  width: 34px;
+  height: 20px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background-color: var(--mv-track);
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--mv-d-2) var(--mv-ease-out);
+}
+.md-switch::after,
+.material-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: auto;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--mv-knob);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 0 0 .5px rgba(0, 0, 0, .08);
+  transform: none;
+  transition: transform var(--mv-d-2) var(--mv-ease-spring);
+}
+.md-switch:checked,
+.material-toggle:checked { background-color: var(--mv-accent); }
+.md-switch:checked::after,
+.material-toggle:checked::after { transform: translateX(-14px); background-color: var(--mv-knob); }
+/* They are checkboxes with `outline: none`, so keyboard focus needs its own ring. */
+.md-switch:focus-visible,
+.material-toggle:focus-visible,
+.peer:focus-visible ~ .peer-checked\:bg-gs-success { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+
+/* Tailwind "peer" switches: track, knob and the checked colour. */
+.peer-checked\:bg-gs-success { background-color: var(--mv-track) !important; }
+.peer:checked ~ .peer-checked\:bg-gs-success { background-color: var(--mv-accent) !important; }
+.peer-checked\:bg-gs-success::after {
+  background-color: var(--mv-knob) !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+}
+
+/* The per-event notification switches (renderNotificationMenu). Their knob carries both
+   bg-gs-primary and bg-gs-muted, so which colour won depended on stylesheet order and
+   an ON switch could look OFF. Drawn here as ordinary switches instead. */
+#notif-settings-list input + div {
+  width: 34px !important;
+  height: 20px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--mv-track) !important;
+  box-shadow: none !important;
+  transition: background-color var(--mv-d-2) var(--mv-ease-out);
+}
+#notif-settings-list input + div + div {
+  top: 2px !important;
+  right: 2px;
+  left: auto;
+  width: 16px !important;
+  height: 16px !important;
+  background: var(--mv-knob) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3) !important;
+  transform: none !important;
+  transition: transform var(--mv-d-2) var(--mv-ease-spring);
+}
+#notif-settings-list input:checked + div { background: var(--mv-accent) !important; }
+#notif-settings-list input:checked + div + div { transform: translateX(-14px) !important; }
+#notif-settings-list label { border-radius: 8px; }
+
+/* ── 8. Tables and rows ── */
+.ide-table th {
+  background: var(--mv-surface);
+  color: var(--mv-label-2);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0;
+  border-bottom: 1px solid var(--mv-sep-2);
+  border-right-color: var(--mv-sep);
+}
+.ide-table td {
+  border-bottom: 1px solid var(--mv-sep);
+  border-right-color: var(--mv-sep);
+}
+.ide-table tr:hover,
+.ide-table tbody tr:hover { background: var(--mv-fill); }
+.server-row:hover,
+.sni-row:hover,
+.node-row:hover,
+.result-row:hover { background-color: var(--mv-fill); }
+.ide-table tbody tr.selected,
+.result-row.selected,
+.server-row.selected,
+.node-row.selected,
+.sni-row.selected { background-color: var(--mv-accent-soft) !important; }
+
+.quality-badge {
+  border: 0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-family: var(--mv-font-latin);
+  font-weight: 600;
+}
+.q-excellent { background: var(--mv-accent-soft); color: var(--mv-accent); border: 0; }
+.q-good { background: color-mix(in srgb, var(--mv-green) 16%, transparent); color: var(--mv-green-ink); border: 0; }
+.q-medium { background: color-mix(in srgb, var(--mv-orange) 16%, transparent); color: var(--mv-orange-ink); border: 0; }
+.q-slow { background: color-mix(in srgb, var(--mv-red) 14%, transparent); color: var(--mv-red-ink); border: 0; }
+
+.progress-bar { background: var(--mv-track); border-radius: 999px; }
+.progress-fill { background: var(--mv-accent); box-shadow: none; }
+#resizer:hover, #resizer.active, .resizer-x:hover, .resizer-y:hover { background-color: var(--mv-accent); }
+
+/* ── 9. Workspace tabs (injected by tab-dnd.js) ── */
+html .ws-tab {
+  height: 26px;
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  color: var(--mv-label-2);
+  transition: background var(--mv-d-1) var(--mv-ease-out), color var(--mv-d-1) var(--mv-ease-out);
+}
+html .ws-tab:hover { background: var(--mv-fill); color: var(--mv-label); }
+html .ws-tab.is-active {
+  background: var(--mv-control);
+  color: var(--mv-label);
+  font-weight: 600;
+  box-shadow: var(--mv-control-hair);
+}
+html .ws-tab.is-active .ws-tab-icon,
+html .ws-tab.is-active .ws-tab-close { color: var(--mv-accent); }
+html .ws-tab-close:hover { background: var(--mv-fill-2); color: var(--mv-red-ink); }
+html .ws-tab-drop { background: var(--mv-accent); box-shadow: 0 0 6px rgba(var(--mv-accent-rgb), .6); }
+
+/* ── 10. Current layout surfaces (until the window system replaces them) ── */
+#top-nav-container,
+#left-sidebar,
+#terminal-panel,
+#empty-state > div,
+#scanner-sidebar-container > *,
+#editor-content-wrap,
+#settings-tab-wrap {
+  border: none !important;
+  border-radius: var(--mv-r-xl) !important;
+  background: var(--mv-surface);
+  box-shadow: 0 0 0 var(--mv-hl) var(--mv-sep-2), 0 1px 3px rgba(0, 0, 0, .16) !important;
+}
+.sidebar-header {
+  color: var(--mv-label-2);
+  border-bottom: 1px solid var(--mv-sep);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+}
+
+.activity-bar button {
+  border-radius: var(--mv-r-md);
+  color: var(--mv-label-2);
+}
+.activity-bar button:hover { color: var(--mv-label); background-color: var(--mv-fill-2); }
+.activity-bar button.active { color: var(--mv-accent); }
+html .activity-bar button.rail-focus {
+  background: var(--mv-accent);
+  color: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(var(--mv-accent-rgb), .45);
+}
+html .activity-bar button.rail-focus:hover { background: var(--mv-accent); filter: brightness(1.08); color: #FFFFFF; }
+html .activity-bar button.rail-prev { background: var(--mv-fill-2); color: var(--mv-label); }
+html .activity-bar .rail-divider { background: var(--mv-sep-2); }
+html .activity-bar .rail-drop-slot { background: var(--mv-accent-soft); box-shadow: inset 0 0 0 1px var(--mv-accent); }
+
+.status-bar { color: var(--mv-label-2); background: transparent; }
+.status-bar button,
+.status-bar a { color: var(--mv-label-2); }
+.status-bar a:hover,
+.status-bar .sb-item:hover { background: var(--mv-fill); }
+
+.stat-card { border-radius: var(--mv-r-lg); }
+
+/* ── 11. Menus and popovers ── */
+#main-menu,
+#notification-menu,
+html .rail-menu {
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  border: 0;
+  border-radius: var(--mv-r-lg);
+  box-shadow: var(--mv-e2);
+  padding: 5px;
+}
+#main-menu > div { padding: 0; }
+#main-menu button,
+#notification-menu button:not(#btn-notif-perm),
+html .rail-menu button { border-radius: 6px; }
+#main-menu button:hover,
+html .rail-menu button:hover:not([disabled]) { background: var(--mv-accent); color: #FFFFFF; }
+#main-menu button:hover span,
+#main-menu button:hover i { color: #FFFFFF; }
+
+/* ── 12. Tooltips (initGlobalTooltip): macOS tooltips have no arrow ── */
+html body #global-custom-tooltip,
+.tooltip-btn .tooltip-text {
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  color: var(--mv-label);
+  border: 0;
+  border-radius: 7px;
+  box-shadow: var(--mv-e2);
+  padding: 5px 10px;
+  font-size: 11.5px;
+  line-height: 1.75;
+  z-index: 999999;
+}
+html body #global-custom-tooltip::after { display: none; }
+
+/* ── 13. Alerts (ui-modal.js → uiConfirm / uiAlert): the macOS alert ── */
+html body .uim-backdrop {
+  background: var(--mv-scrim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-family: var(--mv-font);
+}
+html body .uim-box {
+  width: min(300px, calc(100vw - 40px));
+  padding: 20px 18px 16px;
+  border: 0;
+  border-radius: var(--mv-r-xl);
+  background: var(--mv-window);
+  box-shadow: var(--mv-e5);
+  text-align: center;
+}
+html body .uim-head { flex-direction: column; align-items: center; gap: 10px; padding: 0; }
+html body .uim-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 22.5%;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: var(--mv-font-latin);
+}
+html body .uim-icon.danger { background: color-mix(in srgb, var(--mv-red) 16%, transparent); color: var(--mv-red-ink); }
+html body .uim-icon.warn { background: color-mix(in srgb, var(--mv-orange) 16%, transparent); color: var(--mv-orange-ink); }
+html body .uim-icon.info,
+html body .uim-icon.question { background: var(--mv-accent-soft); color: var(--mv-accent); }
+html body .uim-icon.success { background: color-mix(in srgb, var(--mv-green) 16%, transparent); color: var(--mv-green-ink); }
+html body .uim-title { font-size: 13.5px; font-weight: 700; line-height: 1.6; padding: 0; color: var(--mv-label); }
+html body .uim-body { padding: 6px 0 0; font-size: 12px; line-height: 1.85; color: var(--mv-label-2); }
+html body .uim-body b,
+html body .uim-body strong { color: var(--mv-label); }
+html body .uim-foot { padding: 16px 0 0; gap: 8px; }
+html body .uim-btn {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  font-size: 13px;
+  font-weight: 500;
+}
+html body .uim-btn-ghost { background: var(--mv-control); color: var(--mv-label); box-shadow: var(--mv-control-hair); }
+html body .uim-btn-ghost:hover { background: var(--mv-control-hover); }
+html body .uim-btn-primary { background: var(--mv-accent); color: #FFFFFF; font-weight: 600; }
+html body .uim-btn-danger { background: var(--mv-red-fill); color: #FFFFFF; font-weight: 600; }
+html body .uim-btn:focus-visible { outline: 2px solid var(--mv-accent-ring); outline-offset: 1px; }
+
+/* The old single toast line gives way to the banner stack once ui/mv.js is running. */
+html[data-mv-toast] .toast-container { display: none; }
+
+/* ── 13b. Sheets: every panel's own dialog (cloud, zeus, sni import, archive, combination…)
+   is a fixed full-screen overlay holding one card. macOS dims what is behind a sheet and
+   never blurs it, and gives every sheet one radius and one shadow — whatever the panel's
+   author picked (rounded-2xl, -3xl, [24px], shadow-xl, -2xl). ── */
+html body .fixed.inset-0[class*="backdrop-blur"],
+html body .fixed.inset-0 > .absolute.inset-0[class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html body .fixed.inset-0 > :is(.shadow-2xl, .shadow-xl):is(.rounded-2xl, .rounded-3xl, [class*="rounded-[2"]),
+html body .fixed.inset-0 > div > :is(.shadow-2xl, .shadow-xl):is(.rounded-2xl, .rounded-3xl, [class*="rounded-[2"]),
+html body #ip-archive-modal,
+html body #archive-alert-modal > div,
+html body #archive-confirm-modal > div {
+  border-radius: 14px;
+  border-color: transparent;
+  box-shadow: var(--mv-e4);
+}
+/* V2Ray's dialogs never showed a dim: their shared #modal-backdrop keeps its `hidden` class
+   (openModal only swaps its opacity). The dialog root is the full-screen layer, so it
+   dims instead — and a tall one (import, edit, subscription) scrolls within the screen. */
+html body :is(#importModal, #editModal, #deleteModal, #cancelTestModal, #deleteAllModal, #subModal, #shareModal) {
+  background: var(--mv-scrim);
+}
+html body :is(#importModal, #editModal, #subModal) > div {
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+/* ── 14. The Google-dark palette classes from style.css ── */
+.bg-google-bg { background-color: var(--mv-surface); }
+.bg-google-surface { background-color: var(--mv-surface-2); }
+.bg-google-surface2 { background-color: var(--mv-surface-3); }
+.bg-google-surface3 { background-color: var(--mv-surface-4); }
+.bg-google-blue { background-color: var(--mv-accent); }
+.bg-google-blue\/10 { background-color: var(--mv-accent-soft); }
+.bg-google-blue\/5 { background-color: color-mix(in srgb, var(--mv-accent) 7%, transparent); }
+.bg-google-green { background-color: var(--mv-green); }
+.bg-google-green\/10 { background-color: color-mix(in srgb, var(--mv-green) 12%, transparent); }
+.bg-google-red { background-color: var(--mv-red); }
+.bg-google-red\/10 { background-color: color-mix(in srgb, var(--mv-red) 12%, transparent); }
+.text-google-bg { color: var(--mv-on-accent); }
+.text-google-text { color: var(--mv-label); }
+.text-google-muted { color: var(--mv-label-2); }
+.text-google-blue { color: var(--mv-accent); }
+.text-google-green { color: var(--mv-green-ink); }
+.text-google-red { color: var(--mv-red-ink); }
+.border-google-surface3 { border-color: var(--mv-sep-2); }
+.border-google-border { border-color: var(--mv-sep-3); }
+.border-google-blue { border-color: var(--mv-accent); }
+.border-google-blue\/30 { border-color: color-mix(in srgb, var(--mv-accent) 35%, transparent); }
+.border-google-green\/20 { border-color: color-mix(in srgb, var(--mv-green) 25%, transparent); }
+.border-google-red\/20 { border-color: color-mix(in srgb, var(--mv-red) 25%, transparent); }
+.hover\:bg-google-surface:hover { background-color: var(--mv-surface-2); }
+.hover\:bg-google-surface2:hover { background-color: var(--mv-surface-3); }
+.hover\:bg-google-blue\/10:hover { background-color: var(--mv-accent-soft); }
+.hover\:bg-google-red\/10:hover { background-color: color-mix(in srgb, var(--mv-red) 12%, transparent); }
+.hover\:text-google-text:hover { color: var(--mv-label); }
+.hover\:border-google-blue\/30:hover { border-color: color-mix(in srgb, var(--mv-accent) 35%, transparent); }

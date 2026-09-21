@@ -1,0 +1,284 @@
+<div id="guide-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-m3-surface w-full max-w-5xl max-h-[90vh] rounded-3xl shadow-2xl border border-m3-outline flex flex-col text-m3-onSurface overflow-hidden" dir="rtl" style="font-family: 'Vazirmatn', Tahoma, sans-serif;">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-m3-outline p-6 bg-m3-surface2">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-m3-primary/10 flex items-center justify-center text-m3-primary">
+                    <i class="ph-bold ph-book-open text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-m3-onSurface m-0">راهنمای جامع نرم‌افزار</h3>
+                    <p class="text-xs text-m3-onSurfaceVariant mt-1">آموزش گام به گام تنظیمات و امکانات (بر اساس ساختار واقعی کدهای برنامه)</p>
+                </div>
+            </div>
+            <button onclick="hideModal('guide-modal')" class="text-m3-onSurfaceVariant hover:text-red-400 transition-colors bg-transparent border-none cursor-pointer">
+                <i class="ph-bold ph-x text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 overflow-y-auto custom-scrollbar flex flex-col gap-8 text-sm leading-relaxed">
+
+            <!-- Intro -->
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-5 text-blue-400">
+                <p class="font-bold mb-2">به مستندات رسمی خوش آمدید!</p>
+                <p class="text-xs">در این بخش، تک تک قابلیت‌های نرم‌افزار دقیقاً مطابق با آنچه در سیستم برنامه‌نویسی شده، کالبدشکافی شده است. این یک راهنمای سطحی نیست؛ بلکه راهنمای حرفه‌ای شما برای تسلط بر نرم‌افزار است.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- 1. Scanner Settings -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-sliders"></i> ۱. تنظیمات اسکنر (سایدبار)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">در سایدبار سمت راست، کنترل موتور اسکنر در دستان شماست:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>انتخاب ارائه‌دهندگان:</b> انتخاب بین Cloudflare، Akamai و...</li>
+                        <li><b>محدودیت‌ها:</b> تنظیم حداکثر پینگ مجاز و تعداد آی‌پی‌های خروجی.</li>
+                        <li><b>کانفیگ فیلتر شده:</b> مهم‌ترین بخش! یک کانفیگ پایه وارد می‌کنید تا نرم‌افزار در "مرحله سوم اسکن"، تست قطعی عبور از فیلترینگ را روی آی‌پی‌ها انجام دهد.</li>
+                    </ul>
+                </div>
+
+                <!-- 2 & 6. Scanner System & Tabs -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-radar"></i> ۲ و ۶. سیستم اسکنر و تب‌ها
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">اسکنر نرم‌افزار سه مرحله‌ای است:</p>
+                    <ol class="list-decimal pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li>تست پینگ و بررسی باز بودن پورت‌ها (HTTPS/HTTP).</li>
+                        <li>بررسی مالکیت آی‌پی و ASN.</li>
+                        <li><b>تست قطعی اینترنت:</b> استفاده از کانفیگ پایه شما برای اطمینان از عبور داده‌ها.</li>
+                    </ol>
+                    <p class="text-m3-onSurfaceVariant text-xs mt-2"><b>تب‌های اسکنر:</b> نتایج در تب‌های مجزا (مثل IPv4/IPv6 یا گروه‌های مختلف) نمایش داده می‌شوند تا مدیریت آن‌ها آسان باشد.</p>
+                </div>
+
+                <!-- 3. Main Settings -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-gear"></i> ۳. تنظیمات اصلی (پیکربندی)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">در تب تنظیمات (Settings)، هسته اصلی کانفیگ‌ساز برنامه قرار دارد:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>پروتکل‌ها و پورت‌ها:</b> تعیین دقیق پروتکل‌های خروجی و پورت‌های ارتباطی مجاز.</li>
+                        <li><b>تنظیمات پیشرفته فرگمنت (Fragment):</b> امکان فعال‌سازی فرگمنت و تنظیم دقیق <b>طول (Length)</b> و <b>فاصله زمانی پکیج‌ها (Interval)</b> برای دور زدن سیستم‌های فیلترینگ پیچیده (DPI).</li>
+                    </ul>
+                </div>
+
+                <!-- 4. Combo Panel -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-intersect"></i> ۴. پنل ترکیب (Combine)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">مرکز جادویی نرم‌افزار برای تولید صدها کانفیگ:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>گروه‌های آی‌پی:</b> آی‌پی‌های سالم نتایج اسکن را انتخاب کنید.</li>
+                        <li><b>ترکیب:</b> آن‌ها را با کانفیگ‌های خامی که از پنل‌های ابری گرفته‌اید ادغام کنید.</li>
+                        <li><b>تست اتصال و آرشیو:</b> روی ترکیبات جدید تست پینگ بگیرید و فقط <b>نودهای سالم</b> را کپی یا به آرشیو منتقل کنید.</li>
+                    </ul>
+                </div>
+
+                <!-- 5. History -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-clock-counter-clockwise"></i> ۵. تاریخچه اسکن IP
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs">نیازی به اسکن‌های مکرر نیست. برنامه دارای قابلیت <b>"ذخیره تب فعلی"</b> است. می‌توانید نتایج درخشان اسکن امروز را ذخیره کنید تا فردا مستقیماً از بخش تاریخچه از آن‌ها استفاده کنید. قابلیت تنظیم حداکثر موارد ذخیره شده و پاکسازی تاریخچه نیز تعبیه شده است.</p>
+                </div>
+
+                <!-- 13. V2Ray -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-rocket"></i> ۱۳. بخش V2Ray (کلاینت داخلی)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">برنامه به یک کلاینت داخلی قدرتمند مجهز است:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>ابزارهای تست:</b> امکان تست پینگ، تست تأخیر واقعی (Real Delay) و تست سرعت.</li>
+                        <li><b>مدیریت نودها:</b> ویرایش کانفیگ‌ها، مرتب‌سازی بر اساس سرعت/تأخیر، و حذف نودها.</li>
+                        <li><b>پروکسی سیستم:</b> با یک کلیک (System Proxy)، کل سیستم عامل شما به نود انتخابی متصل می‌شود.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Cloud Panels Section -->
+            <div class="mt-4 pt-6 border-t border-m3-outline">
+                <h4 class="text-lg font-bold text-m3-primary mb-4 flex items-center gap-2">
+                    <i class="ph-bold ph-cloud"></i> سیستم‌های ابری و استقرار وورکرها
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- 9. Cloudflare Key -->
+                    <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                        <h4 class="text-base font-bold text-m3-onSurface mb-2">۹. دریافت Global Key</h4>
+                        <p class="text-m3-onSurfaceVariant text-xs">برای اتصال نرم‌افزار به اکانت کلودفلر، وارد <code>dash.cloudflare.com</code> شوید > My Profile > بخش API Tokens > ردیف Global API Key > زدن دکمه View. کلید طولانی را کپی کرده و در برنامه وارد کنید.</p>
+                    </div>
+
+                    <!-- 7. Worker Management -->
+                    <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                        <h4 class="text-base font-bold text-m3-onSurface mb-2">۷. مدیریت وورکرها</h4>
+                        <p class="text-m3-onSurfaceVariant text-xs">پس از اتصال کلودفلر، نرم‌افزار اکانت‌های شما را لیست می‌کند. از طریق رابط کاربری می‌توانید مستقیماً وورکرهای جدید بسازید (Deploy) یا تنظیمات هر پنل را برای وورکرهای مختلف اعمال کنید.</p>
+                    </div>
+
+                    <!-- 8 & 11. Edge Panel -->
+                    <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                        <h4 class="text-base font-bold text-m3-onSurface mb-2">۸ و ۱۱. پنل Edge و انتخاب آی‌پی ثابت</h4>
+                        <p class="text-m3-onSurfaceVariant text-xs mb-2">سبک‌ترین پنل برنامه با پروتکل VLESS خالص.</p>
+                        <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                            <li>استقرار سریع کدهای Edge روی وورکر.</li>
+                            <li><b>آی‌پی ثابت (Proxy IP):</b> از طریق دکمه تنظیمات پنل Edge، می‌توانید آی‌پی ثابت وارد کنید تا ترافیک شما از یک آی‌پی مشخص (برای بایننس و صرافی‌ها) عبور کند.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 10. BPB Panel -->
+                    <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                        <h4 class="text-base font-bold text-m3-onSurface mb-2">۱۰. کار با پنل BPB</h4>
+                        <p class="text-m3-onSurfaceVariant text-xs">پنل BPB برای اینترنت‌های شدیداً محدود طراحی شده است. پس از استقرار، با زدن دکمه "دریافت کانفیگ"، خروجی‌هایی شامل معماری Fragment و Warp-in-Warp دریافت می‌کنید که مقاومت بالایی در برابر مسدودسازی دارند.</p>
+                    </div>
+
+                    <!-- 12. Zeus Panel -->
+                    <div class="md:col-span-2 bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                        <h4 class="text-base font-bold text-m3-onSurface mb-2">۱۲. کار با پنل پیشرفته زئوس (Zeus)</h4>
+                        <p class="text-m3-onSurfaceVariant text-xs mb-2">زئوس پنل اختصاصی و مدیریتی نرم‌افزار است. تفاوت اصلی آن با Edge در <b>قابلیت مدیریت کاربران</b> است:</p>
+                        <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                            <li>پس از استقرار زئوس، دکمه <b>"مدیریت کاربران"</b> فعال می‌شود.</li>
+                            <li>شما می‌توانید کاربران مختلفی با <b>حجم ترافیک محدود</b> و <b>تاریخ انقضا</b> تعریف کنید.</li>
+                            <li>سیستم به شما اجازه می‌دهد <b>Fingerprint</b> اختصاصی (مثل Chrome, Safari) برای هر کانفیگ تعیین کنید تا ترافیک کاملاً استتار شود.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 Systems added in 1.1.0. Kept in their own block with a heading so a
+                 returning user can find what is new without re-reading the whole guide.
+                 ============================================================ -->
+            <div class="flex items-center gap-3 mt-2">
+                <div class="h-px flex-1 bg-m3-outline"></div>
+                <span class="text-xs font-bold text-m3-primary whitespace-nowrap">سیستم‌های جدید نسخه ۱.۱.۰</span>
+                <div class="h-px flex-1 bg-m3-outline"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Google Script Tunnel -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-google-logo"></i> تونل گوگل اسکریپت (GST)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">
+                        ترافیک شما از داخل زیرساخت خود گوگل عبور می‌کند، پس از دید فیلترینگ شبیه یک ارتباط عادی با گوگل است.
+                    </p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>ویزارد مرحله‌ای:</b> هر صفحه فقط یک کار. گواهی، رمز، Worker، اسکریپت گوگل، تست.</li>
+                        <li><b>چند ریلی:</b> هر حساب گوگل ۲۰ هزار درخواست در روز دارد؛ هر ریلی جدید یعنی سهمیه‌ی بیشتر و بار پخش‌شده.</li>
+                        <li><b>ترکیب اختیاری با کلادفلر:</b> برای <b>هر ریلی جداگانه</b> روشن/خاموش می‌شود. بدون کلادفلر هم کاملاً کار می‌کند.</li>
+                        <li><b>مهم:</b> سوییچ کلادفلر تا وقتی اسکریپت گوگل را دوباره Deploy نکنید اعمال نمی‌شود — برنامه همان دو خطی که باید عوض شود را نشانتان می‌دهد.</li>
+                        <li><b>تب سلامت:</b> برای هر ریلی دو چراغ مستقل (گوگل / کلادفلر) و برای هر خطا یک راه‌حل و یک دکمه.</li>
+                        <li><b>تست ترکیب:</b> با مقایسه‌ی آی‌پی خروجی ثابت می‌کند ترافیک واقعاً از Worker رد می‌شود.</li>
+                    </ul>
+                </div>
+
+                <!-- Connection modes -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-plugs-connected"></i> سه حالت اتصال
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">در پنل تونل گوگل اسکریپت و موتورهای ماسک، وایرگارد و وارپ در وارپ، یکی از سه حالت را انتخاب می‌کنید:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>فقط تونل محلی:</b> چیزی در ویندوز تغییر نمی‌کند؛ خودتان مرورگر را تنظیم می‌کنید.</li>
+                        <li><b>پروکسی سیستم:</b> مرورگر و برنامه‌های سازگار. بازی‌ها و برنامه‌های دیگر از تونل رد نمی‌شوند.</li>
+                        <li><b>تونل سراسری:</b> همه‌ی برنامه‌ها، بدون نشت. تنها حالتی که DNS هم پوشش داده می‌شود.</li>
+                        <li>این دو حالت آخر <b>هم‌زمان ممکن نیستند</b> — در سطح بسته با هم تداخل دارند، پس انتخاب یکی دیگری را خاموش می‌کند.</li>
+                        <li>اگر برنامه ناگهانی بسته شود، در اجرای بعدی تنظیمات ویندوز خودکار ترمیم می‌شود.</li>
+                    </ul>
+                </div>
+
+                <!-- Deep DNS -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-broom"></i> پاک‌سازی عمیق DNS
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">
+                        از منوی همبرگری بالا باز می‌شود. اگر DNS را روی «خودکار» گذاشته‌اید ولی باز هم همان قبلی می‌ماند،
+                        علتش این است که <b>روتر شما آن را از طریق DHCP پخش می‌کند</b> — «خودکار» یعنی «هرچه روتر گفت».
+                    </p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>بررسی DNS فعلی:</b> نشان می‌دهد DNS دقیقاً از کجا می‌آید و هرکدام را جداگانه پاک می‌کند.</li>
+                        <li>منابع بررسی‌شده: روتر (DHCP)، تنظیم دستی کارت شبکه، کارت‌های غیرفعال، DNS رمزنگاری‌شده (DoH) ویندوز ۱۱، و قوانین NRPT.</li>
+                        <li><b>فهرست DNSها:</b> ایرانی و جهانی، با تست زنده‌ی سرعت قبل از انتخاب.</li>
+                        <li><b>هشدار:</b> DNSهای تحریم‌شکن ایرانی معمولاً دامنه‌های خارج از فهرستشان را نمی‌شناسند — مثلاً <span dir="ltr">workers.dev</span> با شکن باز نمی‌شود.</li>
+                        <li>تنظیم قبلی قبل از هر تغییر پشتیبان‌گیری می‌شود و دکمه‌ی بازگردانی دارید.</li>
+                    </ul>
+                </div>
+
+                <!-- Dedicated DNS -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-globe-hemisphere-west"></i> DNS اختصاصی
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">
+                        یک DNS رمزنگاری‌شده (DoH) روی Worker شخصی کلادفلر خودتان که <b>خودکار روی همه‌ی سایت‌ها</b> اعمال می‌شود.
+                    </p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li>فیلترینگ DNS دور زده می‌شود، چون پرس‌وجوها رمزنگاری‌شده‌اند.</li>
+                        <li><b>هدایت منطقه‌ای:</b> با انتخاب منطقه، نزدیک‌ترین سرور بازی یا CDN انتخاب می‌شود و پینگ کم‌تر می‌شود.</li>
+                        <li>روی حساب خودتان مستقر می‌شود؛ ترافیک از کلادفلر خودتان می‌گذرد، نه سرور اشتراکی.</li>
+                        <li>از حساب‌های ثبت‌شده در «استقرار خودکار ابری» استفاده می‌کند — نیازی به وارد کردن دوباره‌ی اطلاعات نیست.</li>
+                    </ul>
+                </div>
+
+                <!-- Sanction buster -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-lock-open"></i> تحریم‌شکن
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">
+                        سایت‌های <b>تحریمی</b> را باز می‌کند — یعنی سایت‌هایی که خودشان آی‌پی ایران را بلاک کرده‌اند، نه سایت‌هایی که فیلتر شده‌اند.
+                    </p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li>تفاوت را خودش تشخیص می‌دهد: تحریم (پاسخ ۴۰۳ می‌آید) در برابر فیلتر (اتصال قطع می‌شود).</li>
+                        <li>فقط دامنه‌های مجاز از رله عبور می‌کنند، نه کل ترافیک — پس سرعت بقیه‌ی اینترنت دست‌نخورده می‌ماند.</li>
+                        <li>دانلود از این مسیر عمداً بسته است.</li>
+                        <li>در ویزارد تونل گوگل اسکریپت، اگر لازم باشد، خودکار و بی‌صدا روشن و بعد به حالت اول برگردانده می‌شود.</li>
+                    </ul>
+                </div>
+
+                <!-- WARP engines: MASQUE / WireGuard / WARP-in-WARP -->
+                <div class="bg-m3-surface2 rounded-2xl p-5 border border-m3-outline">
+                    <h4 class="text-base font-bold text-m3-primary mb-3 flex items-center gap-2">
+                        <i class="ph-bold ph-lightning"></i> ماسک، وایرگارد، وارپ در وارپ (سه موتور)
+                    </h4>
+                    <p class="text-m3-onSurfaceVariant text-xs mb-2">این موتور سه روش مختلف برای عبور از فیلترینگ دارد:</p>
+                    <ul class="list-disc pr-4 space-y-1 text-m3-onSurfaceVariant text-xs">
+                        <li><b>WireGuard:</b> پروتکل سبک و سریع. کم‌ترین مصرف باتری و بیش‌ترین سرعت، ولی الگوی ترافیکش قابل تشخیص است.</li>
+                        <li><b>MASQUE:</b> ترافیک را داخل HTTP/3 پنهان می‌کند، پس شبیه بازدید عادی از یک سایت دیده می‌شود. در شبکه‌های سخت‌گیر بهتر جواب می‌دهد.</li>
+                        <li><b>وارپ در وارپ:</b> دو لایه‌ی پشت سر هم. کندتر است ولی وقتی لایه‌ی اول شناسایی شده باشد کار می‌کند.</li>
+                        <li>اگر پروفایل مبهم‌سازی «سبک» جواب نداد، «تهاجمی» را امتحان کنید — مخصوصاً برای حالت تونل سراسری.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-m3-outline bg-m3-surface2 flex items-center justify-between gap-4">
+            <span class="text-xs text-m3-onSurfaceVariant">
+                تمامی حقوق و کدهای این نرم‌افزار متعلق به توسعه‌دهندگان آن می‌باشد. (نسخه 1.2.0)
+            </span>
+            <!-- A second, unmissable way out. The X in the header is easy to miss on a
+                 long scrolling document, and this dialog is tall enough that the header
+                 is off-screen by the time you reach the end. -->
+            <button onclick="hideModal('guide-modal')"
+                class="px-5 py-2 rounded-full bg-m3-primary text-white text-xs font-bold hover:brightness-110 transition-all whitespace-nowrap">
+                بستن راهنما
+            </button>
+        </div>
+
+    </div>
+</div>

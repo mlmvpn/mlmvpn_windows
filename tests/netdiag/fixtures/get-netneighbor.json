@@ -1,0 +1,682 @@
+﻿[
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff92:9256",
+        "LinkLayerAddress":  "33-33-FF-92-92-56",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:3",
+        "LinkLayerAddress":  "33-33-00-01-00-03",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::fb",
+        "LinkLayerAddress":  "33-33-00-00-00-FB",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::c",
+        "LinkLayerAddress":  "33-33-00-00-00-0C",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1",
+        "LinkLayerAddress":  "33-33-00-00-00-01",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "33-33-FF-BE-24-E2",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "33-33-FF-E3-C7-D7",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "33-33-FF-AD-11-9D",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "33-33-FF-1E-CF-FA",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "33-33-00-01-00-02",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "33-33-00-00-00-16",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "33-33-00-00-00-02",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2:ffbe:24e2",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffe3:c7d7",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ffad:119d",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:ff1e:cffa",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::1:2",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::16",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::c",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "ff02::2",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  23
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  26,
+        "InterfaceAlias":  "Local Area Connection* 15",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  28,
+        "InterfaceAlias":  "Local Area Connection* 14",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "02-00-5E-08-11-22",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  8,
+        "InterfaceAlias":  "Ethernet 4",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "255.255.255.255",
+        "LinkLayerAddress":  "02-00-5E-09-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "02-00-5E-08-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.252",
+        "LinkLayerAddress":  "02-00-5E-10-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.251",
+        "LinkLayerAddress":  "02-00-5E-11-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "192.168.1.255",
+        "LinkLayerAddress":  "02-00-5E-09-11-22",
+        "State":  6,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "192.168.1.1",
+        "LinkLayerAddress":  "02-00-5E-12-11-22",
+        "State":  5,
+        "InterfaceIndex":  33,
+        "InterfaceAlias":  "Wi-Fi 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "02-00-5E-08-11-22",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  23,
+        "InterfaceAlias":  "Ethernet 3",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "02-00-5E-08-11-22",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  4,
+        "InterfaceAlias":  "Ethernet",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "02-00-5E-08-11-22",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "02-00-5E-06-11-22",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "02-00-5E-07-11-22",
+        "State":  6,
+        "InterfaceIndex":  34,
+        "InterfaceAlias":  "VPN - VPN Client",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "239.255.255.250",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.22",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2
+    },
+    {
+        "IPAddress":  "224.0.0.2",
+        "LinkLayerAddress":  "",
+        "State":  6,
+        "InterfaceIndex":  1,
+        "InterfaceAlias":  "Loopback Pseudo-Interface 1",
+        "AddressFamily":  2
+    }
+]

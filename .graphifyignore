@@ -1,0 +1,7 @@
+core/python/
+node_modules/
+dist/
+graphify-out/
+android/app/build/
+**/target/
+**/vendor/

@@ -1,0 +1,52 @@
+<div
+  id="panel-set-speed"
+  class="settings-panel-content flex flex-col max-w-4xl w-full mx-auto"
+  style="display: none"
+>
+  <h3 class="text-xl font-bold text-gs-text mb-8 border-b border-gs-border pb-4">
+    <i class="ph-fill ph-gauge text-2xl text-gs-primary align-middle ml-2"></i> تنظیمات و تست سرعت اینترنت
+  </h3>
+
+  <!-- Speed Test Dashboard -->
+  <div class="bg-gs-surface/50 border border-gs-border rounded-xl p-6 mb-8 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-gs-primary/10 to-transparent pointer-events-none"></div>
+    <div class="relative z-10 flex flex-col items-center">
+      <div class="flex items-center gap-12 w-full justify-center mb-8">
+        <!-- Ping -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-gs-muted text-[12px] font-bold tracking-wider uppercase">Ping</div>
+          <div class="flex items-end gap-1">
+            <span id="speed-test-ping" class="text-3xl font-bold text-gs-text font-mono">--</span>
+            <span class="text-gs-muted text-sm pb-1">ms</span>
+          </div>
+        </div>
+        <!-- Download -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-gs-muted text-[12px] font-bold tracking-wider uppercase">Download</div>
+          <div class="flex items-end gap-1">
+            <span id="speed-test-down" class="text-3xl font-bold text-gs-muted font-mono">--</span>
+            <span class="text-gs-muted text-sm pb-1">Mbps</span>
+          </div>
+        </div>
+        <!-- Upload -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-gs-muted text-[12px] font-bold tracking-wider uppercase">Upload</div>
+          <div class="flex items-end gap-1">
+            <span id="speed-test-up" class="text-3xl font-bold text-gs-muted font-mono">--</span>
+            <span class="text-gs-muted text-sm pb-1">Mbps</span>
+          </div>
+        </div>
+      </div>
+      <button
+        id="btn-start-speed-test"
+        class="bg-gs-primary hover:bg-opacity-90 text-gs-bg font-bold py-3 px-8 rounded-full shadow-lg transition-all active:scale-95 flex items-center gap-2"
+        onclick="window.startLocalSpeedTest()"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        شروع تست سرعت
+      </button>
+    </div>
+  </div>
+</div>

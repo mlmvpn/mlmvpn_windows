@@ -1,0 +1,903 @@
+/* =====================================================================
+   MLMVPN shell — menu bar, dock, desktop, windows.
+   ---------------------------------------------------------------------
+   Active only when <html class="mv-shell"> (set by shell/boot.js once the
+   shell is built). Without that class the old layout shows untouched,
+   which is also what the per-user «چیدمان قدیمی» lever falls back to.
+
+   Stacking: #mv-desktop (z 1) holds the wallpaper, the home grid and the
+   windows layer; the dock (45) and menu bar (46) sit above it; every
+   legacy overlay (z 50 and up) stays above the shell, as before.
+   ===================================================================== */
+
+/* ── The old chrome steps aside ── */
+html.mv-shell .header-bar,
+html.mv-shell .main-area,
+html.mv-shell footer.status-bar,
+html.mv-shell #main-menu,
+html.mv-shell #main-menu-overlay,
+html.mv-shell .toast-container { display: none !important; }
+html.mv-shell body.layout { background: var(--mv-desk); }
+
+/* Slide-overs that were placed under the old 35px title bar. */
+html.mv-shell #history-menu,
+html.mv-shell #history-overlay,
+html.mv-shell #endpoint-drawer,
+html.mv-shell #drawer-overlay { top: var(--mv-menubar-h) !important; }
+html.mv-shell #history-menu { height: calc(100vh - var(--mv-menubar-h)) !important; }
+
+/* ── Desktop ── */
+#mv-desktop {
+  position: fixed;
+  inset: var(--mv-menubar-h) 0 0 0;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--mv-desk);
+}
+.mv-wallpaper {
+  position: absolute;
+  inset: calc(-1 * var(--mv-menubar-h)) 0 0 0;
+  display: block;
+  width: 100%;
+  height: calc(100% + var(--mv-menubar-h));
+  /* Painted before the canvas draws, and kept if it cannot. */
+  background: linear-gradient(#232A55, #6A4A7C 44%, #D8826B 66%, #2A2C48 68%, #14162A);
+}
+html[data-appearance="light"] .mv-wallpaper { background: linear-gradient(#5B8ED0, #9CC0E6 45%, #F1D2C6 66%, #7C8DB8 68%, #36446A); }
+
+.mv-home {
+  position: absolute;
+  inset: 0 0 92px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 34px 24px 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.mv-home-brand { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+/* The wordmark sits on the wallpaper, like the icon labels, so it is white in both
+   appearances. Its ink is a clipped gradient (brand-title.js): the base stop is set here,
+   and the shadow is a drop-shadow — a text-shadow would show through the clipped fill. */
+.mv-home-brand #brand-title { color: #FFFFFF; filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .35)); }
+.mv-home-brand #brand-title .bt-ink { --bt-base: rgba(255, 255, 255, .80); text-shadow: none; }
+.mv-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 112px);
+  justify-content: center;
+  gap: 20px 6px;
+  width: min(100%, 720px);
+  margin-top: 34px;
+}
+.mv-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 0;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.mv-app .mv-ic { transition: transform var(--mv-d-2) var(--mv-ease-out), filter var(--mv-d-2) var(--mv-ease-out); }
+.mv-app:hover .mv-ic { transform: translateY(-2px); }
+.mv-app:active .mv-ic { transform: scale(.94); filter: brightness(.9); }
+.mv-app:focus-visible { outline: 2px solid rgba(255, 255, 255, .75); outline-offset: 2px; }
+/* White with a shadow on every wallpaper — the Android home-screen rule. */
+.mv-app-label {
+  max-width: 108px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mv-ic.is-folder {
+  background: rgba(255, 255, 255, .24);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-content: start;
+  place-items: stretch;
+  /* From the tile's own size, not percentages: percentage padding is measured against the
+     CONTAINING block, which for the drag ghost (position: fixed) is the whole window — the
+     folder swelled to ~390 px the moment it was picked up. */
+  box-sizing: border-box;
+  gap: calc(var(--sz) * .07);
+  padding: calc(var(--sz) * .14);
+}
+.mv-ic.is-folder > i {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 26%;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--t) 82%, #FFFFFF), color-mix(in srgb, var(--t) 86%, #000));
+}
+
+/* Launchpad-style folder */
+.mv-folder {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, .18);
+  animation: mv-fade-in var(--mv-d-2) var(--mv-ease-out);
+}
+.mv-folder-box {
+  width: min(460px, calc(100% - 40px));
+  padding: 18px 20px 24px;
+  border-radius: 26px;
+  background: var(--mv-mat-thick);
+  -webkit-backdrop-filter: var(--mv-blur-thick);
+  backdrop-filter: var(--mv-blur-thick);
+  box-shadow: var(--mv-hair), 0 24px 70px rgba(0, 0, 0, .35);
+  animation: mv-pop-in var(--mv-d-3) var(--mv-ease-spring);
+}
+.mv-folder-box h2 { margin: 0 0 16px; text-align: center; font-size: 15px; font-weight: 700; color: var(--mv-label); }
+.mv-folder-grid { display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 16px; }
+.mv-folder-grid .mv-app-label { color: var(--mv-label); text-shadow: none; }
+/* The title is the name field itself, as on a phone: tap it and type. */
+.mv-folder-head { position: relative; display: flex; justify-content: center; margin: 0 0 14px; }
+.mv-folder-title {
+  width: min(260px, 100%);
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--mv-label);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: background var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-folder-title:hover { background: var(--mv-fill); }
+.mv-folder-title:focus { background: var(--mv-fill-2, var(--mv-fill)); box-shadow: 0 0 0 2px var(--mv-accent-ring, var(--mv-accent)); }
+.mv-folder-del {
+  position: absolute;
+  inset-inline-end: -4px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mv-label-2);
+  font-size: 15px;
+  cursor: pointer;
+}
+.mv-folder-del:hover { background: color-mix(in srgb, var(--mv-red) 14%, transparent); color: var(--mv-red-ink, var(--mv-red)); }
+.mv-folder-del:focus-visible { outline: 2px solid var(--mv-accent-ring, var(--mv-accent)); outline-offset: 2px; }
+.mv-folder-hint { margin: 16px 0 0; text-align: center; font-size: 11.5px; color: var(--mv-label-2); }
+.mv-folder-box.is-dropping-out { box-shadow: var(--mv-hair), 0 0 0 2px color-mix(in srgb, var(--mv-accent) 55%, transparent), 0 24px 70px rgba(0, 0, 0, .35); }
+/* An icon a dragged app is held over: let go and they become one folder. */
+.mv-home-grid .mv-app.is-merge-target > .mv-ic {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, #FFFFFF 70%, transparent), 0 8px 22px rgba(0, 0, 0, .3);
+  transition: transform var(--mv-d-2) var(--mv-ease-spring), box-shadow var(--mv-d-2) var(--mv-ease-out);
+}
+@keyframes mv-fade-in { from { opacity: 0; } }
+@keyframes mv-pop-in { from { opacity: 0; transform: scale(.94); } }
+
+/* ── Windows ── */
+#mv-windows { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.mv-win {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* macOS 26 rounds windows more, and more again when a toolbar or sidebar floats inside. */
+  border-radius: 16px;
+  background: var(--mv-surface);
+  box-shadow: var(--mv-e3);
+  overflow: hidden;
+  pointer-events: auto;
+}
+.mv-win.is-active { box-shadow: var(--mv-e4); }
+.mv-win.has-toolbar { border-radius: 20px; }
+/* A sidebar window (page kit › .mv-split): no title bar of its own. The bar lies over the
+   top band — transparent, still the drag handle — its lights sit on the inset sidebar and
+   the pane shows its own title. 22px = the sidebar's 14px + its 8px inset (concentric). */
+.mv-win.is-split { border-radius: 22px; }
+.mv-win.is-split .mv-win-bar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 50px;
+  z-index: 5;
+  padding-inline: 22px 12px;
+  background: transparent;
+  box-shadow: none;
+}
+.mv-win.is-split .mv-win-title { display: none; }
+.mv-win.is-split .mv-win-body { background: var(--mv-pane); }
+.mv-win.is-split .mv-side-top { height: 42px; }
+/* Focused by script when it comes forward (wm.js open) — the active shadow already says so. */
+.mv-win:focus, .mv-win:focus-visible { outline: none; }
+.mv-win.is-hidden { display: none; }
+
+/* A PANEL INSIDE A WINDOW NEVER CARRIES ITS OWN STACKING ORDER.
+   Panels that overlay the old column layout give their root a z-index (SNI's is 10). In a window
+   that root sits under the window's own transparent bar (z-index 5) — so a panel with 10 covered
+   the bar, and with it the close / minimise / zoom buttons: the SNI window had no controls at all.
+   The window owns the stacking here; the panel's own value is for the legacy layout. */
+.mv-win-body > * { z-index: auto !important; }
+
+/* A full-screen dialog living in a window (apps.js › sheetWindow): its layer lies flat in
+   the body, its dim and its own ✕ go (the window has both), and its card fills the window.
+   `display` is left alone — the dialog's own open/close still sets it. */
+.mv-win-body > .mv-sheetwin {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+.mv-sheetwin > #ip-archive-overlay,
+.mv-sheetwin > #combination-center-overlay,
+/* The combination centre's header holds only its title and ✕ — the window bar says both. */
+.mv-sheetwin .cc-head,
+.mv-sheetwin .fc-head,
+.mv-sheetwin [onclick="closeIpArchive()"],
+.mv-sheetwin [onclick="closeCombinationCenter()"] { display: none !important; }
+html body .mv-sheetwin > #ip-archive-modal,
+html body .mv-sheetwin > div:not([id$="-overlay"]) {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  height: auto;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+.mv-win.is-opening { animation: mv-win-in var(--mv-d-3) var(--mv-ease-spring); }
+@keyframes mv-win-in { from { opacity: 0; transform: scale(.96); } }
+
+.mv-win-bar {
+  flex: none;
+  position: relative;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 12px;
+  background: var(--mv-window);
+  box-shadow: inset 0 calc(-1 * var(--mv-hl)) 0 var(--mv-sep-2);
+  user-select: none;
+}
+.mv-win.has-toolbar .mv-win-bar { height: 50px; gap: 12px; }
+.mv-win-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 46%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mv-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.mv-win.has-toolbar .mv-win-title {
+  position: static;
+  transform: none;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.mv-win-title small { font-size: 11px; font-weight: 400; color: var(--mv-label-2); font-family: var(--mv-font); }
+.mv-win:not(.is-active) .mv-win-title { color: var(--mv-label-3); }
+/* App names are product names — «V2Ray», «VodiWalker» — so their ASCII digits stay Latin. Numbers
+   the app formats in Persian (toLocaleString('fa-IR')) are other code points, unaffected. */
+.mv-win-title,
+.mv-app-label,
+.mv-dock-label,
+.mv-mb-menu.is-app,
+.mv-mb-si,
+.mv-spot-row { font-family: var(--mv-font-tech); }
+.mv-win-tools { margin-inline-start: auto; display: flex; align-items: center; gap: 4px; }
+
+/* Traffic lights: at the start (right) in RTL — close, minimise, zoom from the edge. */
+.mv-tl { display: flex; gap: 8px; flex: none; }
+.mv-tl > button {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: transparent;
+  cursor: default;
+}
+.mv-tl > button svg { width: 8px; height: 8px; }
+.mv-tl > .is-close { background: var(--mv-tl-close); }
+.mv-tl > .is-min { background: var(--mv-tl-min); }
+.mv-tl > .is-zoom { background: var(--mv-tl-zoom); }
+.mv-tl:hover > button { color: rgba(0, 0, 0, .55); }
+.mv-win:not(.is-active) .mv-tl:not(:hover) > button,
+.mv-tl > button:disabled { background: var(--mv-tl-idle); }
+.mv-tl > button:focus-visible { outline: 2px solid var(--mv-accent-ring); outline-offset: 1px; }
+
+.mv-win-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--mv-surface);
+}
+.mv-win-body.is-flush { padding: 0; gap: 0; overflow: hidden; }
+.mv-win-body.is-row { flex-direction: row; }
+/* Pages lifted out of the old tab strip: renderActiveTab() still hides them by name
+   when the scanner switches tabs, and inside their own window they must stay put. */
+.mv-win-body > .mv-page-root { display: flex !important; flex: 1; min-height: 0; min-width: 0; }
+/* Surfaces that used to be separate floating cards in the old layout. */
+.mv-win-body > #settings-tab-wrap,
+.mv-win-body > #editor-area {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.mv-win-body > #editor-area { padding: 8px; gap: 8px !important; background: var(--mv-surface); }
+/* The scanner is a split page now (components/scan.js › #scan-root): its host must add nothing
+   of its own, or the page-kit sidebar sits inset inside a second grey frame. */
+/* width:auto undoes style.css's ".editor-area { width: 0 }" — the classic grow-from-zero fix
+   for a flex ROW (which is what the old layout and the old is-row body both were). The split
+   window's body is a COLUMN, and there zero width means zero. */
+.mv-win.is-split .mv-win-body > #editor-area { padding: 0; gap: 0 !important; background: transparent; width: auto; }
+
+.mv-win-status {
+  flex: none;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-inline: 12px;
+  background: var(--mv-window);
+  box-shadow: inset 0 var(--mv-hl) 0 var(--mv-sep-2);
+  font-size: 11.5px;
+  color: var(--mv-label-2);
+}
+/* Shown only while one of its progress rows is. */
+.mv-win-status:not(:has(> :not([style*="display: none"]))) { display: none; }
+
+.mv-rs { position: absolute; z-index: 6; }
+.mv-rs[data-e="n"] { top: 0; left: 12px; right: 12px; height: 5px; cursor: ns-resize; }
+.mv-rs[data-e="s"] { bottom: 0; left: 12px; right: 12px; height: 6px; cursor: ns-resize; }
+.mv-rs[data-e="e"] { right: 0; top: 12px; bottom: 12px; width: 6px; cursor: ew-resize; }
+.mv-rs[data-e="w"] { left: 0; top: 12px; bottom: 12px; width: 6px; cursor: ew-resize; }
+.mv-rs[data-e="ne"] { top: 0; right: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+.mv-rs[data-e="sw"] { bottom: 0; left: 0; width: 12px; height: 12px; cursor: nesw-resize; }
+.mv-rs[data-e="nw"] { top: 0; left: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+.mv-rs[data-e="se"] { bottom: 0; right: 0; width: 12px; height: 12px; cursor: nwse-resize; }
+.mv-win.is-zoomed .mv-rs { display: none; }
+/* A maximised window fills the desktop edge to edge: square corners, no floating shadow.
+   (Every radius above, the split window's 22px included, is for a window that floats.) */
+.mv-win.is-zoomed,
+.mv-win.is-zoomed.has-toolbar,
+.mv-win.is-zoomed.is-split { border-radius: 0; box-shadow: none; }
+
+.mv-snap {
+  position: absolute;
+  z-index: 999;
+  border-radius: var(--mv-r-xl);
+  background: var(--mv-accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--mv-accent);
+  pointer-events: none;
+  transition: left var(--mv-d-2) var(--mv-ease-out), top var(--mv-d-2) var(--mv-ease-out), width var(--mv-d-2) var(--mv-ease-out), height var(--mv-d-2) var(--mv-ease-out);
+}
+html.mv-dragging, html.mv-dragging * { cursor: grabbing !important; user-select: none !important; }
+html.mv-resizing * { user-select: none !important; }
+
+/* Console tabs sit in the title bar. */
+.mv-win-tools .mv-seg > button { height: 22px; font-size: 12px; }
+.mv-win-body > #view-core,
+.mv-win-body > #view-terminal,
+.mv-win-body > #view-monitor { flex: 1; min-height: 0; }
+
+/* Scanner tool buttons moved in from the old title bar. */
+.mv-win-tools #btn-top-scan,
+.mv-win-tools #btn-top-restart { height: 28px !important; width: 30px; justify-content: center; border-radius: var(--mv-r-sm) !important; }
+.mv-win-tools #btn-top-scan:hover,
+.mv-win-tools #btn-top-restart:hover { background: var(--mv-fill-2) !important; }
+.mv-win-tools #auto-save-container { margin-inline: 4px; }
+.mv-win-tools #auto-save-label { font-size: 11.5px !important; color: var(--mv-label-2) !important; }
+.mv-tool {
+  width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--mv-r-sm);
+  background: transparent;
+  color: var(--mv-label-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 17px;
+}
+.mv-tool:hover { background: var(--mv-fill-2); color: var(--mv-label); }
+.mv-tool[aria-pressed="true"] { color: var(--mv-accent); }
+.mv-tool svg { width: 17px; height: 17px; }
+.mv-tool-sep { width: var(--mv-hl); height: 18px; background: var(--mv-sep-2); margin-inline: 4px; }
+
+/* ── Menu bar ── */
+.mv-menubar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--mv-menubar-h);
+  z-index: 46;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline-start: 8px;
+  background: var(--mv-mat-thick);
+  -webkit-backdrop-filter: var(--mv-blur-thick);
+  backdrop-filter: var(--mv-blur-thick);
+  box-shadow: inset 0 calc(-1 * var(--mv-hl)) 0 var(--mv-sep);
+  color: var(--mv-label);
+  font-size: 13px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+.mv-menubar button,
+.mv-menubar a,
+.mv-menubar [data-no-drag],
+.mv-menubar #panel-status-lights,
+.mv-menubar #live-speed-module-container { -webkit-app-region: no-drag; }
+.mv-mb-start, .mv-mb-end { display: flex; align-items: center; height: 100%; min-width: 0; }
+.mv-mb-logo {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-inline-end: 4px;
+  border-radius: 5px;
+}
+.mv-mb-menu {
+  height: 22px;
+  padding-inline: 9px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  cursor: default;
+}
+.mv-mb-menu.is-app { font-weight: 800; }
+.mv-mb-menu:hover,
+.mv-mb-menu[aria-expanded="true"] { background: var(--mv-fill-2); }
+.mv-mb-status { display: flex; align-items: center; gap: 2px; height: 100%; }
+.mv-mb-si {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 7px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+  white-space: nowrap;
+  cursor: default;
+}
+button.mv-mb-si:hover { background: var(--mv-fill-2); }
+.mv-mb-si[hidden] { display: none; }
+.mv-mb-lamp { width: 7px; height: 7px; border-radius: 50%; background: var(--mv-green); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--mv-green) 28%, transparent); }
+.mv-mb-clock { font-variant-numeric: tabular-nums; padding-inline: 8px; }
+
+/* Status items moved in from the old status bar. */
+.mv-menubar #live-speed { font-size: 11.5px !important; gap: 8px !important; color: var(--mv-label-2) !important; }
+.mv-menubar #live-speed > span:first-child { display: none; }
+.mv-menubar #panel-status-lights { gap: 5px !important; margin: 0 6px !important; padding-inline: 4px; }
+.mv-menubar #panel-status-lights > div { width: 7px !important; height: 7px !important; }
+.mv-menubar #btn-notifications { margin: 0 !important; width: 28px; height: 22px; border-radius: 5px !important; }
+.mv-menubar #btn-notifications:hover { background: var(--mv-fill-2) !important; }
+.mv-menubar #btn-notifications i { color: var(--mv-label) !important; font-size: 15px !important; }
+html.mv-shell #notification-menu { top: calc(var(--mv-menubar-h) + 6px) !important; bottom: auto !important; left: 150px !important; right: auto !important; }
+html.mv-shell #notification-menu-overlay { top: var(--mv-menubar-h); }
+
+/* The Electron window's own controls, at the end of the bar. They look like
+   Windows' caption buttons on purpose: they act on the whole app window, which
+   the macOS traffic lights on each window inside must not be mistaken for. */
+.mv-caption { display: flex; height: 100%; margin-inline-start: 6px; }
+.mv-caption > button {
+  width: 44px;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--mv-label-2);
+  display: grid;
+  place-items: center;
+  cursor: default;
+}
+.mv-caption > button svg { width: 11px; height: 11px; }
+.mv-caption > button:hover { background: var(--mv-fill-2); color: var(--mv-label); }
+.mv-caption > button.is-close:hover { background: var(--mv-caption-close); color: #FFFFFF; }
+
+/* ── Dock ── */
+.mv-dock {
+  position: fixed;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 20px;
+  background: var(--mv-mat-thick);
+  -webkit-backdrop-filter: var(--mv-blur-thick);
+  backdrop-filter: var(--mv-blur-thick);
+  box-shadow: var(--mv-hair), 0 12px 34px rgba(0, 0, 0, .25);
+}
+/* A window runs under the dock (maximised, snapped, or dragged that low): the dock drops to 70%
+   so it takes less attention. Scaling from the bottom keeps it on the same edge. */
+.mv-dock { transform-origin: bottom center; transition: transform var(--mv-d-3) var(--mv-ease-spring); }
+html.mv-dock-compact .mv-dock { transform: translateX(-50%) scale(.7); }
+
+/* Settings › صفحه نمایش — Android's display page on the desktop: «اندازه آیکون» and «اندازه
+   عنوان آیکون‌ها» (60–140%, the scales on <html> as --mv-icon-scale / --mv-label-scale) and
+   names under the dock icons. boot.js sets them before the desktop is drawn, so the first frame
+   is already right. The icons carry their size inline (--sz), hence !important. As on Android,
+   the icon size scales the icons only — the grid's spacing stays. */
+html[data-icon-scale] .mv-home-grid .mv-app > .mv-ic { --sz: calc(64px * var(--mv-icon-scale, 1)) !important; }
+html[data-icon-scale] .mv-folder-grid .mv-app > .mv-ic { --sz: calc(56px * var(--mv-icon-scale, 1)) !important; }
+html[data-label-scale] .mv-app-label { font-size: calc(12px * var(--mv-label-scale, 1)); }
+.mv-dock-name { display: none; }
+html[data-dock-labels="on"] .mv-dock-item { height: auto; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+html[data-dock-labels="on"] .mv-dock-name {
+  display: block; max-width: 54px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 10px; line-height: 1.3; color: var(--mv-label-2);
+}
+html[data-label-scale][data-dock-labels="on"] .mv-dock-name { font-size: calc(10px * var(--mv-label-scale, 1)); max-width: calc(54px * max(1, var(--mv-label-scale, 1))); }
+/* The magnified icon would sit on its own name; with names shown the dock stays still. */
+html[data-dock-labels="on"] .mv-dock-item .mv-ic { transform: none !important; }
+
+/* «تصویر زمینه در همه صفحات» — Android's switch, drawn the way macOS does it (Appearance ›
+   "Allow wallpaper tinting in windows"): window surfaces take a faint cast of the wallpaper's
+   colour (--mv-wall-tint, measured by shell/wallpaper.js). Off, every window is the plain
+   neutral surface, the home screen alone keeps the picture. */
+html.mv-shell[data-wallpaper-tint="on"] {
+  --mv-surface: color-mix(in srgb, var(--mv-wall-tint, transparent) 7%, #1E1F22);
+  --mv-pane: color-mix(in srgb, var(--mv-wall-tint, transparent) 7%, #2A2B2F);
+}
+html.mv-shell[data-wallpaper-tint="on"][data-appearance="light"] {
+  --mv-surface: color-mix(in srgb, var(--mv-wall-tint, transparent) 5%, #FFFFFF);
+  --mv-pane: color-mix(in srgb, var(--mv-wall-tint, transparent) 5%, #FFFFFF);
+}
+.mv-dock-item {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.mv-dock-item .mv-ic { --sz: 48px; transform-origin: bottom center; transition: transform var(--mv-d-2) var(--mv-ease-out); }
+.mv-dock-item:hover .mv-ic { transform: scale(1.28) translateY(-6px); }
+.mv-dock-item:hover + .mv-dock-item .mv-ic,
+.mv-dock-item:has(+ .mv-dock-item:hover) .mv-ic { transform: scale(1.12) translateY(-2px); }
+html[data-dock-magnify="off"] .mv-dock-item .mv-ic { transform: none !important; }
+.mv-dock-item:active .mv-ic { filter: brightness(.85); }
+.mv-dock-item:focus-visible { outline: none; }
+.mv-dock-item:focus-visible .mv-ic { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+.mv-dock-label {
+  position: absolute;
+  bottom: calc(100% + 22px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--mv-label);
+  background: var(--mv-mat-thin);
+  -webkit-backdrop-filter: var(--mv-blur-thin);
+  backdrop-filter: var(--mv-blur-thin);
+  box-shadow: var(--mv-e2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-dock-item:hover .mv-dock-label { opacity: 1; }
+.mv-dock-item.is-running::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--mv-label);
+  opacity: .75;
+}
+.mv-dock-sep { width: var(--mv-hl); align-self: stretch; margin: 4px 3px; background: var(--mv-sep-2); }
+.mv-dock-prog {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, .35);
+  overflow: hidden;
+}
+.mv-dock-prog > i { display: block; height: 100%; width: 0; background: #FFFFFF; }
+.mv-dock-item.is-bouncing .mv-ic { animation: mv-bounce .6s var(--mv-ease-out) 1; }
+@keyframes mv-bounce { 30% { transform: translateY(-14px); } 60% { transform: translateY(0); } 80% { transform: translateY(-5px); } }
+
+/* ── Home: search pill, and room for the widgets on wide screens ── */
+.mv-home-search {
+  margin-top: 14px;
+  width: min(380px, 90%);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--mv-mat-thick);
+  -webkit-backdrop-filter: var(--mv-blur-thick);
+  backdrop-filter: var(--mv-blur-thick);
+  box-shadow: var(--mv-hair), 0 6px 20px rgba(0, 0, 0, .15);
+  color: var(--mv-label-2);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: text;
+}
+.mv-home-search svg { width: 14px; height: 14px; flex: none; }
+.mv-home-search > span:not(.mv-kbd) { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-home-search .mv-kbd { margin-right: auto; }   /* physical: .mv-kbd is direction:ltr */
+.mv-home-search:hover { color: var(--mv-label); }
+
+@media (min-width: 1180px) {
+  html[data-widgets-start="true"] .mv-home { padding-inline-start: 300px; }
+  html[data-widgets-end="true"] .mv-home { padding-inline-end: 280px; }
+}
+@media (min-width: 980px) and (max-width: 1179px) {
+  .mv-widgets-col.is-end { display: none; }
+  html[data-widgets-start="true"] .mv-home { padding-inline-start: 300px; }
+}
+@media (max-width: 979px) { .mv-widgets { display: none; } }
+
+/* ── Widgets ── */
+.mv-widgets { position: absolute; inset: 18px 18px 96px; z-index: 1; pointer-events: none; }
+.mv-widgets-col { position: absolute; top: 0; width: 262px; display: flex; flex-direction: column; gap: 14px; pointer-events: auto; }
+.mv-widgets-col.is-start { inset-inline-start: 0; }
+.mv-widgets-col.is-end { inset-inline-end: 0; width: 240px; }
+.mv-widget {
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--mv-mat-thick);
+  -webkit-backdrop-filter: var(--mv-blur-thick);
+  backdrop-filter: var(--mv-blur-thick);
+  box-shadow: var(--mv-hair), 0 10px 30px rgba(0, 0, 0, .18);
+  color: var(--mv-label);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.mv-widget[hidden] { display: none; }
+.mv-wg-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: var(--mv-label-2); }
+.mv-wg-head .mv-wg-muted { font-weight: 500; margin: 0; }
+.mv-wg-muted { margin: 0 0 6px; font-size: 12px; color: var(--mv-label-2); }
+.mv-wg-cta { width: 100%; margin-top: 10px; }
+.mv-wg-engine { display: flex; align-items: center; gap: 10px; }
+.mv-wg-engine b { display: block; font-size: 13.5px; }
+.mv-wg-engine small { display: block; font-size: 11.5px; color: var(--mv-label-2); }
+.mv-wg-country { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.mv-wg-country img { width: 28px; height: 20px; border-radius: 4px; object-fit: cover; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .25); }
+.mv-wg-country b { display: block; }
+.mv-wg-country small { display: block; font-size: 11px; color: var(--mv-label-2); }
+.mv-wg-line { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12px; }
+.mv-wg-line span { color: var(--mv-label-2); }
+.mv-wg-traffic { display: flex; justify-content: space-between; gap: 10px; }
+.mv-wg-traffic small { display: block; font-size: 11px; color: var(--mv-label-2); }
+.mv-wg-traffic b { font-size: 17px; font-weight: 700; }
+.mv-wg-spark { display: block; width: 100%; height: 34px; margin-top: 8px; }
+.mv-lampdot { display: inline-block; width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--mv-gray); }
+.mv-wg-cloud-row { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 4px 8px; padding-block: 3px; font-size: 12px; }
+.mv-wg-cloud-row > span:last-child { color: var(--mv-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-wg-cloud-row.is-ok .mv-lampdot { background: var(--mv-green); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--mv-green) 28%, transparent); }
+.mv-wg-cloud-row.is-warn .mv-lampdot { background: var(--mv-yellow); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--mv-yellow) 28%, transparent); }
+.mv-wg-cloud-row.is-bad .mv-lampdot { background: var(--mv-red); box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--mv-red) 28%, transparent); }
+.mv-wg-time { font-size: 34px; font-weight: 700; line-height: 1.15; }
+.mv-wg-date { margin-top: 4px; font-size: 13px; }
+.mv-wg-greg { font-size: 11px; color: var(--mv-label-2); direction: ltr; text-align: right; }
+.mv-wg-link { padding: 0; border: 0; background: none; font: inherit; font-size: 12px; font-weight: 600; color: var(--mv-accent); cursor: pointer; }
+.mv-wg-news { display: block; width: 100%; padding: 6px 0; border: 0; border-top: var(--mv-hl) solid var(--mv-sep); background: none; font: inherit; color: inherit; text-align: start; cursor: pointer; }
+.mv-wg-head + .mv-wg-news { border-top: 0; }
+.mv-wg-news b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12.5px; font-weight: 600; }
+.mv-wg-news small { display: block; font-size: 11px; color: var(--mv-label-2); }
+.mv-wg-news:hover b { color: var(--mv-accent); }
+
+/* ── Spotlight ── */
+.mv-spot { position: fixed; inset: 0; z-index: 1150; display: flex; align-items: flex-start; justify-content: center; padding-top: 16vh; animation: mv-fade-in var(--mv-d-1) var(--mv-ease-out); }
+.mv-spot-box {
+  width: min(620px, 92vw);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--mv-mat-regular);
+  -webkit-backdrop-filter: var(--mv-blur-regular);
+  backdrop-filter: var(--mv-blur-regular);
+  box-shadow: var(--mv-e5);
+  animation: mv-pop-in var(--mv-d-2) var(--mv-ease-spring);
+}
+.mv-spot-field { display: flex; align-items: center; gap: 10px; height: 52px; padding-inline: 16px; }
+.mv-spot-field > svg { width: 20px; height: 20px; flex: none; color: var(--mv-label-2); }
+.mv-spot-field input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 17px; color: var(--mv-label); }
+.mv-spot-field input::placeholder { color: var(--mv-label-3); }
+.mv-spot-list { max-height: 52vh; overflow-y: auto; padding: 4px 8px 8px; box-shadow: inset 0 var(--mv-hl) 0 var(--mv-sep); }
+.mv-spot-group { padding: 8px 8px 4px; font-size: 11px; font-weight: 700; color: var(--mv-label-3); }
+.mv-spot-row { width: 100%; height: 40px; display: flex; align-items: center; gap: 10px; padding-inline: 8px; border: 0; border-radius: var(--mv-r-md); background: none; font: inherit; font-size: 13.5px; color: var(--mv-label); text-align: start; cursor: default; }
+.mv-spot-row .mv-ic { box-shadow: none; }
+.mv-spot-row .mv-kbd { margin-right: auto; }
+.mv-spot-row.is-sel { background: var(--mv-accent); color: #FFFFFF; }
+.mv-spot-row.is-sel .mv-kbd { background: rgba(255, 255, 255, .2); box-shadow: none; color: #FFFFFF; }
+.mv-spot-glyph { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 7px; background: var(--mv-fill-2); color: var(--mv-label-2); }
+.mv-spot-glyph svg { width: 15px; height: 15px; }
+.mv-spot-row.is-sel .mv-spot-glyph { background: rgba(255, 255, 255, .2); color: #FFFFFF; }
+.mv-spot-empty { padding: 18px; text-align: center; font-size: 13px; color: var(--mv-label-2); }
+.mv-mb-find svg { width: 15px; height: 15px; }
+
+/* ── Notification Centre ── */
+.mv-nc {
+  position: fixed;
+  top: calc(var(--mv-menubar-h) + 6px);
+  left: 6px;
+  bottom: 6px;
+  width: 360px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  background: var(--mv-mat-regular);
+  -webkit-backdrop-filter: var(--mv-blur-regular);
+  backdrop-filter: var(--mv-blur-regular);
+  box-shadow: var(--mv-e5);
+  animation: mv-nc-in var(--mv-d-3) var(--mv-ease-spring);
+}
+@keyframes mv-nc-in { from { opacity: 0; transform: translateX(-24px); } }
+.mv-nc-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 6px; }
+.mv-nc-head b { font-size: 15px; }
+.mv-nc-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 10px 10px; }
+.mv-nc-group { margin: 6px 4px 0; font-size: 11px; font-weight: 700; color: var(--mv-label-3); }
+.mv-nc-item { width: auto; background: var(--mv-mat-thin); animation: none; }
+.mv-nc-foot { display: flex; justify-content: center; padding: 10px 14px; box-shadow: inset 0 var(--mv-hl) 0 var(--mv-sep); }
+.mv-menubar #btn-notifications { position: relative; }
+html.mv-shell .mv-menubar #notif-indicator { display: none !important; }
+.mv-bell-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--mv-red);
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Wallpaper picker (Settings › ظاهر) ── */
+.mv-wp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 12px; padding: 12px; }
+.mv-wp { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; border: 0; background: none; font: inherit; font-size: 11.5px; color: var(--mv-label-2); cursor: pointer; }
+.mv-wp-img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: grid;
+  place-items: center;
+  border-radius: var(--mv-r-md);
+  background: var(--mv-fill-2) center / cover no-repeat;
+  box-shadow: 0 0 0 var(--mv-hl) var(--mv-sep-2);
+  font-size: 22px;
+  color: var(--mv-label-3);
+  transition: box-shadow var(--mv-d-1) var(--mv-ease-out);
+}
+.mv-wp[aria-pressed="true"] { color: var(--mv-label); }
+.mv-wp[aria-pressed="true"] .mv-wp-img { box-shadow: 0 0 0 3px var(--mv-accent); }
+.mv-wp:focus-visible .mv-wp-img { box-shadow: 0 0 0 3px var(--mv-accent-ring); }
+.mv-wp-blur { flex: 0 1 200px; accent-color: var(--mv-accent); }
+.mv-wp-blur-val { min-width: 36px; justify-content: flex-end; font-variant-numeric: tabular-nums; }
+
+/* ── Arranging icons ── */
+.mv-drag-ghost { position: fixed; z-index: 1300; pointer-events: none; opacity: .94; box-shadow: 0 14px 30px rgba(0, 0, 0, .35) !important; transition: opacity var(--mv-d-1) var(--mv-ease-out); }
+.mv-drag-ghost.is-leaving { opacity: .4; }
+.is-drag-src { opacity: .25; }
+html.mv-arranging, html.mv-arranging * { cursor: grabbing !important; user-select: none !important; }
+html.mv-arranging .mv-dock-item .mv-ic { transform: none !important; }
+.mv-dock.is-drop-target { box-shadow: 0 0 0 2px var(--mv-accent), 0 12px 34px rgba(0, 0, 0, .25); }
+
+/* ── «بررسی سیستم» (systemcheck.js › openSystemCheck): a sheet over the app — it dims,
+   it does not blur. Startup is the black boot screen (#sc-boot) and no longer uses this. ── */
+html body #sc-overlay {
+  background: var(--mv-scrim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-family: var(--mv-font);
+}
+html body .sc-card {
+  background: var(--mv-mat-regular);
+  -webkit-backdrop-filter: var(--mv-blur-regular);
+  backdrop-filter: var(--mv-blur-regular);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: var(--mv-e5);
+}
+html body .sc-head,
+html body .sc-foot { border-color: var(--mv-sep); }
+html body .sc-head-icon { background: var(--mv-accent-soft); color: var(--mv-accent); border-radius: 22.5%; }
+html body .sc-step { background: var(--mv-fill-2); border: 0; color: var(--mv-label-2); }
+html body .sc-feat,
+html body .sc-row { background: var(--mv-fill); border-color: transparent; }
+html body .sc-feat.done,
+html body .sc-row.ok { border-color: color-mix(in srgb, var(--mv-green) 35%, transparent); }
+html body .sc-feat.failed,
+html body .sc-row.fail { border-color: color-mix(in srgb, var(--mv-red) 42%, transparent); background: color-mix(in srgb, var(--mv-red) 8%, transparent); }
+html body .sc-row.warn { border-color: color-mix(in srgb, var(--mv-orange) 42%, transparent); }
+html body .sc-row-ico,
+html body .sc-src { background: var(--mv-fill-2); border-color: transparent; }
+html body .sc-bar,
+html body .sc-total-bar { background: var(--mv-track); }
+html body .sc-btn { height: 30px; padding: 0 14px; border: 0; border-radius: var(--mv-r-sm); background: var(--mv-control); box-shadow: var(--mv-control-hair); color: var(--mv-label); font-size: 13px; }
+html body .sc-btn:hover:not(:disabled) { background: var(--mv-control-hover); border: 0; }
+html body .sc-btn.primary { background: var(--mv-accent); color: #FFFFFF; box-shadow: none; }
+
+/* ── «کاهش حرکت» (and Windows' own reduce-motion signal) ──
+   Movement becomes a fade: nothing zooms, slides or bounces. Durations already collapse
+   through --mv-d-3/--mv-d-4; this covers what uses its own timing. Loading indicators keep
+   moving — a stopped spinner reads as a hang. The wordmark sweep is decorative and only
+   stops for the app's own switch: brand-title.js deliberately ignores the Windows signal. */
+html[data-motion="reduced"] .mv-dock-item.is-bouncing .mv-ic { animation: none; }
+html[data-motion="reduced"] :is(.mv-folder-box, .mv-spot-box, .mv-nc, .mv-banner, .nd-offer, .animate-modal) { animation-name: mv-fade-in; }
+html[data-motion="reduced"] #brand-title .bt-ink.bt-sweeping { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .mv-dock-item.is-bouncing .mv-ic { animation: none; }
+  html:not([data-motion="full"]) :is(.mv-folder-box, .mv-spot-box, .mv-nc, .mv-banner, .nd-offer, .animate-modal) { animation-name: mv-fade-in; }
+}
+
+/* The wallpaper picker inside Settings › ظاهر: the form section supplies the heading and the
+   box, so the picker's own title and group frame step aside. */
+#mv-set-wallpaper-slot .mv-wp-picker > .mv-group-title { display: none; }
+#mv-set-wallpaper-slot .mv-wp-picker > .mv-group { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+#mv-set-wallpaper-slot .mv-wp-grid { padding: 2px 0 8px; }
+#mv-set-wallpaper-slot .mv-wp-picker .mv-row { padding-inline: 0; }

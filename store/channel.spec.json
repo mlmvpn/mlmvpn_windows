@@ -1,0 +1,117 @@
+{
+  "_": [
+    "What the signed channel offers, per item. `node scripts/store-channel.js build` turns this into",
+    "dist/store-channel/store-channel.json — every digest measured, the whole thing signed.",
+    "",
+    "PIN WHAT HAS BEEN TESTED, NOT WHAT IS NEWEST. An entry belongs here after the version was run",
+    "against this app: the store validates a core before activating it, but that check cannot see a",
+    "protocol change three screens deep. When in doubt, leave the item out — the store then simply",
+    "offers nothing for it, which is the honest state.",
+    "",
+    "from.github  digest read off the release page (GitHub computes it at upload)",
+    "from.url     downloaded and hashed by the build; pin the URL to a commit, never to a branch",
+    "from.file    built on this machine (upstream publishes no Windows binary) and uploaded to our",
+    "             own release by `publish`",
+    "",
+    "A core whose catalogue entry carries `upstream.direct` does NOT belong here. Those install the",
+    "developer's own published archive as soon as it exists (store/direct.js) — pinning one would",
+    "only hold it back at whatever number we last signed. Aether is the only one today."
+  ],
+  "channel": "stable",
+  "minApp": "1.2.3",
+  "items": [
+    {
+      "id": "xray",
+      "version": "26.9.9",
+      "released": "2026-09-08",
+      "notes": "دو انتشار تازه‌تر از نسخهٔ همراه برنامه. داده‌های مسیریابی geoip و geosite هم همراهش تازه می‌شوند.",
+      "artifacts": [
+        {
+          "name": "Xray-windows-64.zip",
+          "format": "zip",
+          "extract": { "xray.exe": "xray.exe", "geoip.dat": "geoip.dat", "geosite.dat": "geosite.dat" },
+          "from": { "github": { "repo": "XTLS/Xray-core", "tag": "v26.9.9", "asset": "Xray-windows-64.zip" } }
+        }
+      ]
+    },
+    {
+      "id": "singbox",
+      "version": "1.14.0",
+      "released": "2026-08-31",
+      "notes": "نسخهٔ نصب‌شده آلفای همین شماره است؛ این بروزرسانی یعنی رفتن به همان نسخه، این بار پایدار.",
+      "artifacts": [
+        {
+          "name": "sing-box-1.14.0-windows-amd64.zip",
+          "format": "zip",
+          "extract": { "sing-box.exe": "sing-box.exe", "libcronet.dll": "libcronet.dll" },
+          "from": { "github": { "repo": "SagerNet/sing-box", "tag": "v1.14.0", "asset": "sing-box-1.14.0-windows-amd64.zip" } }
+        }
+      ]
+    },
+    {
+      "id": "tor",
+      "version": "15.0.22",
+      "released": "2026-09-02",
+      "notes": "همان نسخه‌ای که همراه برنامه است — تازه‌ترین پایدار (۱۶.۰a11 آلفاست). اینجا ثبت شده تا اگر فایل‌های تور خراب یا ناقص شدند، از همین‌جا دوباره و با هش رسمی خودشان نصب شوند.",
+      "artifacts": [
+        {
+          "name": "tor-expert-bundle-windows-x86_64-15.0.22.tar.gz",
+          "format": "tar.gz",
+          "extract": {
+            "tor/tor.exe": "tor.exe",
+            "tor/pluggable_transports/lyrebird.exe": "pluggable_transports/lyrebird.exe",
+            "tor/pluggable_transports/conjure-client.exe": "pluggable_transports/conjure-client.exe",
+            "tor/pluggable_transports/pt_config.json": "pluggable_transports/pt_config.json",
+            "data/geoip": "data/geoip",
+            "data/geoip6": "data/geoip6"
+          },
+          "from": { "url": "https://dist.torproject.org/torbrowser/15.0.22/tor-expert-bundle-windows-x86_64-15.0.22.tar.gz" }
+        }
+      ]
+    },
+    {
+      "id": "tailscale",
+      "version": "1.102.4",
+      "released": "2026-09-09",
+      "notes": "انتشار اصلاحی روی همان خط ۱.۱۰۲؛ همان فرمان‌هایی که این برنامه از آن استفاده می‌کند. پیش از فعال شدن، فایل تازه اجرا و نسخه‌اش خوانده می‌شود.",
+      "artifacts": [
+        {
+          "name": "tailscale-setup-1.102.4-amd64.msi",
+          "format": "msi",
+          "extract": {
+            "tailscaled.exe": "tailscaled.exe",
+            "tailscale.exe": "tailscale.exe",
+            "wintun.dll": "wintun.dll"
+          },
+          "from": { "url": "https://pkgs.tailscale.com/stable/tailscale-setup-1.102.4-amd64.msi" }
+        }
+      ]
+    },
+    {
+      "id": "zeus",
+      "version": "2.2.0",
+      "released": "2026-09-11",
+      "notes": "همهٔ مسیرهایی که برنامه از پنل می‌خواند — کاربران، آی‌پی پروکسی، ساب و ورود — در این نسخه همان‌اند؛ دیتابیس کاربران دست نمی‌خورد.",
+      "artifacts": [
+        {
+          "name": "zeus-2.2.0.js",
+          "format": "raw",
+          "from": { "url": "https://raw.githubusercontent.com/panel-zeus/Z-E-U-S/871a965817be812a470cd5d94b7fe5492a633b7f/Source.js" }
+        }
+      ]
+    },
+    {
+      "id": "edge",
+      "version": "2026-09-04 16:24:13",
+      "released": "2026-09-04",
+      "notes": "همان متغیرها و همان تنظیمات سازگاری نسخهٔ فعلی — فقط کد عوض می‌شود.",
+      "artifacts": [
+        {
+          "name": "edgetunnel-2026-09-04.js",
+          "format": "raw",
+          "from": { "url": "https://raw.githubusercontent.com/cmliu/edgetunnel/448a83ced00a43c1d892d5ecbed86a26ea9eeaff/_worker.js" }
+        }
+      ]
+    }
+  ]
+}

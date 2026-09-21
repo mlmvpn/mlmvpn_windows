@@ -1,0 +1,138 @@
+<style>
+/* «مانیتور مصرف» on the engine page (ui/page-kit.css › .mv-split + .mv-eng-*).
+   This window has no connect button because it has nothing to connect: it reads a record
+   the app keeps on disk. So the hero carries the one figure the window is about — today —
+   with the live chart beside it, and everything else is a card under it. */
+#view-monitor { font-family: var(--mv-font); position: relative; z-index: 0; }
+#view-monitor [dir="ltr"] { font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; }
+
+/* The hero's headline is a number, not a sentence. */
+#view-monitor .mon-big {
+    font-size: 34px; line-height: 1.25; letter-spacing: -.01em;
+    font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums;
+    direction: ltr; text-align: start;
+}
+#view-monitor .mon-sub { display: flex; gap: 14px; flex-wrap: wrap; }
+#view-monitor .mon-up { color: var(--mv-orange-ink); }
+#view-monitor .mon-down { color: var(--mv-green-ink); }
+
+/* A card's own figure: big, tabular, and the two directions under it. */
+.mon-fig { padding: 2px 13px 4px; font-size: 20px; font-weight: 700;
+           font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; direction: ltr; }
+.mon-pair { padding: 0 13px 2px; display: flex; gap: 12px; font-size: 11px;
+            font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; direction: ltr; }
+
+/* ── the thirty-day chart ───────────────────────────────────────────────── */
+.mon-chart {
+    margin-top: 14px; border-radius: 14px; padding: 14px 15px 12px;
+    background: var(--mv-group); box-shadow: inset 0 0 0 var(--mv-hl) var(--mv-group-edge);
+    display: flex; flex-direction: column; gap: 12px; min-height: 230px;
+}
+.mon-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mon-chart-head h3 { margin: 0; font-size: 13px; font-weight: 700; }
+.mon-chart-head span { font-size: 11px; color: var(--mv-label-2); }
+.mon-chart-body { position: relative; flex: 1; min-height: 170px; }
+/* Three hairlines behind the bars, so a height can be read instead of only compared. */
+.mon-chart-grid { position: absolute; inset: 0 0 22px; display: flex; flex-direction: column;
+                  justify-content: space-between; pointer-events: none; }
+.mon-chart-grid i { display: block; border-top: var(--mv-hl) dashed var(--mv-sep-2); }
+.mon-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 5px;
+            padding: 18px 2px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.mon-bars::-webkit-scrollbar { display: none; }
+.mon-bar { position: relative; flex: 1 1 0; min-width: 10px; height: 100%;
+           display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.mon-bar-col { width: 100%; flex: 1; min-height: 0; display: flex; align-items: flex-end;
+               border-radius: 4px; background: var(--mv-fill); overflow: hidden; }
+.mon-bar-col > i { display: block; width: 100%; border-radius: 4px; background: var(--mv-accent);
+                   transition: height var(--mv-d-2, .25s) var(--mv-ease-out, ease); }
+/* Today's bar is the one the hero is about — it is named, not just drawn. */
+.mon-bar.is-today .mon-bar-col > i { background: var(--mv-green); }
+.mon-bar-day { flex: none; height: 18px; display: flex; align-items: center;
+               font-size: 9px; font-family: var(--mv-font-tech); color: var(--mv-label-3); }
+.mon-tip {
+    position: absolute; bottom: 100%; margin-bottom: 5px; z-index: 5;
+    padding: 3px 7px; border-radius: 7px; white-space: nowrap;
+    background: var(--mv-window, var(--mv-surface)); color: var(--mv-label);
+    box-shadow: 0 0 0 var(--mv-hl) var(--mv-sep-2), 0 6px 18px rgba(0,0,0,.28);
+    font-size: 10.5px; font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums;
+    direction: ltr; opacity: 0; pointer-events: none; transition: opacity var(--mv-d-1, .15s);
+}
+.mon-bar:hover .mon-tip { opacity: 1; }
+
+/* ── the full day list ──────────────────────────────────────────────────── */
+.mon-day-row { display: flex; align-items: center; gap: 10px; }
+.mon-day-date { flex: none; width: 92px; font-size: 11.5px; }
+.mon-day-meter { flex: 1; min-width: 40px; height: 6px; border-radius: 3px;
+                 background: var(--mv-fill); overflow: hidden; }
+.mon-day-meter > i { display: block; height: 100%; border-radius: 3px; background: var(--mv-accent); }
+.mon-day-fig { flex: none; font-size: 11.5px; font-family: var(--mv-font-tech);
+               font-variant-numeric: tabular-nums; direction: ltr; min-width: 74px; text-align: left; }
+.mon-day-pair { flex: none; font-size: 10.5px; color: var(--mv-label-2); direction: ltr;
+                font-family: var(--mv-font-tech); font-variant-numeric: tabular-nums; }
+@media (max-width: 620px) { .mon-day-pair { display: none; } }
+</style>
+
+<div class="mv-split" id="view-monitor" dir="rtl" style="display: none;">
+  <aside class="mv-side" aria-label="بخش‌های مانیتور مصرف">
+    <div class="mv-side-top"></div>
+    <div class="mv-eng-ident" id="mon-ident"></div>
+    <nav class="mv-side-list">
+      <div class="mv-side-group">
+        <button type="button" class="mv-side-item active" data-mon-sec="overview">
+          <span class="mv-side-tile" style="--tint:var(--mv-yellow)"><i class="ph-fill ph-chart-bar"></i></span><span>نمای کلی</span>
+        </button>
+        <button type="button" class="mv-side-item" data-mon-sec="days">
+          <span class="mv-side-tile" style="--tint:var(--mv-blue)"><i class="ph-fill ph-calendar-blank"></i></span><span>روزها</span>
+        </button>
+      </div>
+      <div class="mv-side-group">
+        <button type="button" class="mv-side-item mv-side-go" id="mon-settings" title="ثبت مصرف را در تنظیمات روشن یا خاموش کنید">
+          <span class="mv-side-tile" style="--tint:var(--mv-label-2)"><i class="ph-fill ph-sliders-horizontal"></i></span>
+          <span>تنظیمات مانیتورینگ</span>
+          <i class="ph-bold ph-arrow-up-left" aria-hidden="true"></i>
+        </button>
+      </div>
+    </nav>
+  </aside>
+
+  <section class="mv-pane is-home">
+    <header class="mv-pane-bar">
+      <div class="mv-pane-nav" role="group" aria-label="پیمایش بخش‌ها">
+        <button type="button" id="mon-back" aria-label="بخش قبلی" title="بخش قبلی" disabled><i class="ph-bold ph-caret-right"></i></button>
+      </div>
+      <h1 class="mv-pane-title" id="mon-pane-title">نمای کلی</h1>
+    </header>
+
+    <div class="mv-pane-scroll custom-scrollbar" id="mon-scroll">
+      <div class="mv-eng-sec is-on" data-sec="overview">
+        <!-- No power button: this window records, it does not connect. The figure IS the hero. -->
+        <div class="mv-eng-stage" id="mon-stage" style="--tint:var(--mv-yellow)">
+          <div class="mv-eng-stage-text">
+            <h1 class="mon-big" id="mon-today" dir="ltr">0 B</h1>
+            <p id="mon-today-line">مصرف امروز، از نیمه‌شب به وقت ایران.</p>
+          </div>
+          <div class="mv-eng-stage-side">
+            <div class="mv-eng-live" id="mon-live"></div>
+          </div>
+        </div>
+
+        <div class="mv-eng-grid" id="mon-cards"></div>
+
+        <div class="mon-chart">
+          <div class="mon-chart-head">
+            <h3>مصرف روزانه — ۳۰ روز اخیر</h3>
+            <span>بیشترین روز: <b id="mon-peak" dir="ltr">0 B</b></span>
+          </div>
+          <div class="mon-chart-body">
+            <div class="mon-chart-grid"><i></i><i></i><i></i><i></i></div>
+            <div class="mon-bars" id="mon-bars" dir="ltr"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mv-eng-sec" data-sec="days"><div class="mv-form" id="mon-sec-days"></div></div>
+    </div>
+
+    <div class="mv-eng-foot" id="mon-foot"></div>
+  </section>
+</div>

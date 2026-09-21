@@ -1,0 +1,6 @@
+
+Current WinHTTP proxy settings:
+
+    Proxy Server(s) :  127.0.0.1:20809
+    Bypass List     :  <local>;192.168.*
+

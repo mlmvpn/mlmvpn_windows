@@ -1,0 +1,123 @@
+{
+  "_meta": {
+    "description": "Sanction-buster allowlist. Server SNI-proxy forwards ONLY these domains; everything else is refused. Client uses this for the 'تحریم شکن' panel status list.",
+    "version": 2,
+    "notes": "tier: 'light' = login/API/store (allowed). 'download' = heavy CDN, ALWAYS blocked to protect traffic. 'test' = geo-uncertain, must be probed from the UAE relay before trusting.",
+    "policy": "Downloads are fully disabled. Any domain in the 'blocked_download' list is refused even if it matches a service."
+  },
+
+  "ai": [
+    { "name": "Google Gemini",      "tier": "test",  "domains": ["gemini.google.com", "bard.google.com", "aistudio.google.com", "generativelanguage.googleapis.com"] },
+    { "name": "OpenAI / ChatGPT",   "tier": "test",  "domains": ["chatgpt.com", "chat.openai.com", "api.openai.com", "auth.openai.com", "cdn.oaistatic.com"] },
+    { "name": "Anthropic / Claude", "tier": "test",  "domains": ["claude.ai", "chat.claude.ai", "api.anthropic.com", "console.anthropic.com"] },
+    { "name": "Google Colab",       "tier": "test",  "domains": ["colab.research.google.com"] },
+    { "name": "Perplexity",         "tier": "test",  "domains": ["perplexity.ai", "www.perplexity.ai"] },
+    { "name": "Microsoft Copilot",  "tier": "test",  "domains": ["copilot.microsoft.com"] }
+  ],
+
+  "google_services": [
+    { "name": "Google Analytics",       "tier": "light", "domains": ["analytics.google.com"] },
+    { "name": "Google Ads",             "tier": "light", "domains": ["ads.google.com"] },
+    { "name": "Google Fonts",           "tier": "light", "domains": ["fonts.googleapis.com"] },
+    { "name": "Google Tag Manager",     "tier": "light", "domains": ["googletagmanager.com", "www.googletagmanager.com"] },
+    { "name": "Android Developers",     "tier": "test",  "domains": ["developer.android.com", "developers.google.com"] },
+    { "name": "Firebase",               "tier": "test",  "domains": ["firebase.google.com", "firebaseremoteconfig.googleapis.com", "firebaseextensions.clients6.google.com"] },
+    { "name": "Google (misc)",          "tier": "test",  "domains": ["notifications.google.com", "appspot.com", "web.dev"] },
+    { "name": "Go / golang",            "tier": "light", "domains": ["golang.org", "go.dev"] }
+  ],
+
+  "gaming_login": [
+    { "name": "Steam (login/store/community)", "tier": "light", "vpnDetect": true, "domains": ["store.steampowered.com", "steamcommunity.com", "login.steampowered.com", "api.steampowered.com", "help.steampowered.com"] },
+    { "name": "Epic Games (login/store)",      "tier": "light", "vpnDetect": true, "domains": ["www.epicgames.com", "store.epicgames.com", "accounts.epicgames.com", "launcher.store.epicgames.com"] },
+    { "name": "Rockstar / Social Club",        "tier": "light", "vpnDetect": true, "domains": ["socialclub.rockstargames.com", "www.rockstargames.com", "signin.rockstargames.com", "auth.rockstargames.com"] },
+    { "name": "Ubisoft Connect",               "tier": "light", "vpnDetect": true, "domains": ["connect.ubisoft.com", "account.ubisoft.com", "store.ubisoft.com"] },
+    { "name": "EA App / Origin",               "tier": "light", "vpnDetect": true, "domains": ["www.ea.com", "signin.ea.com", "accounts.ea.com"] },
+    { "name": "Battle.net (CoD/Warzone login)","tier": "light", "vpnDetect": true, "domains": ["www.battle.net", "account.battle.net", "us.battle.net", "eu.battle.net"] },
+    { "name": "Xbox / Microsoft account",      "tier": "light", "vpnDetect": true, "domains": ["login.live.com", "account.xbox.com", "www.xbox.com"] },
+    { "name": "PlayStation Network",           "tier": "light", "vpnDetect": true, "domains": ["www.playstation.com", "my.account.sony.com", "id.sonyentertainmentnetwork.com"] }
+  ],
+
+  "dev_tools": [
+    { "name": "GitHub",       "tier": "light", "domains": ["github.com", "api.github.com", "codeload.github.com", "raw.githubusercontent.com"] },
+    { "name": "GitLab",       "tier": "light", "domains": ["gitlab.com"] },
+    { "name": "Docker Hub",   "tier": "light", "domains": ["hub.docker.com", "registry-1.docker.io", "auth.docker.io", "docker.io", "docker.com"] },
+    { "name": "npm",          "tier": "light", "domains": ["registry.npmjs.org", "www.npmjs.com"] },
+    { "name": "Cloudflare",   "tier": "light", "domains": ["dash.cloudflare.com", "developers.cloudflare.com"] },
+    { "name": "Grafana",      "tier": "light", "domains": ["grafana.com"] },
+    { "name": "Algolia",      "tier": "light", "domains": ["www.algolia.com", "algolia.com"] },
+    { "name": "Oracle Cloud", "tier": "test",  "domains": ["cloud.oracle.com", "www.oracle.com", "oracle.com", "oraclecloud.com"] },
+    { "name": "Google Cloud", "tier": "test",  "domains": ["console.cloud.google.com", "cloud.google.com"] }
+  ],
+
+  "enterprise": [
+    { "name": "VMware",       "tier": "test", "domains": ["vmware.com", "vsphereclient.vmware.com", "code.vmware.com", "blogs.vmware.com", "kb.vmware.com", "docs.vmware.com", "ssc.vmware.com", "my.vmware.com", "mon.vmware.com"] },
+    { "name": "Intel",        "tier": "test", "domains": ["intel.com", "intel.de", "ark.intel.com", "corpredirect.intel.com"] },
+    { "name": "Cisco",        "tier": "test", "domains": ["api.cisco.com"] },
+    { "name": "SolarWinds",   "tier": "test", "domains": ["solarwinds.com", "thwack.solarwinds.com", "oriondemo.solarwinds.com"] },
+    { "name": "HPE",          "tier": "test", "domains": ["hpe.com", "community.hpe.com"] },
+    { "name": "AMD",          "tier": "test", "domains": ["amd.com"] },
+    { "name": "NVIDIA",       "tier": "test", "domains": ["nvidia.com"] },
+    { "name": "Lenovo",       "tier": "test", "domains": ["lenovo.com"] },
+    { "name": "Adobe",        "tier": "test", "domains": ["adobe.com"] },
+    { "name": "Visa",         "tier": "test", "domains": ["visa.com", "visa.de"] },
+    { "name": "Texas Instruments", "tier": "test", "domains": ["ti.com"] },
+    { "name": "AT&T",         "tier": "test", "domains": ["att.com"] },
+    { "name": "Splunk",       "tier": "test", "domains": ["splunk.com"] },
+    { "name": "Motorola",     "tier": "test", "domains": ["motorola.com"] },
+    { "name": "GNS3",         "tier": "test", "domains": ["gns3.com"] },
+    { "name": "Spiceworks",   "tier": "test", "domains": ["spiceworks.com"] },
+    { "name": "ArcGIS / Esri","tier": "test", "domains": ["arcgis.com"] },
+    { "name": "Linux Host Support", "tier": "test", "domains": ["linuxhostsupport.com"] }
+  ],
+
+  "productivity": [
+    { "name": "Slack",     "tier": "test",  "domains": ["slack.com"] },
+    { "name": "Atlassian", "tier": "test",  "domains": ["atlassian.net"] },
+    { "name": "Notion",    "tier": "test",  "domains": ["notion.so"] },
+    { "name": "Kinsta",    "tier": "test",  "domains": ["kinsta.com"] },
+    { "name": "Pastebin",  "tier": "light", "domains": ["pastebin.com"] }
+  ],
+
+  "shopping": [
+    { "name": "eBay", "tier": "test", "domains": ["ebay.com", "ebaystatic.co", "ebayimg.com", "ebaycdn.net"] }
+  ],
+
+  "media_login": [
+    { "name": "Spotify (login)",  "tier": "light", "domains": ["accounts.spotify.com", "www.spotify.com", "open.spotify.com"] },
+    { "name": "SoundCloud",       "tier": "light", "domains": ["soundcloud.com", "secure.soundcloud.com"] },
+    { "name": "YouTube thumbnails","tier": "light", "domains": ["i.ytimg.com"] },
+    { "name": "IGN",              "tier": "test",  "domains": ["ign.com"] },
+    { "name": "BoardGameGeek",    "tier": "test",  "domains": ["boardgamegeek.com"] },
+    { "name": "Computerworld",    "tier": "test",  "domains": ["computerworld.com"] }
+  ],
+
+  "cdn_assets": [
+    { "name": "App CDN assets (CloudFront)", "tier": "test", "domains": ["dgivdslhqe3qo.cloudfront.net", "d36jcksde1wxzq.cloudfront.net", "d2wy8f7a9ursnm.cloudfront.net", "d20hvw4zeymqbm.cloudfront.net"] }
+  ],
+
+  "blocked_download": {
+    "_comment": "Refused ALWAYS — heavy CDNs / package repos / driver downloads that would burn the monthly traffic. Downloads disabled by policy.",
+    "patterns": [
+      "*.steamcontent.com",
+      "*.steamstatic.com",
+      "steamcdn-a.akamaihd.net",
+      "*.epicgames.com/*download*",
+      "download.epicgames.com",
+      "*.patches.rockstargames.com",
+      "*.dl.delivery.mp.microsoft.com",
+      "*.xboxlive.com",
+      "*.blzddist1-a.akamaihd.net",
+      "*.data.ea.com",
+      "*.download.ubi.com",
+      "dl.google.com",
+      "packages.cloud.google.com",
+      "apt.kubernetes.io",
+      "repo.mysql.com",
+      "downloadcenter.intel.com",
+      "download-ssc.cisco.com",
+      "software.cisco.com",
+      "filehippo.com",
+      "pcsupport.lenovo.com"
+    ]
+  }
+}
