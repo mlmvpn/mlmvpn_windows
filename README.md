@@ -11,6 +11,8 @@
 
 **English** · [فارسی](README.fa.md)
 
+<img src="docs/images/desktop.png" alt="The MLMVPN for Windows desktop — engine tiles, connection status, and live traffic" width="900">
+
 </div>
 
 ---

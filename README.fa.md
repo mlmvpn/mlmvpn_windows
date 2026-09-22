@@ -11,6 +11,8 @@
 
 [English](README.md) · **فارسی**
 
+<img src="docs/images/desktop.png" alt="میزکار MLMVPN برای ویندوز — تایل موتورها، وضعیت اتصال و ترافیک زنده" width="900">
+
 </div>
 
 ---
