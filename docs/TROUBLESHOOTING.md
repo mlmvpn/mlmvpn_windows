@@ -2,9 +2,28 @@
 
 [فارسی](TROUBLESHOOTING.fa.md)
 
-**The short way:** double-click **`MLMVPN-Report.cmd`**, next to `MLM VPN.exe` in the install
-folder. It works when the app does not, tells you how far the last launch got, and leaves one
-`.zip` on the Desktop to send. Everything below is the long way.
+## 📥 The short way — the report tool
+
+### [**Download the report tool (8 KB)**](https://github.com/mlmvpn/mlmvpn_windows/blob/main/tools/MLMVPN-Report-Tool.zip)
+
+Use the **Download** button on that page, unzip it, and double-click **`MLMVPN-Report.cmd`**.
+
+It needs nothing from the application — only Windows PowerShell — so it works precisely when the
+app does not. It says how far the last launch got and what stopped it, opens that in Notepad, and
+leaves one `.zip` on the Desktop to send.
+
+> **From 1.2.4 onwards** the same file ships inside the application, beside `MLM VPN.exe` in the
+> install folder, so there is nothing to download.
+>
+> **Note:** `startup.log` has only been written since **1.2.3**. On an older version the tool will
+> say it found nothing — install 1.2.3 or later first, reproduce the problem once, then run it.
+
+If Windows shows a security warning, choose **More info → Run anyway**. It is a plain text script;
+you can open it in Notepad and read it first.
+
+---
+
+Everything below is the long way.
 
 Start by finding the right section by **symptom**. Each one says what to do and, where we know it,
 what actually causes it.

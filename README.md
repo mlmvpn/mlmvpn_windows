@@ -146,7 +146,8 @@ Download an installer or the portable build from the
 
 ### When something goes wrong: `MLMVPN-Report.cmd`
 
-Every installed copy has **`MLMVPN-Report.cmd`** sitting beside `MLM VPN.exe`. Double-click it.
+**[Download the tool (8 KB)](https://github.com/mlmvpn/mlmvpn_windows/blob/main/tools/MLMVPN-Report-Tool.zip)** — or, from **1.2.4** onwards, find it beside
+`MLM VPN.exe` in the install folder. Double-click `MLMVPN-Report.cmd`.
 
 It needs nothing from the application — only Windows PowerShell — so it works precisely when the
 app does not: a window that opens black, a launch that hangs before the loading screen, an app that
