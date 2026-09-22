@@ -2,6 +2,10 @@
 
 [فارسی](TROUBLESHOOTING.fa.md)
 
+**The short way:** double-click **`MLMVPN-Report.cmd`**, next to `MLM VPN.exe` in the install
+folder. It works when the app does not, tells you how far the last launch got, and leaves one
+`.zip` on the Desktop to send. Everything below is the long way.
+
 Start by finding the right section by **symptom**. Each one says what to do and, where we know it,
 what actually causes it.
 

@@ -43,10 +43,8 @@ const HTTP_PORT = 20841;
 const LANTERN_DATA_DIR = path.join(os.homedir(), '.mlmvpn', 'lantern');
 
 function binPath() {
-    const base = process.resourcesPath && fs.existsSync(path.join(process.resourcesPath, 'core'))
-        ? process.resourcesPath
-        : __dirname;
-    return require('./core-paths').file('lantern', 'lantern.exe', path.join(base, 'core', 'lantern.exe'));
+    const corePaths = require('./core-paths');
+    return corePaths.file('lantern', 'lantern.exe', corePaths.bundled('core', 'lantern.exe'));
 }
 
 function isInstalled() { return fs.existsSync(binPath()); }
@@ -642,6 +640,7 @@ function drawOne(i, budgetMs) {
                 '-deviceid', id,
                 '-proxyall=false',
             ], { windowsHide: true, stdio: 'ignore' });
+            child.on('error', () => { child = null; resolve([]); });
         } catch (e) {
             return resolve([]);
         }

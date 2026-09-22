@@ -357,7 +357,7 @@ function record(line, onLog) {
 // ============================================================
 
 function binPaths() {
-    const root = require('./core-paths').dir('tor', path.join(__dirname, 'core', 'tor'));
+    const root = require('./core-paths').dir('tor', require('./core-paths').bundled('core', 'tor'));
     return {
         tor: path.join(root, 'tor.exe'),
         pt: path.join(root, 'pluggable_transports', 'lyrebird.exe'),

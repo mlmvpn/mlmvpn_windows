@@ -65,7 +65,7 @@ const MAX_TCP = 8;
 const DATA_DIR = path.join(os.homedir(), '.mlmvpn', 'gateway');
 
 /** The shipped seed list, and the updated copy that supersedes it once one has been fetched. */
-function seedPath() { return path.join(__dirname, 'core', 'vpngate_servers.csv'); }
+function seedPath() { return require('./core-paths').bundled('core', 'vpngate_servers.csv'); }
 function livePath() { return path.join(DATA_DIR, 'servers.csv'); }
 
 /**
@@ -78,7 +78,7 @@ function cliPath() {
     const roots = [
         process.env['ProgramFiles'] && path.join(process.env['ProgramFiles'], 'SoftEther VPN Client'),
         process.env['ProgramFiles(x86)'] && path.join(process.env['ProgramFiles(x86)'], 'SoftEther VPN Client'),
-        path.join(__dirname, 'core', 'softether'),
+        require('./core-paths').bundled('core', 'softether'),
     ].filter(Boolean);
     for (const r of roots) {
         for (const exe of ['vpncmd_x64.exe', 'vpncmd.exe']) {
@@ -92,7 +92,7 @@ function cliPath() {
 /** The bundled installer, for a machine that does not have the client yet. */
 function installerPath() {
     for (const exe of ['vpnsetup_x64.exe', 'vpnsetup.exe']) {
-        const p = path.join(__dirname, 'core', 'softether', exe);
+        const p = require('./core-paths').bundled('core', 'softether', exe);
         if (fs.existsSync(p)) return p;
     }
     return null;

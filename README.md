@@ -144,6 +144,22 @@ Download an installer or the portable build from the
 | `mlm-vpn-Setup-<version>-ia32.exe` | 32-bit Windows |
 | `mlm-vpn-Portable-<version>*.exe` | No installation |
 
+### When something goes wrong: `MLMVPN-Report.cmd`
+
+Every installed copy has **`MLMVPN-Report.cmd`** sitting beside `MLM VPN.exe`. Double-click it.
+
+It needs nothing from the application — only Windows PowerShell — so it works precisely when the
+app does not: a window that opens black, a launch that hangs before the loading screen, an app that
+closes itself. It reads `startup.log`, says in plain Persian **how far the last launch got and what
+stopped it**, opens that verdict in Notepad, and leaves a single `.zip` on the Desktop with every
+log worth sending.
+
+> **Maintainers:** this file ships through `build.extraFiles` in `package.json`, which puts it
+> *next to the executable* rather than inside `app.asar` — it has to be reachable without the app
+> running. The source is `tools/`. **Do not drop it from `extraFiles` when changing the build**,
+> and keep the UTF-8 byte-order mark on `tools/report.ps1`: PowerShell 5.1 reads a .ps1 without one
+> as ANSI, and every Persian string becomes mojibake.
+
 **If the window opens black or white:** right-click the tray icon next to the Windows clock and
 turn off **«کشیدن صفحه با کارت گرافیک»** (draw with the graphics card), then restart. The same menu
 has **«باز کردن گزارش راه‌اندازی»**, which opens `startup.log` — please attach that file to any

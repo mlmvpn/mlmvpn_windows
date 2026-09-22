@@ -88,10 +88,10 @@ function diary(kind, fields, note) {
 
 function binPaths() {
     return {
-        exe: require('./core-paths').file('psiphon', 'psiphon.exe', path.join(__dirname, 'core', 'psiphon.exe')),
+        exe: require('./core-paths').file('psiphon', 'psiphon.exe', require('./core-paths').bundled('core', 'psiphon.exe')),
         // Psiphon's own embedded server list. Platform-independent, so this is the very file the
         // Android app ships in its assets — one list, one place to update it.
-        serverList: path.join(__dirname, 'core', 'psiphon_server_entries.txt'),
+        serverList: require('./core-paths').bundled('core', 'psiphon_server_entries.txt'),
     };
 }
 

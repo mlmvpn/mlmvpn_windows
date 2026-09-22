@@ -35,7 +35,7 @@ const { spawn } = require('child_process');
 // it. See openvpn-catalog.js for why the rows are shared and the verdicts are not.
 const catalog = require('./openvpn-catalog');
 
-const CORE_DIR = path.join(__dirname, 'core', 'openvpn');
+const CORE_DIR = require('./core-paths').bundled('core', 'openvpn');
 const EXE = path.join(CORE_DIR, 'openvpn.exe');
 const DATA_DIR = path.join(os.homedir(), '.mlmvpn', 'openvpn');
 const LIST_FILE = path.join(DATA_DIR, 'servers.json');

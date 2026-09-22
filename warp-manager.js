@@ -357,7 +357,7 @@ function verify(port, { host = 'www.cloudflare.com', timeoutMs = VERIFY_TIMEOUT_
  * removing even that when a WireGuard of our own can carry WARP.
  */
 function aetherPath() {
-    return corePaths.file('warp-aether', 'aether.exe', path.join(__dirname, 'core', 'aether.exe'));
+    return corePaths.file('warp-aether', 'aether.exe', corePaths.bundled('core', 'aether.exe'));
 }
 
 /**

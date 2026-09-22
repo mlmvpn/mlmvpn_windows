@@ -94,6 +94,33 @@ function activeInstall(id) {
     return rec;
 }
 
+/**
+ * A path to a file this build SHIPS — the one thing every engine needs and six of them got wrong.
+ *
+ * In the packaged app, `__dirname` is inside `app.asar`, and `core/` is not: electron-builder
+ * unpacks it to `app.asar.unpacked/core/` because **Windows cannot execute a file inside an
+ * archive**. So `path.join(__dirname, 'core', 'x.exe')` names a path that does not exist, and
+ * spawning it fails with ENOENT.
+ *
+ * It is invisible during development, and that is why it shipped: from source, and in the
+ * asar-to-folder test build (dev-unpack.js), `__dirname` is an ordinary directory with `core/`
+ * right there, so the wrong path is the right path. Only the installer exposes it.
+ *
+ * 2026-09-22: that is exactly how «لنترن» closed the whole application on a user's machine —
+ *   spawn C:\Program Files\MLM VPN\resources\app.asar\core\lantern.exe ENOENT
+ * with سایفون, تور, وارپ, اوپن‌وی‌پی‌ان and گیت‌وی all one click from the same crash.
+ *
+ * Use this instead of building the path by hand. The test in tests/aether/packaging.test.js
+ * fails the build if a manager goes back to a raw `__dirname`.
+ */
+function bundled(...segments) {
+    // Idempotent on purpose: rewriting an already-unpacked path would give .asar.unpacked.unpacked.
+    const root = /\.asar(?!\.unpacked)/i.test(__dirname)
+        ? __dirname.replace(/\.asar(?!\.unpacked)/gi, '.asar.unpacked')
+        : __dirname;
+    return path.join(root, ...segments);
+}
+
 /** Directory holding `id`'s files: the active store install, else `bundledDir`. */
 function dir(id, bundledDir) {
     const a = activeInstall(id);
@@ -131,4 +158,4 @@ function activeVersion(id) {
     return a ? a.version : null;
 }
 
-module.exports = { storeRoot, activeFile, readActive, activeInstall, dir, file, candidates, activeVersion };
+module.exports = { storeRoot, activeFile, readActive, activeInstall, bundled, dir, file, candidates, activeVersion };

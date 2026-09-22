@@ -1,6 +1,29 @@
 const { app, BrowserWindow, Tray, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
+// FIRST, before any manager can be required and start a child: a spawn whose binary is missing
+// fails asynchronously, and an 'error' event with no listener ends this process. That closed the
+// app mid-connect on 2026-09-22. See spawn-guard.js for the whole story.
+try {
+  require('./spawn-guard').install((line) => {
+    console.error(line);
+    try { require('./startup-health').note('spawn:failed', line); } catch (e) { /* no diary */ }
+  });
+} catch (e) { /* the app still runs; a bad spawn can still end it */ }
+
+// The diary opens HERE, before anything heavy is required. server.js pulls in every engine
+// manager at load time, and a launch that dies or hangs inside that require would otherwise
+// write nothing at all — leaving "it freezes before the loading screen" with no evidence, which
+// is the one thing this file exists to prevent.
+let startupHealth = { gpuOff: false };
+try {
+  const h = require('./startup-health');
+  startupHealth = h.beginLaunch();
+  h.note('launch', Object.assign(h.machine(), { gpuOff: startupHealth.gpuOff, fails: startupHealth.fails }));
+  if (startupHealth.undidAuto) h.note('gpu:auto-off-undone', 'an earlier build had switched it off by itself');
+} catch (e) { /* run normally */ }
+
 const { startServer } = require('./server');
+try { require('./startup-health').note('modules:loaded'); } catch (e) { /* no diary */ }
 
 let tray = null;
 let mainWindow = null;
@@ -25,13 +48,6 @@ function health(event, data) {
 // above), and even with the report working it could never have detected the thing it was for:
 // a window that is black because the GPU cannot composite still boots, still runs, and still
 // reports itself ready. The signal and the symptom are unrelated.
-let startupHealth = { gpuOff: false };
-try {
-  const h = require('./startup-health');
-  startupHealth = h.beginLaunch();
-  h.note('launch', Object.assign(h.machine(), { gpuOff: startupHealth.gpuOff, fails: startupHealth.fails }));
-  if (startupHealth.undidAuto) h.note('gpu:auto-off-undone', 'an earlier build had switched it off by itself');
-} catch (e) { /* run normally */ }
 if (startupHealth.gpuOff) {
   try { app.disableHardwareAcceleration(); health('gpu:disabled', 'by the user'); } catch (e) { /* too late, or unsupported */ }
 }
