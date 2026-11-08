@@ -15,8 +15,8 @@
 //     refuses the handshake (Android's CombineEngine.rewrite does the same).
 (function (root, factory) {
     const api = factory();
-    if (typeof module === 'object' && module.exports) module.exports = api;
-    else root.CfUri = api;
+    if (typeof module === "object" && module.exports) module.exports = api;
+    root.CfUri = api;
 })(typeof self !== 'undefined' ? self : this, function () {
     'use strict';
 

@@ -3,6 +3,8 @@
 // cf-family (sampleV6 shape, verdict lifetime per network), scan-scout (target).
 // Run: node tests/cf-heal/cf-heal.test.js
 const assert = require('assert');
+const fs = require("fs");
+const vm = require("vm");
 const C = require('../../public/cf-uri');
 const H = require('../../cf-edge-heal');
 const F = require('../../cf-family');
@@ -10,6 +12,16 @@ const S = require('../../scan-scout');
 
 let n = 0;
 const t = (name, fn) => { fn(); n++; console.log('ok -', name); };
+
+t("browser global and CommonJS export coexist", () => {
+    const browser = {};
+    browser.window = browser;
+    browser.self = browser;
+    browser.module = { exports: {} };
+    vm.runInNewContext(fs.readFileSync(require.resolve("../../public/cf-uri"), "utf8"), browser);
+    assert.strictEqual(typeof browser.window.CfUri.rewrite, "function");
+    assert.strictEqual(typeof browser.module.exports.rewrite, "function");
+});
 
 const WS = 'vless://11111111-2222-3333-4444-555555555555@abc.acc.workers.dev:443?encryption=none&security=tls&type=ws&path=%2Fvl%3Fed%3D2560#BPB';
 
