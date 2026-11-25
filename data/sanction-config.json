@@ -1,6 +1,0 @@
-{
-  "detection": {
-    "timeoutMs": 6000,
-    "autoAddSupported": true
-  }
-}
